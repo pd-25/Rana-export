@@ -1,0 +1,62 @@
+@use "sass:map";
+@use "sass:list";
+@use "sass:meta";
+
+// Color Variables - Global Color System
+$colorWhite: #ffffff;
+$colorBlack: #000000;
+$red: #ff0000;
+$colorDark: #030303;
+$colorGray: #666666;
+$colorGray2: #777777;
+$colorPrimary: #FFE5DB;
+$colorSecondary: #F9B9A5;
+$colorSecondary2: #E18979;
+$colorSecondary3: #B16A6F;
+$colorSecondary4: #EFCFCE;
+$borderDark: #A5A7AA;
+$borderLight: #EDEDED;
+
+
+
+/************ Media Queries ***************/
+$breakpoints: (
+    sm: "(max-width: 575.98px)",
+    md: "(max-width: 767.98px)",
+    lg: "(max-width: 991.91px)",
+    xl: "(max-width: 1199.98px)",
+    xxl: "(max-width: 1280.98px)",
+    landscapeSmall: "(max-height: 500px) and (max-width: 950px) and (orientation: landscape)",
+    landscapeXs: "(max-height: 500px) and (max-width: 850px) and (orientation: landscape)",
+    minMd: "(min-width: 768px)",
+    minLg: "(min-width: 992px)",
+    minXl: "(min-width: 1200px)",
+    minXxl: "(min-width: 1400px)",
+    minXxxl: "(min-width: 1800px)",
+);
+
+// 2. Mixin that works for any condition
+@mixin respond-to($breakpoint) {
+    @media screen and #{map.get($breakpoints, $breakpoint)} {
+        @content;
+    }
+}
+
+/************ common property mixins ***************/
+
+@mixin transition-prefixes($transitonVal) {
+    transition: all ease-in-out $transitonVal;
+    -webkit-transition: all ease-in-out $transitonVal;
+    -moz-transition: all ease-in-out $transitonVal;
+    -ms-transition: all ease-in-out $transitonVal;
+}
+
+
+@mixin fullAbsolute() {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    inset: 0;
+    object-fit: cover;
+    object-position: center;
+}
