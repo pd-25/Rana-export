@@ -1,82 +1,116 @@
 "use client";
 import React, { useState } from "react";
 import { createCategory } from "../actions";
+import {
+  Box,
+  TextField,
+  Button,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  FormControlLabel,
+  Switch,
+  Typography,
+  CircularProgress,
+  Stack,
+  Divider,
+} from "@mui/material";
+import { Save as SaveIcon } from "@mui/icons-material";
 
 export default function CategoryForm({ parents }: { parents: any[] }) {
   const [loading, setLoading] = useState(false);
 
   return (
-    <form action={async (formData) => {
-      setLoading(true);
-      await createCategory(formData);
-      // createCategory will redirect or revalidate
-    }}>
-      <div className="mb-4">
-        <label className="form-label fw-bold">Category Name</label>
-        <input 
-          type="text" 
-          name="name" 
-          className="form-control form-control-minimal" 
-          placeholder="e.g. Cotton Fabrics" 
-          required 
+    <Box
+      component="form"
+      action={async (formData) => {
+        setLoading(true);
+        await createCategory(formData);
+      }}
+      noValidate
+    >
+      <Stack spacing={4}>
+        <TextField
+          label="Category Name"
+          name="name"
+          placeholder="e.g. Cotton Fabrics"
+          fullWidth
+          required
+          variant="outlined"
+          sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
         />
-      </div>
 
-      <div className="mb-4">
-        <label className="form-label fw-bold">Parent Category (Optional)</label>
-        <select name="parentId" className="form-select form-control-minimal">
-          <option value="">None (Top Level)</option>
-          {parents.map(p => (
-            <option key={p.id} value={p.id}>{p.name}</option>
-          ))}
-        </select>
-      </div>
+        <FormControl fullWidth>
+          <InputLabel id="parent-label">Parent Category (Optional)</InputLabel>
+          <Select
+            labelId="parent-label"
+            id="parent-select"
+            name="parentId"
+            label="Parent Category (Optional)"
+            defaultValue=""
+            sx={{ borderRadius: 2 }}
+          >
+            <MenuItem value="">
+              <em>None (Top Level)</em>
+            </MenuItem>
+            {parents.map((p) => (
+              <MenuItem key={p.id} value={p.id}>
+                {p.parentId ? "— " : ""}{p.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
 
-      <div className="mb-4">
-        <label className="form-label fw-bold">Description</label>
-        <textarea 
-          name="description" 
-          className="form-control form-control-minimal" 
-          rows={4}
+        <TextField
+          label="Description"
+          name="description"
           placeholder="Describe this category..."
-        ></textarea>
-      </div>
-
-      <div className="mb-4">
-        <label className="form-label fw-bold">Category Image</label>
-        <input 
-          type="file" 
-          name="image" 
-          className="form-control form-control-minimal" 
-          accept="image/*"
+          fullWidth
+          multiline
+          rows={4}
+          variant="outlined"
+          sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
         />
-      </div>
 
-      <div className="mb-4 d-flex align-items-center">
-        <div className="form-check form-switch p-0 d-flex align-items-center">
-          <input 
-            className="form-check-input" 
-            type="checkbox" 
-            name="isActive" 
-            id="isActive" 
-            defaultChecked 
-            style={{ width: '40px', height: '20px', marginLeft: '0', marginRight: '10px' }}
+        <Box>
+          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600, color: "text.secondary", ml: 0.5 }}>
+            Category Image
+          </Typography>
+          <TextField
+            name="image"
+            type="file"
+            fullWidth
+            inputProps={{ accept: "image/*" }}
+            variant="outlined"
+            sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
           />
-          <label className="form-check-label fw-bold" htmlFor="isActive">
-            Active
-          </label>
-        </div>
-      </div>
+        </Box>
 
-      <div className="mt-5 pt-4 border-top">
-        <button 
-          type="submit" 
-          className="btn btn-primary px-5 btn-minimal"
-          disabled={loading}
-        >
-          {loading ? "Saving..." : "Create Category"}
-        </button>
-      </div>
-    </form>
+        <FormControlLabel
+          control={<Switch name="isActive" defaultChecked color="success" />}
+          label={
+            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+              Active (Visible on site)
+            </Typography>
+          }
+        />
+
+        <Divider />
+
+        <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+          <Button
+            type="submit"
+            variant="contained"
+            size="large"
+            disabled={loading}
+            startIcon={loading ? <CircularProgress size={20} /> : <SaveIcon />}
+            sx={{ px: 4, borderRadius: 2 }}
+          >
+            {loading ? "Saving..." : "Create Category"}
+          </Button>
+        </Box>
+      </Stack>
+    </Box>
   );
 }

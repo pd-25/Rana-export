@@ -27,7 +27,61 @@ model Category {
   parentId    Int?
   parent      Category?  @relation("CategoryToCategory", fields: [parentId], references: [id], onDelete: Cascade)
   children    Category[] @relation("CategoryToCategory")
+  
+  products    Product[]
 
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
+}
+
+model Product {
+  id              Int              @id @default(autoincrement())
+  name            String
+  slug            String           @unique
+  sku             String?          @unique
+  modelNo         String?          // "Product" field in spec
+  ean             String?
+  description     String?          @db.LongText
+  mainImage       String?
+  material        String?
+  packaging       String?
+  origin          String?          // Country of Origin
+  shippingDetails String?          @db.Text
+  isActive        Boolean          @default(true)
+  
+  categoryId      Int
+  category        Category         @relation(fields: [categoryId], references: [id])
+  
+  gallery         ProductImage[]
+  variants        ProductVariant[]
+  documents       ProductDocument[]
+
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+}
+
+model ProductImage {
+  id        Int      @id @default(autoincrement())
+  url       String
+  productId Int
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model ProductVariant {
+  id                Int      @id @default(autoincrement())
+  weight            String?  // e.g. "425-475"
+  size              String?  // e.g. "±12"
+  stock             Int      @default(0)
+  totalWeight       String?  // e.g. "±450"
+  
+  productId         Int
+  product           Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model ProductDocument {
+  id        Int      @id @default(autoincrement())
+  name      String
+  url       String
+  productId Int
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 }

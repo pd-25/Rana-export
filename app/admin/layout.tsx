@@ -1,10 +1,62 @@
 "use client";
-import React from "react";
-import { usePathname } from "next/navigation";
+import React, { useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import {
+  Box,
+  Drawer,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Typography,
+  Divider,
+  IconButton,
+  AppBar,
+  Toolbar,
+  Avatar,
+  Menu,
+  MenuItem,
+  CssBaseline,
+  ThemeProvider,
+  createTheme,
+} from "@mui/material";
+import {
+  Dashboard as DashboardIcon,
+  Category as CategoryIcon,
+  Inventory as ProductIcon,
+  Logout as LogoutIcon,
+  Menu as MenuIcon,
+  ChevronLeft as ChevronLeftIcon,
+  Person as PersonIcon,
+} from "@mui/icons-material";
 import Link from "next/link";
-import "bootstrap/dist/css/bootstrap.min.css";
-import "bootstrap-icons/font/bootstrap-icons.css";
-import "./admin.css";
+import { logoutAdmin } from "./logout/actions";
+
+const drawerWidth = 260;
+
+const adminTheme = createTheme({
+  palette: {
+    primary: {
+      main: "#1976d2",
+    },
+    background: {
+      default: "#f5f5f5",
+    },
+  },
+  typography: {
+    fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+  },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          textTransform: "none",
+        },
+      },
+    },
+  },
+});
 
 export default function AdminLayout({
   children,
@@ -12,59 +64,171 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
   const isLoginPage = pathname === "/admin/login";
 
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+  const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleLogout = async () => {
+    await logoutAdmin();
+  };
+
+  if (isLoginPage) {
+    return (
+      <ThemeProvider theme={adminTheme}>
+        <CssBaseline />
+        <Box
+          sx={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100vh",
+            bgcolor: "background.default",
+          }}
+        >
+          {children}
+        </Box>
+      </ThemeProvider>
+    );
+  }
+
+  const menuItems = [
+    { text: "Dashboard", icon: <DashboardIcon />, path: "/admin" },
+    { text: "Categories", icon: <CategoryIcon />, path: "/admin/categories" },
+    { text: "Products", icon: <ProductIcon />, path: "/admin/products" },
+  ];
+
   return (
-    <div className="admin-wrapper" style={{ display: isLoginPage ? 'block' : 'flex' }}>
-      {!isLoginPage && (
-        <aside className="admin-sidebar shadow-sm">
-          <Link href="/admin" className="sidebar-logo">
-            Rana Admin
-          </Link>
-          
-          <nav className="mt-4">
-            <Link 
-              href="/admin" 
-              className={`admin-nav-link ${pathname === '/admin' ? 'active' : ''}`}
-            >
-              <i className="bi bi-speedometer2"></i>
-              Dashboard
-            </Link>
-            
-            <Link 
-              href="/admin/categories" 
-              className={`admin-nav-link ${pathname.startsWith('/admin/categories') ? 'active' : ''}`}
-            >
-              <i className="bi bi-grid"></i>
-              Categories
-            </Link>
-            
-            <Link 
-              href="/admin/products" 
-              className={`admin-nav-link ${pathname.startsWith('/admin/products') ? 'active' : ''}`}
-            >
-              <i className="bi bi-box-seam"></i>
-              Products
-            </Link>
-
-            <div className="mt-5 pt-5 border-top">
-              <form action={async () => {
-                const { logoutAdmin } = await import("@/app/admin/logout/actions");
-                await logoutAdmin();
-              }}>
-                <button type="submit" className="admin-nav-link text-danger w-100 border-0 bg-transparent text-start">
-                  <i className="bi bi-box-arrow-right"></i>
-                  Sign Out
-                </button>
-              </form>
+    <ThemeProvider theme={adminTheme}>
+      <CssBaseline />
+      <Box
+        sx={{
+          display: "flex",
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100vh",
+          bgcolor: "background.default",
+        }}
+      >
+        <AppBar
+          position="fixed"
+          sx={{
+            zIndex: (theme) => theme.zIndex.drawer + 1,
+            boxShadow: "none",
+            borderBottom: "1px solid",
+            borderColor: "divider",
+            bgcolor: "white",
+            color: "text.primary",
+          }}
+        >
+          <Toolbar>
+            <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1, fontWeight: 700, color: 'primary.main' }}>
+              RANA EXPORT ADMIN
+            </Typography>
+            <div>
+              <IconButton onClick={handleMenu} color="inherit">
+                <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main' }}>
+                  <PersonIcon />
+                </Avatar>
+              </IconButton>
+              <Menu
+                id="menu-appbar"
+                anchorEl={anchorEl}
+                anchorOrigin={{
+                  vertical: "bottom",
+                  horizontal: "right",
+                }}
+                keepMounted
+                transformOrigin={{
+                  vertical: "top",
+                  horizontal: "right",
+                }}
+                open={Boolean(anchorEl)}
+                onClose={handleClose}
+              >
+                <MenuItem onClick={handleLogout}>
+                  <ListItemIcon>
+                    <LogoutIcon fontSize="small" />
+                  </ListItemIcon>
+                  Logout
+                </MenuItem>
+              </Menu>
             </div>
-          </nav>
-        </aside>
-      )}
-
-      <main className="admin-main">
-        {children}
-      </main>
-    </div>
+          </Toolbar>
+        </AppBar>
+        <Drawer
+          variant="permanent"
+          sx={{
+            width: drawerWidth,
+            flexShrink: 0,
+            [`& .MuiDrawer-paper`]: {
+              width: drawerWidth,
+              boxSizing: "border-box",
+              borderRight: "1px solid",
+              borderColor: "divider",
+            },
+          }}
+        >
+          <Toolbar />
+          <Box sx={{ overflow: "auto", mt: 2 }}>
+            <List>
+              {menuItems.map((item) => (
+                <ListItem key={item.text} disablePadding>
+                  <ListItemButton
+                    component={Link}
+                    href={item.path}
+                    selected={pathname === item.path || (item.path !== '/admin' && pathname.startsWith(item.path))}
+                    sx={{
+                      mx: 1,
+                      borderRadius: 1,
+                      mb: 0.5,
+                      color: "text.secondary",
+                      "&:hover": {
+                        bgcolor: "rgba(25, 118, 210, 0.08)",
+                        color: "primary.main",
+                        "& .MuiListItemIcon-root": {
+                          color: "primary.main",
+                        },
+                      },
+                      "&.Mui-selected": {
+                        bgcolor: "primary.main",
+                        color: "white",
+                        "&:hover": {
+                          bgcolor: "primary.dark",
+                          color: "white",
+                        },
+                        "& .MuiListItemIcon-root": {
+                          color: "white",
+                        },
+                      },
+                    }}
+                  >
+                    <ListItemIcon sx={{ minWidth: 40, color: "inherit" }}>
+                      {item.icon}
+                    </ListItemIcon>
+                    <ListItemText primary={item.text} primaryTypographyProps={{ fontSize: '0.9rem', fontWeight: 500, color: 'inherit' }} />
+                  </ListItemButton>
+                </ListItem>
+              ))}
+            </List>
+          </Box>
+        </Drawer>
+        <Box component="main" sx={{ flexGrow: 1, p: 3, overflow: "auto" }}>
+          <Toolbar />
+          {children}
+        </Box>
+      </Box>
+    </ThemeProvider>
   );
 }

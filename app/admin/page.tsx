@@ -1,109 +1,214 @@
+"use client";
 import React from "react";
+import {
+  Grid,
+  Card,
+  CardContent,
+  Typography,
+  Box,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Chip,
+  IconButton,
+  Button,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  ListItemIcon,
+} from "@mui/material";
+import {
+  TrendingUp,
+  ShoppingCart,
+  People,
+  AttachMoney,
+  MoreVert,
+  Category as CategoryIcon,
+  Inventory as ProductIcon,
+  Dashboard as DashboardIcon,
+} from "@mui/icons-material";
+import Link from "next/link";
+
+const stats = [
+  {
+    title: "Total Sales",
+    value: "$24,500",
+    icon: <AttachMoney />,
+    color: "#2e7d32",
+    bg: "#e8f5e9",
+  },
+  {
+    title: "New Orders",
+    value: "125",
+    icon: <ShoppingCart />,
+    color: "#0288d1",
+    bg: "#e1f5fe",
+  },
+  {
+    title: "Total Customers",
+    value: "842",
+    icon: <People />,
+    color: "#ed6c02",
+    bg: "#fff3e0",
+  },
+  {
+    title: "Growth",
+    value: "+12%",
+    icon: <TrendingUp />,
+    color: "#9c27b0",
+    bg: "#f3e5f5",
+  },
+];
+
+const recentTransactions = [
+  { id: 1, name: "Modern Portfolio", date: "Jan 24, 2026", status: "Completed", amount: "$89.00" },
+  { id: 2, name: "E-commerce Pro", date: "Jan 23, 2026", status: "Pending", amount: "$129.00" },
+  { id: 3, name: "Minimalist Blog", date: "Jan 22, 2026", status: "Completed", amount: "$45.00" },
+];
 
 export default function AdminDashboard() {
   return (
-    <div className="container-fluid">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1 className="h3 mb-0 text-gray-800">Dashboard Overview</h1>
-        <button className="btn btn-primary btn-sm">
-          <i className="bi bi-download me-2"></i>Generate Report
-        </button>
-      </div>
+    <Box>
+      <Box sx={{ mb: 4, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <Typography variant="h4" sx={{ fontWeight: 700 }}>
+          Dashboard
+        </Typography>
+        <Button variant="contained" startIcon={<TrendingUp />}>
+          Generate Report
+        </Button>
+      </Box>
 
-      <div className="row g-4 mb-4">
-        <div className="col-md-3">
-          <div className="admin-card">
-            <div className="stat-icon bg-primary bg-opacity-10 text-primary">
-              <i className="bi bi-currency-dollar"></i>
-            </div>
-            <h6 className="text-muted mb-1">Total Sales</h6>
-            <h3 className="mb-0">$24,500</h3>
-          </div>
-        </div>
-        <div className="col-md-3">
-          <div className="admin-card">
-            <div className="stat-icon bg-success bg-opacity-10 text-success">
-              <i className="bi bi-cart-check"></i>
-            </div>
-            <h6 className="text-muted mb-1">New Orders</h6>
-            <h3 className="mb-0">125</h3>
-          </div>
-        </div>
-        <div className="col-md-3">
-          <div className="admin-card">
-            <div className="stat-icon bg-info bg-opacity-10 text-info">
-              <i className="bi bi-people"></i>
-            </div>
-            <h6 className="text-muted mb-1">Total Customers</h6>
-            <h3 className="mb-0">842</h3>
-          </div>
-        </div>
-        <div className="col-md-3">
-          <div className="admin-card">
-            <div className="stat-icon bg-warning bg-opacity-10 text-warning">
-              <i className="bi bi-graph-up"></i>
-            </div>
-            <h6 className="text-muted mb-1">Growth</h6>
-            <h3 className="mb-0">+12%</h3>
-          </div>
-        </div>
-      </div>
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        {stats.map((stat) => (
+          <Grid size={{ xs: 12, sm: 6, md: 3 }} key={stat.title}>
+            <Card sx={{ borderRadius: 2, boxShadow: "0 2px 10px rgba(0,0,0,0.05)" }}>
+              <CardContent sx={{ display: "flex", alignItems: "center" }}>
+                <Box
+                  sx={{
+                    p: 1.5,
+                    borderRadius: 2,
+                    bgcolor: stat.bg,
+                    color: stat.color,
+                    mr: 2,
+                    display: "flex",
+                  }}
+                >
+                  {stat.icon}
+                </Box>
+                <Box>
+                  <Typography variant="body2" color="text.secondary">
+                    {stat.title}
+                  </Typography>
+                  <Typography variant="h5" sx={{ fontWeight: 700 }}>
+                    {stat.value}
+                  </Typography>
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
 
-      <div className="row">
-        <div className="col-lg-8">
-          <div className="admin-card">
-            <h5 className="mb-4">Recent Transactions</h5>
-            <div className="table-responsive">
-              <table className="table table-hover align-middle">
-                <thead className="table-light">
-                  <tr>
-                    <th>Template</th>
-                    <th>Date</th>
-                    <th>Status</th>
-                    <th>Amount</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>Modern Portfolio</td>
-                    <td>Jan 24, 2026</td>
-                    <td><span className="badge bg-success-subtle text-success">Completed</span></td>
-                    <td>$89.00</td>
-                  </tr>
-                  <tr>
-                    <td>E-commerce Pro</td>
-                    <td>Jan 23, 2026</td>
-                    <td><span className="badge bg-warning-subtle text-warning">Pending</span></td>
-                    <td>$129.00</td>
-                  </tr>
-                  <tr>
-                    <td>Minimalist Blog</td>
-                    <td>Jan 22, 2026</td>
-                    <td><span className="badge bg-success-subtle text-success">Completed</span></td>
-                    <td>$45.00</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-        <div className="col-lg-4">
-          <div className="admin-card">
-            <h5 className="mb-4">Quick Links</h5>
-            <div className="list-group list-group-flush">
-              <a href="/admin/categories" className="list-group-item list-group-item-action px-0 border-0 d-flex justify-content-between">
-                Manage Categories <i className="bi bi-chevron-right"></i>
-              </a>
-              <a href="/admin/products" className="list-group-item list-group-item-action px-0 border-0 d-flex justify-content-between">
-                Manage Products <i className="bi bi-chevron-right"></i>
-              </a>
-              <a href="/" className="list-group-item list-group-item-action px-0 border-0 d-flex justify-content-between">
-                View Site <i className="bi bi-box-arrow-up-right"></i>
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+      <Grid container spacing={3}>
+        <Grid size={{ xs: 12, lg: 8 }}>
+          <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+            Recent Transactions
+          </Typography>
+          <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: "0 2px 10px rgba(0,0,0,0.05)" }}>
+            <Table>
+              <TableHead sx={{ bgcolor: "#fafafa" }}>
+                <TableRow>
+                  <TableCell sx={{ fontWeight: 600 }}>Template</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>Date</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>Amount</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {recentTransactions.map((row) => (
+                  <TableRow key={row.id} hover>
+                    <TableCell sx={{ fontWeight: 500 }}>{row.name}</TableCell>
+                    <TableCell color="text.secondary">{row.date}</TableCell>
+                    <TableCell>
+                      <Chip
+                        label={row.status}
+                        size="small"
+                        color={row.status === "Completed" ? "success" : "warning"}
+                        variant="filled"
+                        sx={{
+                          fontWeight: 600,
+                          bgcolor: row.status === "Completed" ? "#e8f5e9" : "#fff3e0",
+                          color: row.status === "Completed" ? "#2e7d32" : "#ed6c02",
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>{row.amount}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Grid>
+        <Grid size={{ xs: 12, lg: 4 }}>
+          <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+            Quick Actions
+          </Typography>
+          <Card sx={{ borderRadius: 3, boxShadow: "0 4px 12px rgba(0,0,0,0.05)", border: "1px solid", borderColor: "divider" }}>
+            <List sx={{ p: 1 }}>
+              <ListItem disablePadding sx={{ mb: 0.5 }}>
+                <ListItemButton 
+                  component={Link} 
+                  href="/admin/categories"
+                  sx={{ 
+                    borderRadius: 1.5,
+                    "&:hover": { bgcolor: "primary.50", color: "primary.main" }
+                  }}
+                >
+                  <ListItemIcon sx={{ minWidth: 40, color: "inherit" }}>
+                    <CategoryIcon fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText primary="Manage Categories" primaryTypographyProps={{ fontWeight: 600, fontSize: "0.9rem" }} />
+                </ListItemButton>
+              </ListItem>
+              <ListItem disablePadding sx={{ mb: 0.5 }}>
+                <ListItemButton 
+                  component={Link} 
+                  href="/admin/products"
+                  sx={{ 
+                    borderRadius: 1.5,
+                    "&:hover": { bgcolor: "primary.50", color: "primary.main" }
+                  }}
+                >
+                  <ListItemIcon sx={{ minWidth: 40, color: "inherit" }}>
+                    <ProductIcon fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText primary="Manage Products" primaryTypographyProps={{ fontWeight: 600, fontSize: "0.9rem" }} />
+                </ListItemButton>
+              </ListItem>
+              <ListItem disablePadding>
+                <ListItemButton 
+                  component={Link} 
+                  href="/"
+                  sx={{ 
+                    borderRadius: 1.5,
+                    "&:hover": { bgcolor: "primary.50", color: "primary.main" }
+                  }}
+                >
+                  <ListItemIcon sx={{ minWidth: 40, color: "inherit" }}>
+                    <DashboardIcon fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText primary="View Live Site" primaryTypographyProps={{ fontWeight: 600, fontSize: "0.9rem" }} />
+                </ListItemButton>
+              </ListItem>
+            </List>
+          </Card>
+        </Grid>
+      </Grid>
+    </Box>
   );
 }
