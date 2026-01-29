@@ -68,14 +68,10 @@ model ProductImage {
 }
 
 model ProductVariant {
-  id                Int      @id @default(autoincrement())
-  weight            String?  // e.g. "425-475"
-  size              String?  // e.g. "±12"
-  stock             Int      @default(0)
-  totalWeight       String?  // e.g. "±450"
-  
-  productId         Int
-  product           Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  id        Int      @id @default(autoincrement())
+  data      Json     // Flexible fields: {"Weight (gm)": "425", "Size (cm)": "12", "Liter": "1"}
+  productId Int
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 }
 
 model ProductDocument {
@@ -84,4 +80,20 @@ model ProductDocument {
   url       String
   productId Int
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model VariantGroup {
+  id        Int                @id @default(autoincrement())
+  name      String             @unique
+  fields    Json               // Array of field names: ["Weight (gm)", "Size (cm)", "Material"]
+  items     VariantGroupItem[]
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+}
+
+model VariantGroupItem {
+  id      Int          @id @default(autoincrement())
+  data    Json         // Values matching fields: {"Weight (gm)": "450", "Size (cm)": "15"}
+  groupId Int
+  group   VariantGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
 }

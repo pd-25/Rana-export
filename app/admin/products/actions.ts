@@ -122,16 +122,20 @@ export async function createProduct(formData: FormData) {
   }
 
   // Handle Variants
-  for (let i = 0; i < variantWeights.length; i++) {
-    if (variantWeights[i] || variantSizes[i]) {
+  const variantFieldNames = formData.getAll("variantFieldName[]") as string[];
+  const variantDataStrings = formData.getAll("variantData[]") as string[];
+
+  for (const dataStr of variantDataStrings) {
+    try {
+      const data = JSON.parse(dataStr);
       await (prisma as any).productVariant.create({
         data: {
-          weight: variantWeights[i],
-          size: variantSizes[i],
-          totalWeight: variantTotalWeights[i],
+          data,
           productId: product.id,
         }
       });
+    } catch (e) {
+      console.error("Error saving variant:", e);
     }
   }
 
@@ -210,24 +214,23 @@ export async function updateProduct(id: number, formData: FormData) {
     }
   }
 
-  // Handle Variants (Replace all for simple logic, or more complex update)
-  const variantWeights = formData.getAll("variantWeight[]") as string[];
-  const variantSizes = formData.getAll("variantSize[]") as string[];
-  const variantTotalWeights = formData.getAll("variantTotalWeight[]") as string[];
+  // Handle Variants
+  const variantDataStrings = formData.getAll("variantData[]") as string[];
 
   // Delete old variants and add new ones
   await (prisma as any).productVariant.deleteMany({ where: { productId: id } });
   
-  for (let i = 0; i < variantWeights.length; i++) {
-    if (variantWeights[i] || variantSizes[i]) {
+  for (const dataStr of variantDataStrings) {
+    try {
+      const data = JSON.parse(dataStr);
       await (prisma as any).productVariant.create({
         data: {
-          weight: variantWeights[i],
-          size: variantSizes[i],
-          totalWeight: variantTotalWeights[i],
+          data,
           productId: id,
         }
       });
+    } catch (e) {
+      console.error("Error saving variant:", e);
     }
   }
 

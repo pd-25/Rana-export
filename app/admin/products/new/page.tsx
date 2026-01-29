@@ -15,6 +15,11 @@ export default async function NewProductPage() {
     orderBy: { name: 'asc' }
   });
 
+  const variantGroups = await (prisma as any).variantGroup.findMany({
+    include: { items: true },
+    orderBy: { name: 'asc' }
+  });
+
   return (
     <Box>
       <Box sx={{ mb: 4 }}>
@@ -35,11 +40,11 @@ export default async function NewProductPage() {
           </Typography>
         </Breadcrumbs>
         <Typography variant="h4" sx={{ fontWeight: 800, color: "text.primary" }}>
-          Add New Product
+          Register New Product
         </Typography>
       </Box>
 
-      <ProductForm categories={categories} />
+      <ProductForm categories={categories} variantGroups={variantGroups} />
     </Box>
   );
 }

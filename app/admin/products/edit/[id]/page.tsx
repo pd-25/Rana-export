@@ -32,6 +32,11 @@ export default async function EditProductPage({ params }: { params: { id: string
     orderBy: { name: 'asc' }
   });
 
+  const variantGroups = await (prisma as any).variantGroup.findMany({
+    include: { items: true },
+    orderBy: { name: 'asc' }
+  });
+
   return (
     <Box>
       <Box sx={{ mb: 4 }}>
@@ -56,7 +61,7 @@ export default async function EditProductPage({ params }: { params: { id: string
         </Typography>
       </Box>
 
-      <ProductFormEdit categories={categories} product={product} />
+      <ProductFormEdit categories={categories} product={product} variantGroups={variantGroups} />
     </Box>
   );
 }
