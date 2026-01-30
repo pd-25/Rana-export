@@ -1,7 +1,6 @@
-"use client";
 import React from "react";
+import { prisma } from "@/lib/prisma";
 import {
-  Grid,
   Card,
   CardContent,
   Typography,
@@ -14,201 +13,235 @@ import {
   TableRow,
   Paper,
   Chip,
-  IconButton,
-  Button,
   List,
   ListItem,
   ListItemButton,
   ListItemText,
   ListItemIcon,
+  Button,
+  IconButton,
 } from "@mui/material";
 import {
-  TrendingUp,
   ShoppingCart,
   People,
-  AttachMoney,
-  MoreVert,
   Category as CategoryIcon,
   Inventory as ProductIcon,
   Dashboard as DashboardIcon,
+  Straighten as StraightenIcon,
+  Visibility as ViewIcon,
 } from "@mui/icons-material";
 import Link from "next/link";
 
-const stats = [
-  {
-    title: "Total Sales",
-    value: "$24,500",
-    icon: <AttachMoney />,
-    color: "#2e7d32",
-    bg: "#e8f5e9",
-  },
-  {
-    title: "New Orders",
-    value: "125",
-    icon: <ShoppingCart />,
-    color: "#0288d1",
-    bg: "#e1f5fe",
-  },
-  {
-    title: "Total Customers",
-    value: "842",
-    icon: <People />,
-    color: "#ed6c02",
-    bg: "#fff3e0",
-  },
-  {
-    title: "Growth",
-    value: "+12%",
-    icon: <TrendingUp />,
-    color: "#9c27b0",
-    bg: "#f3e5f5",
-  },
-];
+export default async function AdminDashboard() {
+  const [productCount, categoryCount, customerCount, orderCount, recentOrders] = await Promise.all([
+    (prisma as any).product.count(),
+    (prisma as any).category.count(),
+    (prisma as any).customer.count(),
+    (prisma as any).order.count(),
+    (prisma as any).order.findMany({
+      take: 5,
+      orderBy: { createdAt: 'desc' },
+      include: { customer: true }
+    })
+  ]);
 
-const recentTransactions = [
-  { id: 1, name: "Modern Portfolio", date: "Jan 24, 2026", status: "Completed", amount: "$89.00" },
-  { id: 2, name: "E-commerce Pro", date: "Jan 23, 2026", status: "Pending", amount: "$129.00" },
-  { id: 3, name: "Minimalist Blog", date: "Jan 22, 2026", status: "Completed", amount: "$45.00" },
-];
+  const stats = [
+    {
+      title: "Total Products",
+      value: productCount,
+      icon: <ProductIcon />,
+      color: "#2e7d32",
+      bg: "#e8f5e9",
+      path: "/admin/products"
+    },
+    {
+      title: "Total Categories",
+      value: categoryCount,
+      icon: <CategoryIcon />,
+      color: "#0288d1",
+      bg: "#e1f5fe",
+      path: "/admin/categories"
+    },
+    {
+      title: "Total Customers",
+      value: customerCount,
+      icon: <People />,
+      color: "#ed6c02",
+      bg: "#fff3e0",
+      path: "/admin/customers"
+    },
+    {
+      title: "Total Orders",
+      value: orderCount,
+      icon: <ShoppingCart />,
+      color: "#9c27b0",
+      bg: "#f3e5f5",
+      path: "/admin/orders"
+    },
+  ];
 
-export default function AdminDashboard() {
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "DELIVERED": return "success";
+      case "SHIPPED": return "info";
+      case "PROCESSING": return "warning";
+      case "CANCELLED": return "error";
+      default: return "default";
+    }
+  };
+
   return (
     <Box>
-      <Box sx={{ mb: 4, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <Typography variant="h4" sx={{ fontWeight: 700 }}>
-          Dashboard
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h4" sx={{ fontWeight: 800, color: "text.primary", letterSpacing: "-0.5px" }}>
+          Dashboard Overview
         </Typography>
-        <Button variant="contained" startIcon={<TrendingUp />}>
-          Generate Report
-        </Button>
+        <Typography variant="body2" color="text.secondary">
+          Monitor your store metrics and manage recent activities
+        </Typography>
       </Box>
 
-      <Grid container spacing={3} sx={{ mb: 4 }}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr 1fr' }, gap: 3, mb: 4 }}>
         {stats.map((stat) => (
-          <Grid size={{ xs: 12, sm: 6, md: 3 }} key={stat.title}>
-            <Card sx={{ borderRadius: 2, boxShadow: "0 2px 10px rgba(0,0,0,0.05)" }}>
-              <CardContent sx={{ display: "flex", alignItems: "center" }}>
-                <Box
-                  sx={{
-                    p: 1.5,
-                    borderRadius: 2,
-                    bgcolor: stat.bg,
-                    color: stat.color,
-                    mr: 2,
-                    display: "flex",
-                  }}
-                >
-                  {stat.icon}
-                </Box>
-                <Box>
-                  <Typography variant="body2" color="text.secondary">
-                    {stat.title}
-                  </Typography>
-                  <Typography variant="h5" sx={{ fontWeight: 700 }}>
-                    {stat.value}
-                  </Typography>
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
+          <Box key={stat.title}>
+            <Link href={stat.path} style={{ textDecoration: 'none' }}>
+              <Card sx={{ 
+                borderRadius: 3, 
+                boxShadow: "0 4px 12px rgba(0,0,0,0.05)", 
+                border: "1px solid", 
+                borderColor: "divider",
+                transition: "transform 0.2s, box-shadow 0.2s",
+                "&:hover": {
+                  transform: "translateY(-4px)",
+                  boxShadow: "0 8px 24px rgba(0,0,0,0.1)"
+                }
+              }}>
+                <CardContent sx={{ display: "flex", alignItems: "center" }}>
+                  <Box
+                    sx={{
+                      p: 1.5,
+                      borderRadius: 2,
+                      bgcolor: stat.bg,
+                      color: stat.color,
+                      mr: 2,
+                      display: "flex",
+                    }}
+                  >
+                    {React.cloneElement(stat.icon as React.ReactElement<any>, { fontSize: 'medium' })}
+                  </Box>
+                  <Box>
 
-      <Grid container spacing={3}>
-        <Grid size={{ xs: 12, lg: 8 }}>
-          <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-            Recent Transactions
+                    <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                      {stat.title}
+                    </Typography>
+                    <Typography variant="h5" sx={{ fontWeight: 800 }}>
+                      {stat.value}
+                    </Typography>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Link>
+          </Box>
+        ))}
+      </Box>
+
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: '2fr 1fr' }, gap: 3 }}>
+        <Box>
+          <Typography variant="h6" sx={{ mb: 2, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1 }}>
+            <ShoppingCart fontSize="small" color="action" />
+            Recent Orders
           </Typography>
-          <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: "0 2px 10px rgba(0,0,0,0.05)" }}>
+          <TableContainer component={Paper} sx={{ borderRadius: 3, boxShadow: "0 4px 24px rgba(0,0,0,0.06)", border: "1px solid", borderColor: "divider" }}>
             <Table>
-              <TableHead sx={{ bgcolor: "#fafafa" }}>
+              <TableHead sx={{ bgcolor: "grey.50" }}>
                 <TableRow>
-                  <TableCell sx={{ fontWeight: 600 }}>Template</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Date</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Amount</TableCell>
+                  <TableCell sx={{ fontWeight: 700, fontSize: "0.75rem", color: "text.secondary" }}>ORDER ID</TableCell>
+                  <TableCell sx={{ fontWeight: 700, fontSize: "0.75rem", color: "text.secondary" }}>CUSTOMER</TableCell>
+                  <TableCell sx={{ fontWeight: 700, fontSize: "0.75rem", color: "text.secondary" }}>STATUS</TableCell>
+                  <TableCell sx={{ fontWeight: 700, fontSize: "0.75rem", color: "text.secondary" }}>DATE</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 700, fontSize: "0.75rem", color: "text.secondary" }}>ACTIONS</TableCell>
                 </TableRow>
+
               </TableHead>
               <TableBody>
-                {recentTransactions.map((row) => (
-                  <TableRow key={row.id} hover>
-                    <TableCell sx={{ fontWeight: 500 }}>{row.name}</TableCell>
-                    <TableCell color="text.secondary">{row.date}</TableCell>
-                    <TableCell>
-                      <Chip
-                        label={row.status}
-                        size="small"
-                        color={row.status === "Completed" ? "success" : "warning"}
-                        variant="filled"
-                        sx={{
-                          fontWeight: 600,
-                          bgcolor: row.status === "Completed" ? "#e8f5e9" : "#fff3e0",
-                          color: row.status === "Completed" ? "#2e7d32" : "#ed6c02",
-                        }}
-                      />
+                {recentOrders.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5} align="center" sx={{ py: 4 }}>
+                      <Typography variant="body2" color="text.secondary">No orders yet</Typography>
                     </TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>{row.amount}</TableCell>
                   </TableRow>
-                ))}
+                ) : (
+                  recentOrders.map((order: any) => (
+                    <TableRow key={order.id} hover>
+                      <TableCell sx={{ fontWeight: 700 }}>#{order.id.toString().padStart(5, '0')}</TableCell>
+                      <TableCell>{order.customer.name}</TableCell>
+                      <TableCell>
+                        <Chip
+                          label={order.status}
+                          size="small"
+                          color={getStatusColor(order.status) as any}
+                          sx={{ fontWeight: 700, fontSize: '0.65rem' }}
+                        />
+                      </TableCell>
+                      <TableCell sx={{ color: 'text.secondary', fontSize: '0.875rem' }}>
+                        {new Date(order.createdAt).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell align="right">
+                        <Link href={`/admin/orders/${order.id}`} passHref>
+                          <IconButton size="small" color="primary">
+                            <ViewIcon fontSize="small" />
+                          </IconButton>
+                        </Link>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </TableContainer>
-        </Grid>
-        <Grid size={{ xs: 12, lg: 4 }}>
-          <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-            Quick Actions
+          <Box sx={{ mt: 2, textAlign: 'right' }}>
+            <Link href="/admin/orders" style={{ textDecoration: 'none' }}>
+              <Button size="small" endIcon={<ViewIcon fontSize="small" />}>View All Orders</Button>
+            </Link>
+          </Box>
+        </Box>
+
+        <Box>
+          <Typography variant="h6" sx={{ mb: 2, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1 }}>
+            <DashboardIcon fontSize="small" color="action" />
+            Quick Management
           </Typography>
           <Card sx={{ borderRadius: 3, boxShadow: "0 4px 12px rgba(0,0,0,0.05)", border: "1px solid", borderColor: "divider" }}>
             <List sx={{ p: 1 }}>
-              <ListItem disablePadding sx={{ mb: 0.5 }}>
-                <ListItemButton 
-                  component={Link} 
-                  href="/admin/categories"
-                  sx={{ 
-                    borderRadius: 1.5,
-                    "&:hover": { bgcolor: "primary.50", color: "primary.main" }
-                  }}
-                >
-                  <ListItemIcon sx={{ minWidth: 40, color: "inherit" }}>
-                    <CategoryIcon fontSize="small" />
-                  </ListItemIcon>
-                  <ListItemText primary="Manage Categories" primaryTypographyProps={{ fontWeight: 600, fontSize: "0.9rem" }} />
-                </ListItemButton>
-              </ListItem>
-              <ListItem disablePadding sx={{ mb: 0.5 }}>
-                <ListItemButton 
-                  component={Link} 
-                  href="/admin/products"
-                  sx={{ 
-                    borderRadius: 1.5,
-                    "&:hover": { bgcolor: "primary.50", color: "primary.main" }
-                  }}
-                >
-                  <ListItemIcon sx={{ minWidth: 40, color: "inherit" }}>
-                    <ProductIcon fontSize="small" />
-                  </ListItemIcon>
-                  <ListItemText primary="Manage Products" primaryTypographyProps={{ fontWeight: 600, fontSize: "0.9rem" }} />
-                </ListItemButton>
-              </ListItem>
-              <ListItem disablePadding>
-                <ListItemButton 
-                  component={Link} 
-                  href="/"
-                  sx={{ 
-                    borderRadius: 1.5,
-                    "&:hover": { bgcolor: "primary.50", color: "primary.main" }
-                  }}
-                >
-                  <ListItemIcon sx={{ minWidth: 40, color: "inherit" }}>
-                    <DashboardIcon fontSize="small" />
-                  </ListItemIcon>
-                  <ListItemText primary="View Live Site" primaryTypographyProps={{ fontWeight: 600, fontSize: "0.9rem" }} />
-                </ListItemButton>
-              </ListItem>
+              {[
+                { title: "Manage Products", icon: <ProductIcon />, path: "/admin/products" },
+                { title: "Manage Categories", icon: <CategoryIcon />, path: "/admin/categories" },
+                { title: "Manage Customers", icon: <People />, path: "/admin/customers" },
+                { title: "Manage Orders", icon: <ShoppingCart />, path: "/admin/orders" },
+                { title: "Variant Groups", icon: <StraightenIcon />, path: "/admin/variants" },
+              ].map((item) => (
+                <ListItem key={item.title} disablePadding sx={{ mb: 0.5 }}>
+                  <Link href={item.path} style={{ textDecoration: 'none', width: '100%', color: 'inherit' }}>
+                    <ListItemButton 
+                      sx={{ 
+                        borderRadius: 1.5,
+                        "&:hover": { bgcolor: "primary.50", color: "primary.main" }
+                      }}
+                    >
+                      <ListItemIcon sx={{ minWidth: 40, color: "inherit" }}>
+                        {React.cloneElement(item.icon as React.ReactElement<any>, { fontSize: 'small' })}
+                      </ListItemIcon>
+                      <ListItemText primary={item.title} primaryTypographyProps={{ fontWeight: 600, fontSize: "0.9rem" }} />
+                    </ListItemButton>
+                  </Link>
+                </ListItem>
+              ))}
             </List>
           </Card>
-        </Grid>
-      </Grid>
+        </Box>
+      </Box>
+
+
     </Box>
   );
 }

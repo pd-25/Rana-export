@@ -121,6 +121,59 @@ async function main() {
   });
 
   console.log("Products seeded:", p1.name, ",", p2.name);
+
+  // 5. Seed Customers
+  const customer1 = await prisma.customer.upsert({
+    where: { email: "john@example.com" },
+    update: {},
+    create: {
+      name: "John Doe",
+      email: "john@example.com",
+      phone: "+1234567890",
+      address: "123 Main St, New York, NY 10001",
+    },
+  });
+
+  const customer2 = await prisma.customer.upsert({
+    where: { email: "jane@example.com" },
+    update: {},
+    create: {
+      name: "Jane Smith",
+      email: "jane@example.com",
+      phone: "+0987654321",
+      address: "456 Side St, Los Angeles, CA 90001",
+    },
+  });
+
+  console.log("Customers seeded");
+
+  // 6. Seed Orders
+  const order1 = await prisma.order.create({
+    data: {
+      customerId: customer1.id,
+      status: "PENDING",
+      items: {
+        create: [
+          { productId: p1.id, quantity: 2 },
+          { productId: p2.id, quantity: 1 },
+        ],
+      },
+    },
+  });
+
+  const order2 = await prisma.order.create({
+    data: {
+      customerId: customer2.id,
+      status: "SHIPPED",
+      items: {
+        create: [
+          { productId: p1.id, quantity: 5 },
+        ],
+      },
+    },
+  });
+
+  console.log("Orders seeded");
 }
 
 main()
@@ -131,3 +184,4 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
+

@@ -30,6 +30,7 @@ import {
   ChevronLeft as ChevronLeftIcon,
   Person as PersonIcon,
   Straighten as StraightenIcon,
+  ShoppingBag as OrderIcon,
 } from "@mui/icons-material";
 import Link from "next/link";
 import { logoutAdmin } from "./logout/actions";
@@ -107,7 +108,10 @@ export default function AdminLayout({
     { text: "Categories", icon: <CategoryIcon />, path: "/admin/categories" },
     { text: "Products", icon: <ProductIcon />, path: "/admin/products" },
     { text: "Variant Groups", icon: <StraightenIcon />, path: "/admin/variants" },
+    { text: "Customers", icon: <PersonIcon />, path: "/admin/customers" },
+    { text: "Orders", icon: <OrderIcon />, path: "/admin/orders" },
   ];
+
 
   return (
     <ThemeProvider theme={adminTheme}>
