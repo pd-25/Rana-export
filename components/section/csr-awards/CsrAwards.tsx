@@ -9,8 +9,8 @@ export default function CsrAwards() {
         <Box component="section" className="csrAwardsWrapper">
             <Stack direction="row" spacing={4} flexWrap={{ xs: "wrap", md: "nowrap", lg: "nowrap" }}>
                 <Box className="csrCard" sx={{ width: { xs: "100%", md: "50%", lg: "50%" }, backgroundColor: "#FFE5DB" }}>
-                    <Stack direction="row" spacing={4} flexWrap={{ xs: "wrap", md: "nowrap", lg: "nowrap" }}>
-                        <Box className="sectionHeading isLeft" sx={{ width: { xs: "100%", md: "50%", lg: "50%" } }}>
+                    <Stack direction="row" spacing={4} flexWrap={{ xs: "wrap-reverse", md: "wrap-reverse", lg: "nowrap" }}>
+                        <Box className="sectionHeading isLeft" sx={{ width: { xs: "100%", md: "100%", lg: "50%" } }}>
                             <Typography variant="h2" component="h2" sx={{ display: "flex", alignItems: "end", justifyContent: "start", gap: 2 }}>
                                 CORPORATE SOCIAL
                                 RESPOSIBILITIES
@@ -27,7 +27,7 @@ export default function CsrAwards() {
                                 <Icon name="ButtonArrowAlt" width={20} height={20} />
                             </Button>
                         </Box>
-                        <Box className="csrImage" sx={{ width: { xs: "100%", md: "50%", lg: "50%" } }}>
+                        <Box className="csrImage" sx={{ width: { xs: "100%", md: "100%", lg: "50%" } }}>
                             <Image src={csrImage} alt="CSR Awards" />
                             <Typography variant="body1">
                                 Free Health checkup-Blood Donation Camp for poor, Organised by
@@ -37,8 +37,8 @@ export default function CsrAwards() {
                     </Stack>
                 </Box>
                 <Box className="csrCard" sx={{ width: { xs: "100%", md: "50%", lg: "50%" }, backgroundColor: "#F4DFE5" }}>
-                    <Stack direction="row" spacing={4} flexWrap={{ xs: "wrap", md: "nowrap", lg: "nowrap" }}>
-                        <Box className="sectionHeading isLeft" sx={{ width: { xs: "100%", md: "50%", lg: "50%" } }}>
+                    <Stack direction="row" spacing={4} flexWrap={{ xs: "wrap-reverse", md: "wrap-reverse", lg: "nowrap" }}>
+                        <Box className="sectionHeading isLeft" sx={{ width: { xs: "100%", md: "100%", lg: "50%" } }}>
                             <Typography variant="h2" component="h2" sx={{ display: "flex", alignItems: "end", justifyContent: "start", gap: 2 }}>
                                 Awards and
                                 Recognition
@@ -56,7 +56,7 @@ export default function CsrAwards() {
                                 <Icon name="ButtonArrowAlt" width={20} height={20} />
                             </Button>
                         </Box>
-                        <Box className="csrImage" sx={{ width: { xs: "100%", md: "50%", lg: "50%" } }}>
+                        <Box className="csrImage" sx={{ width: { xs: "100%", md: "100%", lg: "50%" } }}>
                             <Image src={AwardsImage} alt="Awards" />
                             <Box className="awardsImage">
                                 <Image src={TrophyImage} alt="Awards" />

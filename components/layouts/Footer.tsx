@@ -93,10 +93,9 @@ export default function Footer() {
       <Box
         component="footer"
         sx={{
-          backgroundColor: "#5C2E2E", // Dark reddish-brown background
+          backgroundColor: "#7A4851", // Dark reddish-brown background
           color: "#ffffff",
           pt: { xs: 4, md: 6 },
-          pb: { xs: 3, md: 4 },
         }}
       >
         <Container>
@@ -112,7 +111,7 @@ export default function Footer() {
             }}
           >
             {/* Our Story Section */}
-            <Box>
+            <Box sx={{ maxWidth: { xs: "100%", md: "255px" } }}>
               <Typography
                 variant="h6"
                 component="h3"
@@ -121,7 +120,7 @@ export default function Footer() {
                   fontWeight: 600,
                   mb: 2,
                   color: "#ffffff",
-                  borderBottom: "2px solid #B16A6F",
+                  borderBottom: "3px solid #A9636C",
                   paddingBottom: 1,
                   display: "inline-block",
                 }}
@@ -137,7 +136,14 @@ export default function Footer() {
                   mb: 2,
                 }}
               >
-                We are known as the reputed manufacturer of a wide assortment of HAND MADE SINGING BOWL, Tibetan Singing Bowl and Bell. GONG AND CYMBLE AND TINGSHA, These products are famous for their simple design and easy to use.
+                We are known as the reputed
+                manufacturer of a wide
+                assortment of HAND MADE
+                SINGING BOWL , Tibetan Singing
+                Bowl and Bell. GONG AND
+                CYMBLE AND TINGSHA , These
+                products are famous for their
+                simple design and easy to use.
               </Typography>
               <Typography
                 variant="body2"
@@ -148,7 +154,14 @@ export default function Footer() {
                   mb: 2,
                 }}
               >
-                We are known as the reputed manufacturer of a wide assortment of HAND MADE SINGING BOWL, Tibetan Singing Bowl and Bell. GONG AND CYMBLE AND TINGSHA, These products are famous for their simple design and easy to use.
+                We are known as the reputed
+                manufacturer of a wide
+                assortment of HAND MADE
+                SINGING BOWL , Tibetan Singing
+                Bowl and Bell. GONG AND
+                CYMBLE AND TINGSHA , These
+                products are famous for their
+                simple design and easy to use.
               </Typography>
               <Typography
                 variant="body2"
@@ -158,7 +171,9 @@ export default function Footer() {
                   color: "#ffffff",
                 }}
               >
-                We are known as the reputed manufacturer of a wide assortment of HAND MADE
+                We are known as the reputed
+                manufacturer of a wide
+                assortment of HAND MADE
               </Typography>
             </Box>
 
@@ -172,7 +187,7 @@ export default function Footer() {
                   fontWeight: 600,
                   mb: 2,
                   color: "#ffffff",
-                  borderBottom: "2px solid #B16A6F",
+                  borderBottom: "3px solid #A9636C",
                   paddingBottom: 1,
                   display: "inline-block",
                 }}
@@ -245,7 +260,7 @@ export default function Footer() {
                   fontWeight: 600,
                   mb: 2,
                   color: "#ffffff",
-                  borderBottom: "2px solid #B16A6F",
+                  borderBottom: "3px solid #A9636C",
                   paddingBottom: 1,
                   display: "inline-block",
                 }}
@@ -296,7 +311,7 @@ export default function Footer() {
             </Box>
 
             {/* Contact Section */}
-            <Box>
+            <Box sx={{ paddingLeft: { xs: 0, md: 5 } }}>
               <Typography
                 variant="h6"
                 component="h3"
@@ -305,7 +320,7 @@ export default function Footer() {
                   fontWeight: 600,
                   mb: 2,
                   color: "#ffffff",
-                  borderBottom: "2px solid #B16A6F",
+                  borderBottom: "3px solid #A9636C",
                   paddingBottom: 1,
                   display: "inline-block",
                 }}
@@ -325,7 +340,7 @@ export default function Footer() {
                   Chandi (RANA JI)
                 </Typography>
               </Box>
-              <Box sx={{ mb: 2 }}>
+              <Box sx={{ mb: 4 }}>
                 <Typography
                   variant="body2"
                   sx={{
@@ -337,8 +352,20 @@ export default function Footer() {
                 >
                   HEAD OFFICE FACTORY:
                 </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontSize: { xs: "14px", md: "16px" },
+                    lineHeight: 1.6,
+                    color: "#ffffff",
+                  }}
+                >
+                  Ramjibanpur, Paschim Medinipur,
+                  West Bengal, Pincode - 721242
+                  Mobile +91 90029 29605
+                </Typography>
               </Box>
-              <Box sx={{ mb: 2 }}>
+              <Box sx={{ mb: 4 }}>
                 <Typography
                   variant="body2"
                   sx={{
@@ -398,13 +425,10 @@ export default function Footer() {
           </Box>
 
           {/* Map Section */}
-          <Box
+          <Box className="footerMapWrapper"
             sx={{
-              mt: { xs: 4, md: 5 },
-              mb: { xs: 3, md: 4 },
               width: "100%",
-              height: { xs: "300px", md: "400px" },
-              borderRadius: "8px",
+              height: { xs: "300px", md: "340px" },
               overflow: "hidden",
             }}
           >
@@ -420,25 +444,22 @@ export default function Footer() {
             />
           </Box>
 
-          {/* Copyright Notice */}
-          <Box
+
+        </Container>
+        {/* Copyright Notice */}
+        <Box
+          className="footerCopyrightWrapper"
+        >
+          <Typography
+            variant="body2"
             sx={{
-              textAlign: "center",
-              pt: { xs: 2, md: 3 },
-              borderTop: "1px solid rgba(255, 255, 255, 0.1)",
+              fontSize: { xs: "14px", md: "16px" },
+              color: "#ffffff",
             }}
           >
-            <Typography
-              variant="body2"
-              sx={{
-                fontSize: { xs: "14px", md: "16px" },
-                color: "#ffffff",
-              }}
-            >
-              Copyright ©2025 Rana Export Trading House
-            </Typography>
-          </Box>
-        </Container>
+            Copyright ©2025 Rana Export Trading House
+          </Typography>
+        </Box>
       </Box>
     </>
   )
