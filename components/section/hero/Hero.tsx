@@ -26,6 +26,7 @@ import BannerFeaturesInfoIcon2 from "@/public/home/home-banner-features-info-ico
 import BannerFeaturesInfoIcon3 from "@/public/home/home-banner-features-info-icon-03.svg"
 import BannerFeaturesInfoOverlayShape1 from "@/public/home/home-curve-shape-01.png"
 import BannerFeaturesInfoOverlayShape2 from "@/public/home/home-curve-shape-02.png"
+import BannerFloatingGraphic from "@/public/home/home-banner-floating-graphic.png"
 import BannerFeaturesInfoFloatingGraphic1 from "@/public/home/home-banner-floating-graphic-01.png"
 import BannerFeaturesInfoFloatingGraphic2 from "@/public/home/home-banner-floating-graphic-02.png"
 import BannerFeaturesInfoFloatingGraphic3 from "@/public/home/home-banner-floating-graphic-03.png"
@@ -35,6 +36,9 @@ export default function Banner() {
     return (
         <Box component="section" className="bannerWrapper">
             <Box className="bannerContentWrapper" sx={{ backgroundImage: `url(${BannerBackground.src})` }}>
+                <Box className="floatingGraphic">
+                    <Image src={BannerFloatingGraphic} alt="banner features info floating graphic" />
+                </Box>
                 <Container>
                     <Stack direction="column" spacing={8}>
                         <Box className="bannerContent" sx={{ textAlign: 'center' }}>
