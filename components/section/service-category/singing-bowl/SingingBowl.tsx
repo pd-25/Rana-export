@@ -1,8 +1,9 @@
 'use client'
-import { useRef, useState, useEffect } from "react"
+import { useRef, useState, useEffect, useCallback } from "react"
 import { Box, Button, Container, IconButton, Stack, Typography } from "@mui/material";
 import Icon from "@/components/ui/icon/Icon"
 import Image from "next/image"
+import type { StaticImageData } from "next/image"
 import { Swiper, SwiperSlide } from "swiper/react"
 import type { Swiper as SwiperType } from "swiper"
 import { Navigation, Pagination, Autoplay } from "swiper/modules"
@@ -14,32 +15,92 @@ import SingingBowlImage2 from "@/public/home/singing-bowl-pic-02.png"
 import SingingBowlImage3 from "@/public/home/singing-bowl-pic-03.png"
 import SingingBowlImage4 from "@/public/home/singing-bowl-pic-04.png"
 
+export type SingingBowlSlide = {
+    image: StaticImageData
+    title: string
+    meta: string[]
+}
+
+const SLIDES_SECTION_1: SingingBowlSlide[] = [
+    { image: SingingBowlImage1, title: "Bengali traditional bowl", meta: ["Tibetan Singing Bowl", "Chakra Carving"] },
+    { image: SingingBowlImage2, title: "Tibetan Hand Made Singing Bowl", meta: ["Tibetan Singing Bowl", "Chakra Carving"] },
+    { image: SingingBowlImage3, title: "Bengali traditional bowl", meta: ["Tibetan Singing Bowl", "Chakra Carving"] },
+    { image: SingingBowlImage4, title: "Jhamka Bowl", meta: ["Tibetan Singing Bowl", "Chakra Carving"] },
+    { image: SingingBowlImage1, title: "Antique Tibetan Singing Bowl", meta: ["Tibetan Singing Bowl", "Chakra Carving"] },
+]
+
+const SWIPER_BREAKPOINTS = {
+    768: { slidesPerView: 2 },
+    1024: { slidesPerView: 2 },
+    1200: { slidesPerView: 3 },
+    1366: { slidesPerView: 4 },
+} as const
+
+function ProductSlideCard({
+    image,
+    title,
+    meta,
+    alt = "singing bowl",
+}: {
+    image: StaticImageData
+    title: string
+    meta: string[]
+    alt?: string
+}) {
+    return (
+        <Box className="serviceCategorySliderItem">
+            <Box className="imageHolder">
+                <Image src={image} alt={alt} />
+                <IconButton sx={{ backgroundColor: "#F4F4F4" }} aria-label="Add to wishlist">
+                    <Icon name="wishList" width={24} height={24} />
+                </IconButton>
+            </Box>
+            <Box className="contentHolder">
+                <Typography variant="h3">{title}</Typography>
+                <Stack direction="row" spacing={1} alignItems="end" justifyContent="space-between">
+                    <Box className="metaData">
+                        {meta.map((line, i) => (
+                            <Typography key={i} variant="body1">
+                                {line}
+                            </Typography>
+                        ))}
+                    </Box>
+                    <Box className="actionButtons">
+                        <IconButton sx={{ backgroundColor: "#FFFFFF" }} aria-label="3D view">
+                            <Icon name="Product3DView" width={20} height={20} />
+                        </IconButton>
+                        <IconButton sx={{ backgroundColor: "#FFFFFF" }} aria-label="Add to cart">
+                            <Icon name="AddToCart" width={20} height={20} />
+                        </IconButton>
+                    </Box>
+                </Stack>
+            </Box>
+        </Box>
+    )
+}
 
 export default function SingingBowl() {
     const swiperRef = useRef<SwiperType | null>(null);
     const [isBeginning, setIsBeginning] = useState(true);
     const [isEnd, setIsEnd] = useState(false);
 
+    const syncNavState = useCallback((swiper: SwiperType) => {
+        setIsBeginning(swiper.isBeginning);
+        setIsEnd(swiper.isEnd);
+        swiper.navigation?.update();
+    }, []);
+
     useEffect(() => {
-        // Update navigation state after mount and on resize
         const updateNavigation = () => {
             if (swiperRef.current) {
-                // Use requestAnimationFrame to ensure DOM is ready
-                requestAnimationFrame(() => {
-                    if (swiperRef.current) {
-                        swiperRef.current.navigation.update();
-                    }
-                });
+                requestAnimationFrame(() => swiperRef.current?.navigation?.update());
             }
         };
-
-        // Small delay to ensure navigation buttons are in DOM
         const timeoutId = setTimeout(updateNavigation, 100);
-        window.addEventListener('resize', updateNavigation);
-
+        window.addEventListener("resize", updateNavigation);
         return () => {
             clearTimeout(timeoutId);
-            window.removeEventListener('resize', updateNavigation);
+            window.removeEventListener("resize", updateNavigation);
         };
     }, []);
 
@@ -71,230 +132,29 @@ export default function SingingBowl() {
                                 spaceBetween={0}
                                 slidesPerView={1}
                                 pagination={false}
+                                loop={false}
+                                speed={1000}
+                                autoHeight={false}
                                 navigation={{
                                     nextEl: "#singing-bowl-1 .ComSliderNavigation .swiper-button-next",
                                     prevEl: "#singing-bowl-1 .ComSliderNavigation .swiper-button-prev",
                                 }}
+                                autoplay={{ delay: 1500, disableOnInteraction: true }}
+                                breakpoints={SWIPER_BREAKPOINTS}
                                 onSwiper={(swiper) => {
                                     swiperRef.current = swiper;
-                                    setIsBeginning(swiper.isBeginning);
-                                    setIsEnd(swiper.isEnd);
+                                    syncNavState(swiper);
                                 }}
-                                onInit={(swiper) => {
-                                    // Update navigation state after Swiper is fully initialized
-                                    swiper.navigation.update();
-                                }}
-                                onSlideChange={(swiper) => {
-                                    setIsBeginning(swiper.isBeginning);
-                                    setIsEnd(swiper.isEnd);
-                                }}
-                                onTransitionStart={() => {
-                                    // Update navigation when transition starts (fires immediately on button click)
-                                    // Use requestAnimationFrame to ensure DOM is ready
-                                    requestAnimationFrame(() => {
-                                        if (swiperRef.current && swiperRef.current.navigation) {
-                                            swiperRef.current.navigation.update();
-                                        }
-                                    });
-                                }}
-                                onSlideChangeTransitionEnd={(swiper) => {
-                                    // Update navigation after transition completes (critical for button clicks)
-                                    setIsBeginning(swiper.isBeginning);
-                                    setIsEnd(swiper.isEnd);
-                                    // Use setTimeout to ensure Swiper's internal state is fully updated
-                                    setTimeout(() => {
-                                        swiper.navigation.update();
-                                    }, 0);
-                                }}
-                                onReachBeginning={(swiper) => {
-                                    // Explicitly handle when reaching the beginning
-                                    setIsBeginning(true);
-                                    setIsEnd(swiper.isEnd);
-                                    setTimeout(() => {
-                                        swiper.navigation.update();
-                                    }, 0);
-                                }}
-                                onReachEnd={(swiper) => {
-                                    // Explicitly handle when reaching the end
-                                    setIsBeginning(swiper.isBeginning);
-                                    setIsEnd(true);
-                                    setTimeout(() => {
-                                        swiper.navigation.update();
-                                    }, 0);
-                                }}
-                                onBreakpoint={(swiper) => {
-                                    // Update navigation when breakpoint changes (responsive)
-                                    swiper.navigation.update();
-                                }}
-                                // autoPlay={true}
-                                loop={false}
-                                speed={1000}
-                                autoHeight={false}
-                                autoplay={{
-                                    delay: 1500,
-                                    disableOnInteraction: true,
-                                }}
-                                breakpoints={{
-                                    768: {
-                                        slidesPerView: 2,
-                                    },
-                                    1024: {
-                                        slidesPerView: 2,
-                                    },
-                                    1200: {
-                                        slidesPerView: 3,
-                                    },
-                                    1366: {
-                                        slidesPerView: 4,
-                                    },
-                                }}
+                                onSlideChange={syncNavState}
+                                onSlideChangeTransitionEnd={syncNavState}
+                                onBreakpoint={(swiper) => swiper.navigation?.update()}
                                 className="serviceCategorySwiper"
                             >
-                                <SwiperSlide>
-                                    <Box className="serviceCategorySliderItem">
-                                        <Box className="imageHolder">
-                                            <Image src={SingingBowlImage1} alt="singing bowl image" />
-                                            <IconButton sx={{ backgroundColor: "#F4F4F4" }}>
-                                                <Icon name="wishList" width={24} height={24} />
-                                            </IconButton>
-                                        </Box>
-                                        <Box className="contentHolder">
-                                            <Typography variant="h3">Bengali traditional bowl</Typography>
-
-                                            <Stack direction="row" spacing={1} alignItems="end" justifyContent="space-between">
-                                                <Box className="metaData">
-                                                    <Typography variant="body1">Tibetan Singing Bowl </Typography>
-                                                    <Typography variant="body1">Chakra Carving</Typography>
-
-                                                </Box>
-                                                <Box className="actionButtons">
-                                                    <IconButton sx={{ backgroundColor: "#FFFFFF" }}>
-                                                        <Icon name="Product3DView" width={20} height={20} />
-                                                    </IconButton>
-                                                    <IconButton sx={{ backgroundColor: "#FFFFFF" }}>
-                                                        <Icon name="AddToCart" width={20} height={20} />
-                                                    </IconButton>
-                                                </Box>
-                                            </Stack>
-                                        </Box>
-                                    </Box>
-                                </SwiperSlide>
-                                <SwiperSlide>
-                                    <Box className="serviceCategorySliderItem">
-                                        <Box className="imageHolder">
-                                            <Image src={SingingBowlImage2} alt="singing bowl image" />
-                                            <IconButton sx={{ backgroundColor: "#F4F4F4" }}>
-                                                <Icon name="wishList" width={24} height={24} />
-                                            </IconButton>
-                                        </Box>
-                                        <Box className="contentHolder">
-                                            <Typography variant="h3">Tibetan Hand Made Singing Bowl</Typography>
-
-                                            <Stack direction="row" spacing={1} alignItems="end" justifyContent="space-between">
-                                                <Box className="metaData">
-                                                    <Typography variant="body1">Tibetan Singing Bowl </Typography>
-                                                    <Typography variant="body1">Chakra Carving</Typography>
-
-                                                </Box>
-                                                <Box className="actionButtons">
-                                                    <IconButton sx={{ backgroundColor: "#FFFFFF" }}>
-                                                        <Icon name="Product3DView" width={20} height={20} />
-                                                    </IconButton>
-                                                    <IconButton sx={{ backgroundColor: "#FFFFFF" }}>
-                                                        <Icon name="AddToCart" width={20} height={20} />
-                                                    </IconButton>
-                                                </Box>
-                                            </Stack>
-                                        </Box>
-                                    </Box>
-                                </SwiperSlide>
-                                <SwiperSlide>
-                                    <Box className="serviceCategorySliderItem">
-                                        <Box className="imageHolder">
-                                            <Image src={SingingBowlImage3} alt="singing bowl image" />
-                                            <IconButton sx={{ backgroundColor: "#F4F4F4" }}>
-                                                <Icon name="wishList" width={24} height={24} />
-                                            </IconButton>
-                                        </Box>
-                                        <Box className="contentHolder">
-                                            <Typography variant="h3">Bengali traditional bowl</Typography>
-
-                                            <Stack direction="row" spacing={1} alignItems="end" justifyContent="space-between">
-                                                <Box className="metaData">
-                                                    <Typography variant="body1">Tibetan Singing Bowl </Typography>
-                                                    <Typography variant="body1">Chakra Carving</Typography>
-
-                                                </Box>
-                                                <Box className="actionButtons">
-                                                    <IconButton sx={{ backgroundColor: "#FFFFFF" }}>
-                                                        <Icon name="Product3DView" width={20} height={20} />
-                                                    </IconButton>
-                                                    <IconButton sx={{ backgroundColor: "#FFFFFF" }}>
-                                                        <Icon name="AddToCart" width={20} height={20} />
-                                                    </IconButton>
-                                                </Box>
-                                            </Stack>
-                                        </Box>
-                                    </Box>
-                                </SwiperSlide>
-                                <SwiperSlide>
-                                    <Box className="serviceCategorySliderItem">
-                                        <Box className="imageHolder">
-                                            <Image src={SingingBowlImage4} alt="singing bowl image" />
-                                            <IconButton sx={{ backgroundColor: "#F4F4F4" }}>
-                                                <Icon name="wishList" width={24} height={24} />
-                                            </IconButton>
-                                        </Box>
-                                        <Box className="contentHolder">
-                                            <Typography variant="h3">Jhamka Bowl</Typography>
-
-                                            <Stack direction="row" spacing={1} alignItems="end" justifyContent="space-between">
-                                                <Box className="metaData">
-                                                    <Typography variant="body1">Tibetan Singing Bowl </Typography>
-                                                    <Typography variant="body1">Chakra Carving</Typography>
-
-                                                </Box>
-                                                <Box className="actionButtons">
-                                                    <IconButton sx={{ backgroundColor: "#FFFFFF" }}>
-                                                        <Icon name="Product3DView" width={20} height={20} />
-                                                    </IconButton>
-                                                    <IconButton sx={{ backgroundColor: "#FFFFFF" }}>
-                                                        <Icon name="AddToCart" width={20} height={20} />
-                                                    </IconButton>
-                                                </Box>
-                                            </Stack>
-                                        </Box>
-                                    </Box>
-                                </SwiperSlide>
-                                <SwiperSlide>
-                                    <Box className="serviceCategorySliderItem">
-                                        <Box className="imageHolder">
-                                            <Image src={SingingBowlImage1} alt="singing bowl image" />
-                                            <IconButton sx={{ backgroundColor: "#F4F4F4" }}>
-                                                <Icon name="wishList" width={24} height={24} />
-                                            </IconButton>
-                                        </Box>
-                                        <Box className="contentHolder">
-                                            <Typography variant="h3">Antique Tibetan Singing Bowl</Typography>
-
-                                            <Stack direction="row" spacing={1} alignItems="end" justifyContent="space-between">
-                                                <Box className="metaData">
-                                                    <Typography variant="body1">Tibetan Singing Bowl </Typography>
-                                                    <Typography variant="body1">Chakra Carving</Typography>
-
-                                                </Box>
-                                                <Box className="actionButtons">
-                                                    <IconButton sx={{ backgroundColor: "#FFFFFF" }}>
-                                                        <Icon name="Product3DView" width={20} height={20} />
-                                                    </IconButton>
-                                                    <IconButton sx={{ backgroundColor: "#FFFFFF" }}>
-                                                        <Icon name="AddToCart" width={20} height={20} />
-                                                    </IconButton>
-                                                </Box>
-                                            </Stack>
-                                        </Box>
-                                    </Box>
-                                </SwiperSlide>
+                                {SLIDES_SECTION_1.map((slide, index) => (
+                                    <SwiperSlide key={`${slide.title}-${index}`}>
+                                        <ProductSlideCard image={slide.image} title={slide.title} meta={slide.meta} />
+                                    </SwiperSlide>
+                                ))}
                             </Swiper>
                         </Box>
                         <Container className="serviceCategorySliderFooterContainer">
@@ -325,230 +185,29 @@ export default function SingingBowl() {
                                 spaceBetween={0}
                                 slidesPerView={1}
                                 pagination={false}
+                                loop={false}
+                                speed={1000}
+                                autoHeight={false}
                                 navigation={{
                                     nextEl: "#singing-bowl-2 .ComSliderNavigation .swiper-button-next",
                                     prevEl: "#singing-bowl-2 .ComSliderNavigation .swiper-button-prev",
                                 }}
+                                autoplay={{ delay: 1600, disableOnInteraction: true }}
+                                breakpoints={SWIPER_BREAKPOINTS}
                                 onSwiper={(swiper) => {
                                     swiperRef.current = swiper;
-                                    setIsBeginning(swiper.isBeginning);
-                                    setIsEnd(swiper.isEnd);
+                                    syncNavState(swiper);
                                 }}
-                                onInit={(swiper) => {
-                                    // Update navigation state after Swiper is fully initialized
-                                    swiper.navigation.update();
-                                }}
-                                onSlideChange={(swiper) => {
-                                    setIsBeginning(swiper.isBeginning);
-                                    setIsEnd(swiper.isEnd);
-                                }}
-                                onTransitionStart={() => {
-                                    // Update navigation when transition starts (fires immediately on button click)
-                                    // Use requestAnimationFrame to ensure DOM is ready
-                                    requestAnimationFrame(() => {
-                                        if (swiperRef.current && swiperRef.current.navigation) {
-                                            swiperRef.current.navigation.update();
-                                        }
-                                    });
-                                }}
-                                onSlideChangeTransitionEnd={(swiper) => {
-                                    // Update navigation after transition completes (critical for button clicks)
-                                    setIsBeginning(swiper.isBeginning);
-                                    setIsEnd(swiper.isEnd);
-                                    // Use setTimeout to ensure Swiper's internal state is fully updated
-                                    setTimeout(() => {
-                                        swiper.navigation.update();
-                                    }, 0);
-                                }}
-                                onReachBeginning={(swiper) => {
-                                    // Explicitly handle when reaching the beginning
-                                    setIsBeginning(true);
-                                    setIsEnd(swiper.isEnd);
-                                    setTimeout(() => {
-                                        swiper.navigation.update();
-                                    }, 0);
-                                }}
-                                onReachEnd={(swiper) => {
-                                    // Explicitly handle when reaching the end
-                                    setIsBeginning(swiper.isBeginning);
-                                    setIsEnd(true);
-                                    setTimeout(() => {
-                                        swiper.navigation.update();
-                                    }, 0);
-                                }}
-                                onBreakpoint={(swiper) => {
-                                    // Update navigation when breakpoint changes (responsive)
-                                    swiper.navigation.update();
-                                }}
-                                // autoPlay={true}
-                                loop={false}
-                                speed={1000}
-                                autoHeight={false}
-                                autoplay={{
-                                    delay: 1600,
-                                    disableOnInteraction: true,
-                                }}
-                                breakpoints={{
-                                    768: {
-                                        slidesPerView: 2,
-                                    },
-                                    1024: {
-                                        slidesPerView: 2,
-                                    },
-                                    1200: {
-                                        slidesPerView: 3,
-                                    },
-                                    1366: {
-                                        slidesPerView: 4,
-                                    },
-                                }}
+                                onSlideChange={syncNavState}
+                                onSlideChangeTransitionEnd={syncNavState}
+                                onBreakpoint={(swiper) => swiper.navigation?.update()}
                                 className="serviceCategorySwiper"
                             >
-                                <SwiperSlide>
-                                    <Box className="serviceCategorySliderItem">
-                                        <Box className="imageHolder">
-                                            <Image src={SingingBowlImage1} alt="singing bowl image" />
-                                            <IconButton sx={{ backgroundColor: "#F4F4F4" }}>
-                                                <Icon name="wishList" width={24} height={24} />
-                                            </IconButton>
-                                        </Box>
-                                        <Box className="contentHolder">
-                                            <Typography variant="h3">Bengali traditional bowl</Typography>
-
-                                            <Stack direction="row" spacing={1} alignItems="end" justifyContent="space-between">
-                                                <Box className="metaData">
-                                                    <Typography variant="body1">Tibetan Singing Bowl </Typography>
-                                                    <Typography variant="body1">Chakra Carving</Typography>
-
-                                                </Box>
-                                                <Box className="actionButtons">
-                                                    <IconButton sx={{ backgroundColor: "#FFFFFF" }}>
-                                                        <Icon name="Product3DView" width={20} height={20} />
-                                                    </IconButton>
-                                                    <IconButton sx={{ backgroundColor: "#FFFFFF" }}>
-                                                        <Icon name="AddToCart" width={20} height={20} />
-                                                    </IconButton>
-                                                </Box>
-                                            </Stack>
-                                        </Box>
-                                    </Box>
-                                </SwiperSlide>
-                                <SwiperSlide>
-                                    <Box className="serviceCategorySliderItem">
-                                        <Box className="imageHolder">
-                                            <Image src={SingingBowlImage2} alt="singing bowl image" />
-                                            <IconButton sx={{ backgroundColor: "#F4F4F4" }}>
-                                                <Icon name="wishList" width={24} height={24} />
-                                            </IconButton>
-                                        </Box>
-                                        <Box className="contentHolder">
-                                            <Typography variant="h3">Tibetan Hand Made Singing Bowl</Typography>
-
-                                            <Stack direction="row" spacing={1} alignItems="end" justifyContent="space-between">
-                                                <Box className="metaData">
-                                                    <Typography variant="body1">Tibetan Singing Bowl </Typography>
-                                                    <Typography variant="body1">Chakra Carving</Typography>
-
-                                                </Box>
-                                                <Box className="actionButtons">
-                                                    <IconButton sx={{ backgroundColor: "#FFFFFF" }}>
-                                                        <Icon name="Product3DView" width={20} height={20} />
-                                                    </IconButton>
-                                                    <IconButton sx={{ backgroundColor: "#FFFFFF" }}>
-                                                        <Icon name="AddToCart" width={20} height={20} />
-                                                    </IconButton>
-                                                </Box>
-                                            </Stack>
-                                        </Box>
-                                    </Box>
-                                </SwiperSlide>
-                                <SwiperSlide>
-                                    <Box className="serviceCategorySliderItem">
-                                        <Box className="imageHolder">
-                                            <Image src={SingingBowlImage3} alt="singing bowl image" />
-                                            <IconButton sx={{ backgroundColor: "#F4F4F4" }}>
-                                                <Icon name="wishList" width={24} height={24} />
-                                            </IconButton>
-                                        </Box>
-                                        <Box className="contentHolder">
-                                            <Typography variant="h3">Bengali traditional bowl</Typography>
-
-                                            <Stack direction="row" spacing={1} alignItems="end" justifyContent="space-between">
-                                                <Box className="metaData">
-                                                    <Typography variant="body1">Tibetan Singing Bowl </Typography>
-                                                    <Typography variant="body1">Chakra Carving</Typography>
-
-                                                </Box>
-                                                <Box className="actionButtons">
-                                                    <IconButton sx={{ backgroundColor: "#FFFFFF" }}>
-                                                        <Icon name="Product3DView" width={20} height={20} />
-                                                    </IconButton>
-                                                    <IconButton sx={{ backgroundColor: "#FFFFFF" }}>
-                                                        <Icon name="AddToCart" width={20} height={20} />
-                                                    </IconButton>
-                                                </Box>
-                                            </Stack>
-                                        </Box>
-                                    </Box>
-                                </SwiperSlide>
-                                <SwiperSlide>
-                                    <Box className="serviceCategorySliderItem">
-                                        <Box className="imageHolder">
-                                            <Image src={SingingBowlImage4} alt="singing bowl image" />
-                                            <IconButton sx={{ backgroundColor: "#F4F4F4" }}>
-                                                <Icon name="wishList" width={24} height={24} />
-                                            </IconButton>
-                                        </Box>
-                                        <Box className="contentHolder">
-                                            <Typography variant="h3">Jhamka Bowl</Typography>
-
-                                            <Stack direction="row" spacing={1} alignItems="end" justifyContent="space-between">
-                                                <Box className="metaData">
-                                                    <Typography variant="body1">Tibetan Singing Bowl </Typography>
-                                                    <Typography variant="body1">Chakra Carving</Typography>
-
-                                                </Box>
-                                                <Box className="actionButtons">
-                                                    <IconButton sx={{ backgroundColor: "#FFFFFF" }}>
-                                                        <Icon name="Product3DView" width={20} height={20} />
-                                                    </IconButton>
-                                                    <IconButton sx={{ backgroundColor: "#FFFFFF" }}>
-                                                        <Icon name="AddToCart" width={20} height={20} />
-                                                    </IconButton>
-                                                </Box>
-                                            </Stack>
-                                        </Box>
-                                    </Box>
-                                </SwiperSlide>
-                                <SwiperSlide>
-                                    <Box className="serviceCategorySliderItem">
-                                        <Box className="imageHolder">
-                                            <Image src={SingingBowlImage1} alt="singing bowl image" />
-                                            <IconButton sx={{ backgroundColor: "#F4F4F4" }}>
-                                                <Icon name="wishList" width={24} height={24} />
-                                            </IconButton>
-                                        </Box>
-                                        <Box className="contentHolder">
-                                            <Typography variant="h3">Antique Tibetan Singing Bowl</Typography>
-
-                                            <Stack direction="row" spacing={1} alignItems="end" justifyContent="space-between">
-                                                <Box className="metaData">
-                                                    <Typography variant="body1">Tibetan Singing Bowl </Typography>
-                                                    <Typography variant="body1">Chakra Carving</Typography>
-
-                                                </Box>
-                                                <Box className="actionButtons">
-                                                    <IconButton sx={{ backgroundColor: "#FFFFFF" }}>
-                                                        <Icon name="Product3DView" width={20} height={20} />
-                                                    </IconButton>
-                                                    <IconButton sx={{ backgroundColor: "#FFFFFF" }}>
-                                                        <Icon name="AddToCart" width={20} height={20} />
-                                                    </IconButton>
-                                                </Box>
-                                            </Stack>
-                                        </Box>
-                                    </Box>
-                                </SwiperSlide>
+                                {SLIDES_SECTION_1.map((slide, index) => (
+                                    <SwiperSlide key={`section2-${slide.title}-${index}`}>
+                                        <ProductSlideCard image={slide.image} title={slide.title} meta={slide.meta} />
+                                    </SwiperSlide>
+                                ))}
                             </Swiper>
                         </Box>
                         <Container className="serviceCategorySliderFooterContainer">
@@ -579,230 +238,29 @@ export default function SingingBowl() {
                                 spaceBetween={0}
                                 slidesPerView={1}
                                 pagination={false}
+                                loop={false}
+                                speed={1000}
+                                autoHeight={false}
                                 navigation={{
                                     nextEl: "#singing-bowl-3 .ComSliderNavigation .swiper-button-next",
                                     prevEl: "#singing-bowl-3 .ComSliderNavigation .swiper-button-prev",
                                 }}
+                                autoplay={{ delay: 1400, disableOnInteraction: true }}
+                                breakpoints={SWIPER_BREAKPOINTS}
                                 onSwiper={(swiper) => {
                                     swiperRef.current = swiper;
-                                    setIsBeginning(swiper.isBeginning);
-                                    setIsEnd(swiper.isEnd);
+                                    syncNavState(swiper);
                                 }}
-                                onInit={(swiper) => {
-                                    // Update navigation state after Swiper is fully initialized
-                                    swiper.navigation.update();
-                                }}
-                                onSlideChange={(swiper) => {
-                                    setIsBeginning(swiper.isBeginning);
-                                    setIsEnd(swiper.isEnd);
-                                }}
-                                onTransitionStart={() => {
-                                    // Update navigation when transition starts (fires immediately on button click)
-                                    // Use requestAnimationFrame to ensure DOM is ready
-                                    requestAnimationFrame(() => {
-                                        if (swiperRef.current && swiperRef.current.navigation) {
-                                            swiperRef.current.navigation.update();
-                                        }
-                                    });
-                                }}
-                                onSlideChangeTransitionEnd={(swiper) => {
-                                    // Update navigation after transition completes (critical for button clicks)
-                                    setIsBeginning(swiper.isBeginning);
-                                    setIsEnd(swiper.isEnd);
-                                    // Use setTimeout to ensure Swiper's internal state is fully updated
-                                    setTimeout(() => {
-                                        swiper.navigation.update();
-                                    }, 0);
-                                }}
-                                onReachBeginning={(swiper) => {
-                                    // Explicitly handle when reaching the beginning
-                                    setIsBeginning(true);
-                                    setIsEnd(swiper.isEnd);
-                                    setTimeout(() => {
-                                        swiper.navigation.update();
-                                    }, 0);
-                                }}
-                                onReachEnd={(swiper) => {
-                                    // Explicitly handle when reaching the end
-                                    setIsBeginning(swiper.isBeginning);
-                                    setIsEnd(true);
-                                    setTimeout(() => {
-                                        swiper.navigation.update();
-                                    }, 0);
-                                }}
-                                onBreakpoint={(swiper) => {
-                                    // Update navigation when breakpoint changes (responsive)
-                                    swiper.navigation.update();
-                                }}
-                                // autoPlay={true}
-                                loop={false}
-                                speed={1000}
-                                autoHeight={false}
-                                autoplay={{
-                                    delay: 1400,
-                                    disableOnInteraction: true,
-                                }}
-                                breakpoints={{
-                                    768: {
-                                        slidesPerView: 2,
-                                    },
-                                    1024: {
-                                        slidesPerView: 2,
-                                    },
-                                    1200: {
-                                        slidesPerView: 3,
-                                    },
-                                    1366: {
-                                        slidesPerView: 4,
-                                    },
-                                }}
+                                onSlideChange={syncNavState}
+                                onSlideChangeTransitionEnd={syncNavState}
+                                onBreakpoint={(swiper) => swiper.navigation?.update()}
                                 className="serviceCategorySwiper"
                             >
-                                <SwiperSlide>
-                                    <Box className="serviceCategorySliderItem">
-                                        <Box className="imageHolder">
-                                            <Image src={SingingBowlImage1} alt="singing bowl image" />
-                                            <IconButton sx={{ backgroundColor: "#F4F4F4" }}>
-                                                <Icon name="wishList" width={24} height={24} />
-                                            </IconButton>
-                                        </Box>
-                                        <Box className="contentHolder">
-                                            <Typography variant="h3">Bengali traditional bowl</Typography>
-
-                                            <Stack direction="row" spacing={1} alignItems="end" justifyContent="space-between">
-                                                <Box className="metaData">
-                                                    <Typography variant="body1">Tibetan Singing Bowl </Typography>
-                                                    <Typography variant="body1">Chakra Carving</Typography>
-
-                                                </Box>
-                                                <Box className="actionButtons">
-                                                    <IconButton sx={{ backgroundColor: "#FFFFFF" }}>
-                                                        <Icon name="Product3DView" width={20} height={20} />
-                                                    </IconButton>
-                                                    <IconButton sx={{ backgroundColor: "#FFFFFF" }}>
-                                                        <Icon name="AddToCart" width={20} height={20} />
-                                                    </IconButton>
-                                                </Box>
-                                            </Stack>
-                                        </Box>
-                                    </Box>
-                                </SwiperSlide>
-                                <SwiperSlide>
-                                    <Box className="serviceCategorySliderItem">
-                                        <Box className="imageHolder">
-                                            <Image src={SingingBowlImage2} alt="singing bowl image" />
-                                            <IconButton sx={{ backgroundColor: "#F4F4F4" }}>
-                                                <Icon name="wishList" width={24} height={24} />
-                                            </IconButton>
-                                        </Box>
-                                        <Box className="contentHolder">
-                                            <Typography variant="h3">Tibetan Hand Made Singing Bowl</Typography>
-
-                                            <Stack direction="row" spacing={1} alignItems="end" justifyContent="space-between">
-                                                <Box className="metaData">
-                                                    <Typography variant="body1">Tibetan Singing Bowl </Typography>
-                                                    <Typography variant="body1">Chakra Carving</Typography>
-
-                                                </Box>
-                                                <Box className="actionButtons">
-                                                    <IconButton sx={{ backgroundColor: "#FFFFFF" }}>
-                                                        <Icon name="Product3DView" width={20} height={20} />
-                                                    </IconButton>
-                                                    <IconButton sx={{ backgroundColor: "#FFFFFF" }}>
-                                                        <Icon name="AddToCart" width={20} height={20} />
-                                                    </IconButton>
-                                                </Box>
-                                            </Stack>
-                                        </Box>
-                                    </Box>
-                                </SwiperSlide>
-                                <SwiperSlide>
-                                    <Box className="serviceCategorySliderItem">
-                                        <Box className="imageHolder">
-                                            <Image src={SingingBowlImage3} alt="singing bowl image" />
-                                            <IconButton sx={{ backgroundColor: "#F4F4F4" }}>
-                                                <Icon name="wishList" width={24} height={24} />
-                                            </IconButton>
-                                        </Box>
-                                        <Box className="contentHolder">
-                                            <Typography variant="h3">Bengali traditional bowl</Typography>
-
-                                            <Stack direction="row" spacing={1} alignItems="end" justifyContent="space-between">
-                                                <Box className="metaData">
-                                                    <Typography variant="body1">Tibetan Singing Bowl </Typography>
-                                                    <Typography variant="body1">Chakra Carving</Typography>
-
-                                                </Box>
-                                                <Box className="actionButtons">
-                                                    <IconButton sx={{ backgroundColor: "#FFFFFF" }}>
-                                                        <Icon name="Product3DView" width={20} height={20} />
-                                                    </IconButton>
-                                                    <IconButton sx={{ backgroundColor: "#FFFFFF" }}>
-                                                        <Icon name="AddToCart" width={20} height={20} />
-                                                    </IconButton>
-                                                </Box>
-                                            </Stack>
-                                        </Box>
-                                    </Box>
-                                </SwiperSlide>
-                                <SwiperSlide>
-                                    <Box className="serviceCategorySliderItem">
-                                        <Box className="imageHolder">
-                                            <Image src={SingingBowlImage4} alt="singing bowl image" />
-                                            <IconButton sx={{ backgroundColor: "#F4F4F4" }}>
-                                                <Icon name="wishList" width={24} height={24} />
-                                            </IconButton>
-                                        </Box>
-                                        <Box className="contentHolder">
-                                            <Typography variant="h3">Jhamka Bowl</Typography>
-
-                                            <Stack direction="row" spacing={1} alignItems="end" justifyContent="space-between">
-                                                <Box className="metaData">
-                                                    <Typography variant="body1">Tibetan Singing Bowl </Typography>
-                                                    <Typography variant="body1">Chakra Carving</Typography>
-
-                                                </Box>
-                                                <Box className="actionButtons">
-                                                    <IconButton sx={{ backgroundColor: "#FFFFFF" }}>
-                                                        <Icon name="Product3DView" width={20} height={20} />
-                                                    </IconButton>
-                                                    <IconButton sx={{ backgroundColor: "#FFFFFF" }}>
-                                                        <Icon name="AddToCart" width={20} height={20} />
-                                                    </IconButton>
-                                                </Box>
-                                            </Stack>
-                                        </Box>
-                                    </Box>
-                                </SwiperSlide>
-                                <SwiperSlide>
-                                    <Box className="serviceCategorySliderItem">
-                                        <Box className="imageHolder">
-                                            <Image src={SingingBowlImage1} alt="singing bowl image" />
-                                            <IconButton sx={{ backgroundColor: "#F4F4F4" }}>
-                                                <Icon name="wishList" width={24} height={24} />
-                                            </IconButton>
-                                        </Box>
-                                        <Box className="contentHolder">
-                                            <Typography variant="h3">Antique Tibetan Singing Bowl</Typography>
-
-                                            <Stack direction="row" spacing={1} alignItems="end" justifyContent="space-between">
-                                                <Box className="metaData">
-                                                    <Typography variant="body1">Tibetan Singing Bowl </Typography>
-                                                    <Typography variant="body1">Chakra Carving</Typography>
-
-                                                </Box>
-                                                <Box className="actionButtons">
-                                                    <IconButton sx={{ backgroundColor: "#FFFFFF" }}>
-                                                        <Icon name="Product3DView" width={20} height={20} />
-                                                    </IconButton>
-                                                    <IconButton sx={{ backgroundColor: "#FFFFFF" }}>
-                                                        <Icon name="AddToCart" width={20} height={20} />
-                                                    </IconButton>
-                                                </Box>
-                                            </Stack>
-                                        </Box>
-                                    </Box>
-                                </SwiperSlide>
+                                {SLIDES_SECTION_1.map((slide, index) => (
+                                    <SwiperSlide key={`section3-${slide.title}-${index}`}>
+                                        <ProductSlideCard image={slide.image} title={slide.title} meta={slide.meta} />
+                                    </SwiperSlide>
+                                ))}
                             </Swiper>
                         </Box>
                         <Container className="serviceCategorySliderFooterContainer">

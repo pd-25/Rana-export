@@ -19,6 +19,15 @@
     }
 }
 
+.MuiDrawer-paper {
+
+    .logoImage {
+        @include respond-to(xl) {
+            width: 200px !important;
+        }
+    }
+}
+
 .navLinksOuter {
 
     @media (min-width: 1800px) {
@@ -91,4 +100,30 @@
     }
 
 
+}
+
+.headerOuter {
+    transition: all .4s ease-in-out;
+    position: relative;
+
+    &.scrollDown {
+        transform: translateY(-100%);
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+    }
+
+    &.scrollUp {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+        transform: translateY(0);
+        background-color: #fff;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, .4);
+        backdrop-filter: blur(5px);
+    }
 }
