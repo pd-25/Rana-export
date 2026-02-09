@@ -29,7 +29,10 @@ export default function Testimonial() {
                         modules={[Navigation, Pagination, Autoplay]}
                         spaceBetween={20}
                         slidesPerView={1}
-                        navigation={true}
+                        navigation={{
+                            nextEl: ".ComSliderNavigation .swiper-button-next",
+                            prevEl: ".ComSliderNavigation .swiper-button-prev",
+                        }}
                         pagination={false}
                         loop={true}
                         speed={1000}
@@ -186,6 +189,10 @@ export default function Testimonial() {
                             </Box>
                         </SwiperSlide>
                     </Swiper>
+                    <Box className="ComSliderNavigation">
+                        <Box className="swiper-button-prev"></Box>
+                        <Box className="swiper-button-next"></Box>
+                    </Box>
                 </Box>
             </Container>
         </Box>

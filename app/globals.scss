@@ -261,7 +261,7 @@ li {
   .swiper-button-next,
   .swiper-button-prev {
     color: $colorWhite;
-    background: rgba(255, 255, 255, 0.2);
+    background: $colorSecondary3;
     width: 50px;
     height: 50px;
     border-radius: 50%;
@@ -276,12 +276,17 @@ li {
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: $colorPrimary;
-
+    cursor: pointer;
 
     svg {
       width: 20px;
       height: 20px;
+    }
+
+    &.swiper-button-disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      pointer-events: none;
     }
   }
 }
@@ -312,5 +317,26 @@ li {
     color: #846E6E;
     max-width: 280px;
     margin: 0 auto;
+  }
+}
+
+.footerMapWrapper {
+  max-width: 55%;
+  margin: -360px auto 0;
+
+  @include respond-to(lg) {
+    max-width: 100%;
+    margin: 40px auto 0;
+  }
+}
+
+.footerCopyrightWrapper {
+  text-align: center;
+  background-color: #574143;
+  padding: 12px;
+  margin-top: 100px;
+
+  @include respond-to(lg) {
+    margin-top: 40px;
   }
 }

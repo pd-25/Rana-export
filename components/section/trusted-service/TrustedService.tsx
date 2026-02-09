@@ -26,11 +26,12 @@ export default function TrustedService() {
                     spacing={4}
                     flexWrap="wrap"
                     sx={{ mt: 4 }}
+                    className="trustedServiceRow"
                 >
                     <Box
                         className="trustedServiceItem"
                         sx={{
-                            flex: { xs: "1 1 100%", sm: "1 1 calc(50% - 16px)", md: "1 1 calc(25% - 24px)" },
+                            flex: { xs: "1 1 100%", sm: "1 1 calc(50% - 16px)", md: "1 1 calc(50% - 32px)", lg: "1 1 calc(25% - 24px)" },
                             minWidth: 0, textAlign: "center"
                         }}
                     >
@@ -42,7 +43,7 @@ export default function TrustedService() {
                     <Box
                         className="trustedServiceItem"
                         sx={{
-                            flex: { xs: "1 1 100%", sm: "1 1 calc(50% - 16px)", md: "1 1 calc(25% - 24px)" },
+                            flex: { xs: "1 1 100%", sm: "1 1 calc(50% - 16px)", md: "1 1 calc(50% - 32px)", lg: "1 1 calc(25% - 24px)" },
                             minWidth: 0, textAlign: "center"
                         }}
                     >
@@ -54,7 +55,7 @@ export default function TrustedService() {
                     <Box
                         className="trustedServiceItem"
                         sx={{
-                            flex: { xs: "1 1 100%", sm: "1 1 calc(50% - 16px)", md: "1 1 calc(25% - 24px)" },
+                            flex: { xs: "1 1 100%", sm: "1 1 calc(50% - 16px)", md: "1 1 calc(50% - 32px)", lg: "1 1 calc(25% - 24px)" },
                             minWidth: 0, textAlign: "center"
                         }}
                     >
@@ -66,7 +67,7 @@ export default function TrustedService() {
                     <Box
                         className="trustedServiceItem"
                         sx={{
-                            flex: { xs: "1 1 100%", sm: "1 1 calc(50% - 16px)", md: "1 1 calc(25% - 24px)" },
+                            flex: { xs: "1 1 100%", sm: "1 1 calc(50% - 16px)", md: "1 1 calc(50% - 32px)", lg: "1 1 calc(25% - 24px)" },
                             minWidth: 0, textAlign: "center"
                         }}
                     >

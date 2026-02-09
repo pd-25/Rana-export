@@ -1,0 +1,129 @@
+@use '../../app/variable.scss' as *;
+
+.header {
+    background-color: #ffffff;
+}
+
+.logoContainer {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logoImage {
+    width: 210px;
+    object-fit: contain;
+
+    @include respond-to(xl) {
+        width: 130px !important;
+    }
+}
+
+.MuiDrawer-paper {
+
+    .logoImage {
+        @include respond-to(xl) {
+            width: 200px !important;
+        }
+    }
+}
+
+.navLinksOuter {
+
+    @media (min-width: 1800px) {
+        gap: 60px !important;
+    }
+
+    @include respond-to(xl) {
+        gap: 18px !important;
+    }
+
+    .navLink {
+        color: #BC8B8B;
+        text-decoration: none;
+        font-size: 18px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+
+        @include respond-to(xl) {
+            font-size: 14px !important;
+        }
+
+        &:hover {
+            color: #B16A6F;
+        }
+
+    }
+}
+
+
+
+
+.iconButton {
+    color: #666666 !important;
+    padding: 8px !important;
+}
+
+.iconButton:hover {
+    background-color: rgba(0, 0, 0, 0.04) !important;
+}
+
+.utilityIconsOuter {
+    @include respond-to(xl) {
+        gap: 5px !important;
+    }
+}
+
+.mobileMenuDrawerOuter {
+    .MuiPaper-elevation {
+        >div {
+            background-color: #FFE5DB;
+        }
+    }
+
+
+    .mobileNavLink {
+        color: #000000;
+        text-decoration: none;
+        padding: 12px 0;
+        display: block;
+        font-size: 16px;
+        font-weight: 500;
+        text-transform: uppercase;
+        transition: opacity 0.2s;
+
+        &:hover {
+            color: #b16a6f;
+        }
+    }
+
+
+}
+
+.headerOuter {
+    transition: all .4s ease-in-out;
+    position: relative;
+
+    &.scrollDown {
+        transform: translateY(-100%);
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+    }
+
+    &.scrollUp {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+        transform: translateY(0);
+        background-color: #fff;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, .4);
+        backdrop-filter: blur(5px);
+    }
+}

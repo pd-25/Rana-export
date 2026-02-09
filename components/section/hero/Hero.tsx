@@ -24,14 +24,21 @@ import BannerBottomInfoIcon3 from "@/public/home/home-banner-info-icon-03.svg"
 import BannerFeaturesInfoIcon1 from "@/public/home/home-banner-features-info-icon-01.svg"
 import BannerFeaturesInfoIcon2 from "@/public/home/home-banner-features-info-icon-02.svg"
 import BannerFeaturesInfoIcon3 from "@/public/home/home-banner-features-info-icon-03.svg"
-import BannerFeaturesInfoOverlayShape1 from "@/public/home/hero-oval-shape-01.png"
-import BannerFeaturesInfoOverlayShape2 from "@/public/home/hero-oval-shape-02.png"
-
+import BannerFeaturesInfoOverlayShape1 from "@/public/home/home-curve-shape-01.png"
+import BannerFeaturesInfoOverlayShape2 from "@/public/home/home-curve-shape-02.png"
+import BannerFloatingGraphic from "@/public/home/home-banner-floating-graphic.png"
+import BannerFeaturesInfoFloatingGraphic1 from "@/public/home/home-banner-floating-graphic-01.png"
+import BannerFeaturesInfoFloatingGraphic2 from "@/public/home/home-banner-floating-graphic-02.png"
+import BannerFeaturesInfoFloatingGraphic3 from "@/public/home/home-banner-floating-graphic-03.png"
+import BannerFeaturesInfoFloatingGraphic4 from "@/public/home/home-banner-floating-graphic-04.png"
 
 export default function Banner() {
     return (
         <Box component="section" className="bannerWrapper">
             <Box className="bannerContentWrapper" sx={{ backgroundImage: `url(${BannerBackground.src})` }}>
+                <Box className="floatingGraphic">
+                    <Image src={BannerFloatingGraphic} alt="banner features info floating graphic" />
+                </Box>
                 <Container>
                     <Stack direction="column" spacing={8}>
                         <Box className="bannerContent" sx={{ textAlign: 'center' }}>
@@ -147,12 +154,22 @@ export default function Banner() {
                         </Box>
                     </Stack>
                 </Container>
+                <Box className="overlayShape">
+                    <Image src={BannerFeaturesInfoOverlayShape1} alt="banner features info overlay shape" />
+                </Box>
+                <Box className="floatingGraphic">
+                    <Image src={BannerFeaturesInfoFloatingGraphic1} alt="banner features info floating graphic" />
+                    <Image src={BannerFeaturesInfoFloatingGraphic2} alt="banner features info floating graphic" />
+                    <Image src={BannerFeaturesInfoFloatingGraphic3} alt="banner features info floating graphic" />
+                    <Image src={BannerFeaturesInfoFloatingGraphic4} alt="banner features info floating graphic" />
+
+                </Box>
             </Box>
             <Box className="bannerFeaturesInfoWrapper">
-                {/* <Box className="overlayShape">
+                <Box className="overlayShape">
                     <Image src={BannerFeaturesInfoOverlayShape1} alt="banner features info overlay shape" />
                     <Image src={BannerFeaturesInfoOverlayShape2} alt="banner features info overlay shape" />
-                </Box> */}
+                </Box>
                 <Container>
                     <Stack direction="row" spacing={4} justifyContent="center">
                         <Box className="bannerFeaturesInfoBox" sx={{ textAlign: 'center', width: { xs: 1, md: 2 / 3, lg: 1 / 3 } }}>
