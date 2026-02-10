@@ -25,13 +25,31 @@ import {
   Inventory as ProductIcon,
 } from "@mui/icons-material";
 
-export default async function ProductsPage() {
+import ProductFilters from "./ProductFilters";
+
+export default async function ProductsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ search?: string; category?: string }>;
+}) {
+  const { search, category } = await searchParams;
+
+  const categories = await (prisma as any).category.findMany({
+    orderBy: { name: "asc" },
+  });
+
   const products = await (prisma as any).product.findMany({
+    where: {
+      AND: [
+        search ? { name: { contains: search } } : {},
+        category && category !== "all" ? { categoryId: parseInt(category) } : {},
+      ],
+    },
     include: {
       category: true,
       variants: true,
     },
-    orderBy: { createdAt: 'desc' }
+    orderBy: { createdAt: "desc" },
   });
 
   return (
@@ -45,13 +63,13 @@ export default async function ProductsPage() {
             Manage your store inventory and product details
           </Typography>
         </Box>
-        <Link href="/admin/products/new" passHref style={{ textDecoration: 'none' }}>
+        <Link href="/admin/products/new" passHref style={{ textDecoration: "none" }}>
           <Button
             variant="contained"
             startIcon={<AddIcon />}
-            sx={{ 
-              borderRadius: 2, 
-              px: 3, 
+            sx={{
+              borderRadius: 2,
+              px: 3,
               py: 1,
               boxShadow: "0 4px 14px 0 rgba(25, 118, 210, 0.39)",
             }}
@@ -61,27 +79,35 @@ export default async function ProductsPage() {
         </Link>
       </Box>
 
-      <TableContainer component={Paper} sx={{ borderRadius: 3, boxShadow: "0 4px 24px rgba(0,0,0,0.06)", border: "1px solid", borderColor: "divider" }}>
+      <ProductFilters categories={categories} />
+
+      <TableContainer
+        component={Paper}
+        sx={{ borderRadius: 3, boxShadow: "0 4px 24px rgba(0,0,0,0.06)", border: "1px solid", borderColor: "divider" }}
+      >
         <Table>
           <TableHead sx={{ bgcolor: "grey.50" }}>
             <TableRow>
-              <TableCell sx={{ fontWeight: 700, fontSize: "0.75rem", color: "text.secondary", pl: 4 }}>PRODUCT</TableCell>
+              <TableCell sx={{ fontWeight: 700, fontSize: "0.75rem", color: "text.secondary", pl: 4 }}>
+                PRODUCT
+              </TableCell>
               <TableCell sx={{ fontWeight: 700, fontSize: "0.75rem", color: "text.secondary" }}>CATEGORY</TableCell>
-              <TableCell sx={{ fontWeight: 700, fontSize: "0.75rem", color: "text.secondary" }}>SKU</TableCell>
               <TableCell sx={{ fontWeight: 700, fontSize: "0.75rem", color: "text.secondary" }}>VARIANTS</TableCell>
               <TableCell sx={{ fontWeight: 700, fontSize: "0.75rem", color: "text.secondary" }}>STATUS</TableCell>
-              <TableCell align="right" sx={{ fontWeight: 700, fontSize: "0.75rem", color: "text.secondary", pr: 4 }}>ACTIONS</TableCell>
+              <TableCell align="right" sx={{ fontWeight: 700, fontSize: "0.75rem", color: "text.secondary", pr: 4 }}>
+                ACTIONS
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {products.map((prod: any) => (
               <TableRow key={prod.id} hover>
                 <TableCell sx={{ pl: 4 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                     <Avatar
                       src={prod.mainImage}
                       variant="rounded"
-                      sx={{ width: 48, height: 48, bgcolor: 'background.default', border: "1px solid", borderColor: "divider" }}
+                      sx={{ width: 48, height: 48, bgcolor: "background.default", border: "1px solid", borderColor: "divider" }}
                     >
                       <ProductIcon />
                     </Avatar>
@@ -89,24 +115,16 @@ export default async function ProductsPage() {
                       <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
                         {prod.name}
                       </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {prod.modelNo || "No Model #"}
-                      </Typography>
                     </Box>
                   </Box>
                 </TableCell>
                 <TableCell>
-                  <Chip 
-                    label={prod.category.name} 
-                    size="small" 
-                    variant="outlined" 
-                    sx={{ borderRadius: 1, fontSize: '0.75rem' }} 
+                  <Chip
+                    label={prod.category.name}
+                    size="small"
+                    variant="outlined"
+                    sx={{ borderRadius: 1, fontSize: "0.75rem" }}
                   />
-                </TableCell>
-                <TableCell>
-                  <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
-                    {prod.sku || "—"}
-                  </Typography>
                 </TableCell>
                 <TableCell>
                   <Typography variant="body2" sx={{ fontWeight: 600 }}>
@@ -118,21 +136,23 @@ export default async function ProductsPage() {
                     label={prod.isActive ? "Live" : "Draft"}
                     size="small"
                     color={prod.isActive ? "success" : "default"}
-                    sx={{ fontWeight: 700, fontSize: '0.7rem' }}
+                    sx={{ fontWeight: 700, fontSize: "0.7rem" }}
                   />
                 </TableCell>
                 <TableCell align="right" sx={{ pr: 4 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+                  <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1 }}>
                     <Link href={`/admin/products/edit/${prod.id}`} passHref>
-                      <IconButton size="small" sx={{ color: 'primary.main', bgcolor: 'primary.50' }}>
+                      <IconButton size="small" sx={{ color: "primary.main", bgcolor: "primary.50" }}>
                         <EditIcon fontSize="small" />
                       </IconButton>
                     </Link>
-                    <form action={async () => {
-                      "use server";
-                      await deleteProduct(prod.id);
-                    }}>
-                      <IconButton type="submit" size="small" sx={{ color: 'error.main', bgcolor: 'error.50' }}>
+                    <form
+                      action={async () => {
+                        "use server";
+                        await deleteProduct(prod.id);
+                      }}
+                    >
+                      <IconButton type="submit" size="small" sx={{ color: "error.main", bgcolor: "error.50" }}>
                         <DeleteIcon fontSize="small" />
                       </IconButton>
                     </form>

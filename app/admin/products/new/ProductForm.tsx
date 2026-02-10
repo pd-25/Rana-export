@@ -26,6 +26,8 @@ import {
   TableBody,
   TableCell,
   TableRow,
+  Tabs,
+  Tab,
 } from "@mui/material";
 import {
   Save as SaveIcon,
@@ -36,48 +38,81 @@ import {
   Scale as WeightIcon,
   Close as CloseIcon,
   Settings as SettingsIcon,
+  SubdirectoryArrowRight as SubcategoryIcon,
 } from "@mui/icons-material";
 
 export default function ProductForm({ categories, variantGroups }: { categories: any[]; variantGroups: any[] }) {
   const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState(0);
   
   // Dynamic Variants state
-  // fields: Array of field names (e.g. ["Weight", "Size"])
-  // items: Array of row data (e.g. [{"Weight": "450", "Size": "12"}])
   const [variantFields, setVariantFields] = useState<string[]>(["Weight (gm)", "Size (cm)", "Total Weight"]);
-  const [variantRows, setVariantRows] = useState<any[]>([{ id: Date.now(), data: {} }]);
+  const [variantRows, setVariantRows] = useState<any[]>([
+    { 
+      id: Date.now(), 
+      data: { SKU: "", "Model No": "", EAN: "" },
+      imagePreview: null,
+      imageFile: null
+    }
+  ]);
   
   // Previews
   const [mainImagePreview, setMainImagePreview] = useState<string | null>(null);
   const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
   const [documentFiles, setDocumentFiles] = useState<File[]>([]);
 
+  const [selectedGroup, setSelectedGroup] = useState("");
+
   const handleVariantGroupChange = (groupId: any) => {
-    const group = variantGroups.find(g => g.id === groupId);
-    if (group) {
-      setVariantFields(group.fields);
-      // Map group items to our row format, adding unique IDs
-      const newRows = group.items.map((item: any) => ({
-        id: Math.random(), 
-        data: item.data
-      }));
-      setVariantRows(newRows.length > 0 ? newRows : [{ id: Date.now(), data: {} }]);
+    if (!groupId) return;
+    
+    const group = variantGroups.find(g => String(g.id) === String(groupId));
+    if (!group) {
+      console.warn("Group not found for ID:", groupId);
+      return;
     }
+
+    // ONLY UPDATE FIELDS (The Template)
+    const fields = Array.isArray(group.fields) ? group.fields : [];
+    setVariantFields(fields);
+    
+    // Important: We do NOT create new rows/tabs here anymore.
+    // The user will use the separate "Add Variation" button to create items.
   };
 
   const addVariantRow = () => {
-    setVariantRows([...variantRows, { id: Date.now(), data: {} }]);
+    const newId = Date.now();
+    setVariantRows([...variantRows, { 
+      id: newId, 
+      data: { SKU: "", "Model No": "", EAN: "" },
+      imagePreview: null,
+      imageFile: null
+    }]);
+    setActiveTab(variantRows.length);
   };
 
   const removeVariantRow = (id: number) => {
     if (variantRows.length > 1) {
       setVariantRows(variantRows.filter(v => v.id !== id));
+      if (activeTab >= variantRows.length - 1) {
+        setActiveTab(Math.max(0, variantRows.length - 2));
+      }
     }
   };
 
   const updateVariantValue = (rowId: number, field: string, value: string) => {
     setVariantRows(prev => prev.map(row => 
       row.id === rowId ? { ...row, data: { ...row.data, [field]: value } } : row
+    ));
+  };
+
+  const handleVariantImageChange = (rowId: number, file: File | null) => {
+    setVariantRows(prev => prev.map(row => 
+      row.id === rowId ? { 
+        ...row, 
+        imageFile: file, 
+        imagePreview: file ? URL.createObjectURL(file) : null 
+      } : row
     ));
   };
 
@@ -109,6 +144,30 @@ export default function ProductForm({ categories, variantGroups }: { categories:
     setDocumentFiles(prev => [...prev, ...files]);
   };
 
+  const formatCategories = (allCats: any[]) => {
+    const flattened: any[] = [];
+    const map: Record<number, any> = {};
+    allCats.forEach(cat => map[cat.id] = { ...cat, children: [] });
+    const roots: any[] = [];
+    allCats.forEach(cat => {
+      if (cat.parentId && map[cat.parentId]) {
+        map[cat.parentId].children.push(map[cat.id]);
+      } else {
+        roots.push(map[cat.id]);
+      }
+    });
+    const traverse = (nodes: any[], depth = 0) => {
+      nodes.forEach(node => {
+        flattened.push({ ...node, depth });
+        if (node.children) traverse(node.children, depth + 1);
+      });
+    };
+    traverse(roots);
+    return flattened;
+  };
+
+  const formattedCategories = formatCategories(categories);
+
   return (
     <Box
       component="form"
@@ -123,15 +182,42 @@ export default function ProductForm({ categories, variantGroups }: { categories:
         formData.delete('documents');
         documentFiles.forEach(file => formData.append('documents', file));
 
-        // Handle Dynamic Variants: Save as JSON strings
-        variantRows.forEach(row => {
+        // Handle Dynamic Variants
+        formData.delete('variantData[]');
+        variantRows.forEach((row, index) => {
           formData.append('variantData[]', JSON.stringify(row.data));
+          if (row.imageFile) {
+            formData.append(`variantImage_${index}`, row.imageFile);
+          }
         });
 
         await createProduct(formData);
       }}
       noValidate
     >
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4, p: 3, bgcolor: 'background.paper', borderRadius: 4, boxShadow: '0 2px 12px rgba(0,0,0,0.05)' }}>
+        <Box>
+          <Typography variant="h5" sx={{ fontWeight: 800, color: 'primary.main' }}>
+            Product Registration
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Register your product and its multiple variations
+          </Typography>
+        </Box>
+        <Stack direction="row" spacing={2}>
+           <Button
+            type="submit"
+            variant="contained"
+            size="large"
+            disabled={loading}
+            startIcon={loading ? <CircularProgress size={20} /> : <SaveIcon />}
+            sx={{ borderRadius: 2, px: 4, fontWeight: 700 }}
+          >
+            {loading ? "Registering..." : "Publish Product"}
+          </Button>
+        </Stack>
+      </Box>
+
       <Grid container spacing={4}>
         {/* Left Column: Basic Info */}
         <Grid size={{ xs: 12, lg: 8 }}>
@@ -147,34 +233,207 @@ export default function ProductForm({ categories, variantGroups }: { categories:
                   variant="outlined"
                   sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
                 />
-                <Grid container spacing={2}>
-                  <Grid size={{ xs: 12, md: 6 }}>
-                    <TextField label="SKU" name="sku" fullWidth sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }} />
-                  </Grid>
-                  <Grid size={{ xs: 12, md: 6 }}>
-                    <TextField label="Model No (Product)" name="modelNo" fullWidth sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }} />
-                  </Grid>
-                </Grid>
-                <Grid container spacing={2}>
-                  <Grid size={{ xs: 12, md: 6 }}>
-                    <TextField label="EAN (Barcode)" name="ean" fullWidth sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }} />
-                  </Grid>
-                  <Grid size={{ xs: 12, md: 6 }}>
-                    <FormControl fullWidth required>
-                      <InputLabel id="category-label">Category</InputLabel>
-                      <Select labelId="category-label" id="category-select" name="categoryId" label="Category" defaultValue="" sx={{ borderRadius: 2 }}>
-                        {categories.map((cat) => (
-                          <MenuItem key={cat.id} value={cat.id}>{cat.name}</MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  </Grid>
-                </Grid>
-                <TextField label="Description" name="description" fullWidth multiline rows={6} sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }} />
+                <FormControl fullWidth required>
+                  <InputLabel id="category-label">Category</InputLabel>
+                  <Select 
+                    labelId="category-label" 
+                    id="category-select" 
+                    name="categoryId" 
+                    label="Category" 
+                    defaultValue="" 
+                    sx={{ borderRadius: 2 }}
+                    renderValue={(selected) => {
+                      const cat = formattedCategories.find(c => c.id === selected);
+                      return cat ? cat.name : "";
+                    }}
+                  >
+                    {formattedCategories.map((cat) => (
+                      <MenuItem 
+                        key={cat.id} 
+                        value={cat.id}
+                        sx={{ 
+                          pl: cat.depth * 3 + 2,
+                          py: 1.5,
+                          borderBottom: '1px solid',
+                          borderColor: 'grey.100',
+                          '&:last-child': { borderBottom: 0 }
+                        }}
+                      >
+                        <Stack direction="row" alignItems="center" spacing={1}>
+                          {cat.depth > 0 && <SubcategoryIcon sx={{ fontSize: '1rem', color: 'text.secondary', opacity: 0.6 }} />}
+                          <Typography variant="body2" sx={{ fontWeight: cat.depth === 0 ? 700 : 400 }}>
+                            {cat.name}
+                          </Typography>
+                        </Stack>
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <TextField label="Description" name="description" fullWidth multiline rows={4} sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }} />
               </Stack>
             </Paper>
 
-            {/* Specifications */}
+            {/* Variations Section - FULL WIDTH */}
+            <Paper sx={{ p: 4, borderRadius: 3, border: '1px solid', borderColor: 'divider' }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 4 }}>
+                <Box>
+                  <Typography variant="h6" sx={{ fontWeight: 700 }}>1. Variation Template</Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>Select a group or create custom fields to define "Dynamic Fields"</Typography>
+                  <Stack direction="row" spacing={1}>
+                    <FormControl size="small" sx={{ minWidth: 220 }}>
+                      <InputLabel id="variant-group-label">Load Template Group</InputLabel>
+                      <Select
+                        labelId="variant-group-label"
+                        label="Load Template Group"
+                        value={selectedGroup}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setSelectedGroup(val);
+                          handleVariantGroupChange(val);
+                        }}
+                        sx={{ borderRadius: 2 }}
+                      >
+                        {variantGroups.map(g => (
+                          <MenuItem key={g.id} value={g.id}>{g.name}</MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                    <Button variant="outlined" startIcon={<AddIcon />} size="small" onClick={addCustomField} sx={{ borderRadius: 2 }}>
+                      New Field
+                    </Button>
+                  </Stack>
+                </Box>
+                <Box sx={{ textAlign: 'right' }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>2. Add Variation</Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>Create multiple items for this product</Typography>
+                  <Button 
+                    variant="contained" 
+                    startIcon={<AddIcon />} 
+                    size="small" 
+                    onClick={addVariantRow}
+                    sx={{ borderRadius: 2, px: 3, fontWeight: 700 }}
+                  >
+                    Add New Varient
+                  </Button>
+                </Box>
+              </Box>
+
+              <Tabs 
+                value={activeTab} 
+                onChange={(e, v) => setActiveTab(v)} 
+                variant="scrollable" 
+                scrollButtons="auto"
+                sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}
+              >
+                {variantRows.map((row, index) => (
+                  <Tab key={row.id} label={`Varient ${index + 1}`} sx={{ fontWeight: 700 }} />
+                ))}
+              </Tabs>
+
+              {variantRows[activeTab] && (
+                <Box>
+                  <Grid container spacing={4}>
+                    {/* Left: Fields */}
+                    <Grid size={{ xs: 12, md: 8 }}>
+                       <Grid container spacing={2}>
+                          {/* Common Variation Fields */}
+                          <Grid size={{ xs: 12, md: 6 }}>
+                             <TextField 
+                              label="SKU" 
+                              fullWidth 
+                              value={variantRows[activeTab].data["SKU"] || ""}
+                              onChange={(e) => updateVariantValue(variantRows[activeTab].id, "SKU", e.target.value)}
+                              sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+                            />
+                          </Grid>
+                          <Grid size={{ xs: 12, md: 6 }}>
+                             <TextField 
+                              label="Model No (Product)" 
+                              fullWidth 
+                              value={variantRows[activeTab].data["Model No"] || ""}
+                              onChange={(e) => updateVariantValue(variantRows[activeTab].id, "Model No", e.target.value)}
+                              sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+                            />
+                          </Grid>
+                          <Grid size={{ xs: 12 }}>
+                             <TextField 
+                              label="EAN (Barcode)" 
+                              fullWidth 
+                              value={variantRows[activeTab].data["EAN"] || ""}
+                              onChange={(e) => updateVariantValue(variantRows[activeTab].id, "EAN", e.target.value)}
+                              sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+                            />
+                          </Grid>
+                          
+                          <Grid size={{ xs: 12 }}><Divider sx={{ my: 1 }}><Typography variant="caption" color="text.secondary">Dynamic Fields</Typography></Divider></Grid>
+
+                          {variantFields.map(field => (
+                            <Grid size={{ xs: 12, md: 6 }} key={field}>
+                              <TextField
+                                label={field}
+                                fullWidth
+                                value={variantRows[activeTab].data[field] || ""}
+                                onChange={(e) => updateVariantValue(variantRows[activeTab].id, field, e.target.value)}
+                                sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+                              />
+                            </Grid>
+                          ))}
+                       </Grid>
+                    </Grid>
+
+                    {/* Right: Variant Image */}
+                    <Grid size={{ xs: 12, md: 4 }}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>Variant Photo</Typography>
+                      {variantRows[activeTab].imagePreview ? (
+                        <Box sx={{ position: "relative" }}>
+                          <Avatar 
+                            src={variantRows[activeTab].imagePreview} 
+                            variant="rounded" 
+                            sx={{ width: '100%', height: 180, borderRadius: 2, border: '1px solid', borderColor: 'divider' }} 
+                          />
+                          <IconButton 
+                            size="small" 
+                            onClick={() => handleVariantImageChange(variantRows[activeTab].id, null)} 
+                            sx={{ position: 'absolute', top: 8, right: 8, bgcolor: 'rgba(255,255,255,0.8)' }}
+                          >
+                            <DeleteIcon fontSize="small" color="error" />
+                          </IconButton>
+                        </Box>
+                      ) : (
+                        <Button 
+                          component="label" 
+                          variant="outlined" 
+                          fullWidth 
+                          startIcon={<UploadIcon />} 
+                          sx={{ height: 180, borderStyle: 'dashed', borderRadius: 2, flexDirection: 'column', gap: 1 }}
+                        >
+                          Upload Photo
+                          <input 
+                            type="file" 
+                            hidden 
+                            accept="image/*" 
+                            onChange={(e) => handleVariantImageChange(variantRows[activeTab].id, e.target.files?.[0] || null)} 
+                          />
+                        </Button>
+                      )}
+                      
+                      {variantRows.length > 1 && (
+                        <Button 
+                          color="error" 
+                          size="small" 
+                          startIcon={<DeleteIcon />} 
+                          onClick={() => removeVariantRow(variantRows[activeTab].id)}
+                          sx={{ mt: 2, fontWeight: 700 }}
+                        >
+                          Remove this Variation
+                        </Button>
+                      )}
+                    </Grid>
+                  </Grid>
+                </Box>
+              )}
+            </Paper>
+
             <Paper sx={{ p: 4, borderRadius: 3, border: '1px solid', borderColor: 'divider' }}>
               <Typography variant="h6" sx={{ mb: 3, fontWeight: 700 }}>Specifications & Shipping</Typography>
               <Grid container spacing={3}>
@@ -188,11 +447,10 @@ export default function ProductForm({ categories, variantGroups }: { categories:
                   <TextField label="Country of Origin" name="origin" fullWidth sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }} />
                 </Grid>
                 <Grid size={{ xs: 12, md: 6 }}>
-                  <TextField label="Shipping Details" name="shippingDetails" fullWidth multiline  sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }} />
+                  <TextField label="Shipping Details" name="shippingDetails" fullWidth multiline rows={2} sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }} />
                 </Grid>
               </Grid>
             </Paper>
-
           </Stack>
         </Grid>
 
@@ -202,23 +460,9 @@ export default function ProductForm({ categories, variantGroups }: { categories:
             <Paper sx={{ p: 4, borderRadius: 3, border: '1px solid', borderColor: 'divider' }}>
               <FormControlLabel
                 control={<Switch name="isActive" defaultChecked color="success" />}
-                label={<Typography sx={{ fontWeight: 700 }}>Published (Active)</Typography>}
+                label={<Typography sx={{ fontWeight: 700 }}>Active (In Stock)</Typography>}
               />
               <Divider sx={{ my: 2 }} />
-              <Button
-                type="submit"
-                variant="contained"
-                fullWidth
-                size="large"
-                disabled={loading}
-                startIcon={loading ? <CircularProgress size={20} /> : <SaveIcon />}
-                sx={{ borderRadius: 2, py: 1.5, fontWeight: 700 }}
-              >
-                {loading ? "Registering..." : "Create Product"}
-              </Button>
-            </Paper>
-
-            <Paper sx={{ p: 4, borderRadius: 3, border: '1px solid', borderColor: 'divider' }}>
               <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 2 }}>Main Display Image</Typography>
               {mainImagePreview && (
                 <Box sx={{ mb: 2, position: "relative" }}>
@@ -272,75 +516,6 @@ export default function ProductForm({ categories, variantGroups }: { categories:
               </Button>
             </Paper>
           </Stack>
-        </Grid>
-
-        {/* Variants Section - FULL WIDTH */}
-        <Grid size={{ xs: 12 }}>
-          <Paper sx={{ p: 4, borderRadius: 3, border: '1px solid', borderColor: 'divider' }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-              <Box>
-                <Typography variant="h6" sx={{ fontWeight: 700 }}>Flexible Variants</Typography>
-                <Typography variant="body2" color="text.secondary">Use a template group or create custom fields</Typography>
-              </Box>
-              <Stack direction="row" spacing={1}>
-                <FormControl size="small" sx={{ minWidth: 200 }}>
-                  <InputLabel id="variant-group-label">Load From Group</InputLabel>
-                  <Select
-                    labelId="variant-group-label"
-                    label="Load From Group"
-                    defaultValue=""
-                    onChange={(e) => handleVariantGroupChange(e.target.value)}
-                    sx={{ borderRadius: 2 }}
-                  >
-                    {variantGroups.map(g => (
-                      <MenuItem key={g.id} value={g.id}>{g.name}</MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-                <Button variant="outlined" startIcon={<AddIcon />} size="small" onClick={addCustomField} sx={{ borderRadius: 2 }}>
-                  New Field
-                </Button>
-                <Button variant="contained" startIcon={<AddIcon />} size="small" onClick={addVariantRow} sx={{ borderRadius: 2 }}>
-                  Add Row
-                </Button>
-              </Stack>
-            </Box>
-
-            <Box sx={{ overflowX: 'auto' }}>
-              <Table size="small">
-                <TableHead>
-                  <TableRow>
-                    {variantFields.map(field => (
-                      <TableCell key={field} sx={{ fontWeight: 700, whiteSpace: 'nowrap' }}>{field}</TableCell>
-                    ))}
-                    <TableCell align="right" width={50}></TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {variantRows.map((row) => (
-                    <TableRow key={row.id}>
-                      {variantFields.map(field => (
-                        <TableCell key={field}>
-                          <TextField
-                            size="small"
-                            fullWidth
-                            value={row.data[field] || ""}
-                            onChange={(e) => updateVariantValue(row.id, field, e.target.value)}
-                            sx={{ "& .MuiOutlinedInput-root": { borderRadius: 1.5 }, minWidth: 100 }}
-                          />
-                        </TableCell>
-                      ))}
-                      <TableCell align="right">
-                        <IconButton size="small" color="error" onClick={() => removeVariantRow(row.id)} disabled={variantRows.length === 1}>
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Box>
-          </Paper>
         </Grid>
       </Grid>
     </Box>

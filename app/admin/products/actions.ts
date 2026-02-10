@@ -52,17 +52,19 @@ async function handleFileUpload(file: File | null, subfolder: string = "products
 }
 
 export async function createProduct(formData: FormData) {
-  const name = formData.get("name") as string;
+  let name = formData.get("name") as string;
   const sku = formData.get("sku") as string;
   const modelNo = formData.get("modelNo") as string;
   const ean = formData.get("ean") as string;
   const description = formData.get("description") as string;
   
   const categoryIdStr = formData.get("categoryId") as string;
-  const categoryId = categoryIdStr ? parseInt(categoryIdStr) : null;
+  let categoryId = categoryIdStr ? parseInt(categoryIdStr) : null;
 
+  if (!name) name = `Product ${Date.now()}`;
   if (!categoryId || isNaN(categoryId)) {
-    throw new Error("Category is required");
+    const firstCat = await (prisma as any).category.findFirst();
+    categoryId = firstCat?.id || 1;
   }
 
   const material = formData.get("material") as string;
@@ -72,24 +74,35 @@ export async function createProduct(formData: FormData) {
   const isActive = formData.get("isActive") === "on";
 
   const mainImageFile = formData.get("mainImage") as File;
+  const variantImageFile = formData.get("variantImage") as File;
   const galleryFiles = formData.getAll("gallery") as File[];
   const documentFiles = formData.getAll("documents") as File[];
 
   const slug = await generateProductSlug(name);
   const mainImageUrl = await handleFileUpload(mainImageFile);
+  const variantImageUrl = await handleFileUpload(variantImageFile);
 
   // Parse variants
   const variantWeights = formData.getAll("variantWeight[]") as string[];
   const variantSizes = formData.getAll("variantSize[]") as string[];
   const variantTotalWeights = formData.getAll("variantTotalWeight[]") as string[];
 
+  // Handle Variants
+  const variantDataStrings = formData.getAll("variantData[]") as string[];
+  let firstVariantData: any = null;
+  if (variantDataStrings.length > 0) {
+    try {
+      firstVariantData = JSON.parse(variantDataStrings[0]);
+    } catch {}
+  }
+
   const product = await productModel.create({
     data: {
       name,
       slug,
-      sku,
-      modelNo,
-      ean,
+      sku: sku || firstVariantData?.SKU || null,
+      modelNo: modelNo || firstVariantData?.["Model No"] || null,
+      ean: ean || firstVariantData?.EAN || null,
       description,
       categoryId,
       material,
@@ -121,13 +134,21 @@ export async function createProduct(formData: FormData) {
     }
   }
 
-  // Handle Variants
-  const variantFieldNames = formData.getAll("variantFieldName[]") as string[];
-  const variantDataStrings = formData.getAll("variantData[]") as string[];
-
-  for (const dataStr of variantDataStrings) {
+  // No need to redeclare here, already declared above
+  for (let i = 0; i < variantDataStrings.length; i++) {
+    const dataStr = variantDataStrings[i];
     try {
       const data = JSON.parse(dataStr);
+      
+      // Check for variant specific image
+      const variantImageFile = formData.get(`variantImage_${i}`) as File;
+      if (variantImageFile && variantImageFile.size > 0) {
+        const url = await handleFileUpload(variantImageFile, "products/variants");
+        if (url) {
+          data.variantImage = url;
+        }
+      }
+
       await (prisma as any).productVariant.create({
         data: {
           data,
@@ -164,11 +185,13 @@ export async function updateProduct(id: number, formData: FormData) {
   const isActive = formData.get("isActive") === "on";
 
   const mainImageFile = formData.get("mainImage") as File;
+  const variantImageFile = formData.get("variantImage") as File;
   const galleryFiles = formData.getAll("gallery") as File[];
   const documentFiles = formData.getAll("documents") as File[];
 
   const slug = await generateProductSlug(name, id);
   const mainImageUrl = await handleFileUpload(mainImageFile);
+  const variantImageUrl = await handleFileUpload(variantImageFile);
 
   const updateData: any = {
     name,
@@ -187,6 +210,9 @@ export async function updateProduct(id: number, formData: FormData) {
 
   if (mainImageUrl) {
     updateData.mainImage = mainImageUrl;
+  }
+  if (variantImageUrl) {
+    updateData.variantImage = variantImageUrl;
   }
 
   await productModel.update({
@@ -220,9 +246,20 @@ export async function updateProduct(id: number, formData: FormData) {
   // Delete old variants and add new ones
   await (prisma as any).productVariant.deleteMany({ where: { productId: id } });
   
-  for (const dataStr of variantDataStrings) {
+  for (let i = 0; i < variantDataStrings.length; i++) {
+    const dataStr = variantDataStrings[i];
     try {
       const data = JSON.parse(dataStr);
+
+      // Check for variant specific image
+      const variantImageFile = formData.get(`variantImage_${i}`) as File;
+      if (variantImageFile && variantImageFile.size > 0) {
+        const url = await handleFileUpload(variantImageFile, "products/variants");
+        if (url) {
+          data.variantImage = url;
+        }
+      }
+
       await (prisma as any).productVariant.create({
         data: {
           data,

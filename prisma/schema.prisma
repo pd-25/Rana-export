@@ -43,6 +43,7 @@ model Product {
   ean             String?
   description     String? @db.LongText
   mainImage       String?
+  variantImage    String?
   material        String?
   packaging       String?
   origin          String? // Country of Origin
