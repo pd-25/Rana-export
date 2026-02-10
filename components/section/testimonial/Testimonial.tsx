@@ -4,9 +4,7 @@ import { Box, Stack, Typography, Container, Button } from "@mui/material";
 import Image from "next/image"
 import { Swiper, SwiperSlide } from "swiper/react"
 import { Navigation, Pagination, Autoplay } from "swiper/modules"
-import "swiper/css"
-import "swiper/css/navigation"
-import "swiper/css/pagination"
+// Swiper global CSS is imported in app/layout.tsx
 import clientAvatar1 from "@/public/home/client-avatar-01.png"
 import clientAvatar2 from "@/public/home/client-avatar-02.png"
 import quoteIcon1 from "@/public/home/quote-icon-01.svg"
@@ -36,11 +34,11 @@ export default function Testimonial() {
                         pagination={false}
                         loop={true}
                         speed={1000}
-                        autoplay={false}
-                        // autoplay={{
-                        //     delay: 3000,
-                        //     disableOnInteraction: false,
-                        // }}
+                        // autoplay={false}
+                        autoplay={{
+                            delay: 3000,
+                            disableOnInteraction: false,
+                        }}
                         breakpoints={{
                             768: {
                                 slidesPerView: 2,

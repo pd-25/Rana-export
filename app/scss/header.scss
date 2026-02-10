@@ -2,6 +2,12 @@
 
 .header {
     background-color: #ffffff;
+
+    .MuiContainer-root {
+        @include respond-to(minXl) {
+            max-width: 95% !important;
+        }
+    }
 }
 
 .logoContainer {

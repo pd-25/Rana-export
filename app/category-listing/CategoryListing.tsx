@@ -1,18 +1,19 @@
+
 'use client'
 import Image from "next/image";
 import { Box, Container, Typography, Stack, Button, Grid, IconButton } from "@mui/material";
 import Icon from "@/components/ui/icon/Icon"
-import BannerPic from "@/public/collection/collection-lisitng-banner.png";
+import BannerPic from "@/public/category/category-listing-banner.png";
 import Separator from "@/public/collection/collection-listing-heading-separator.svg";
 import AdditionalCategoryIcon from "@/public/collection/additinoal-category-icon.png";
-import ProductImage from "@/public/collection/singing-bowl-pic.png";
+import ProductImage from "@/public/home/singing-bowl-pic-03.png";
 import BackgroundPattern from "@/public/collection/background-pattern.png";
 
 
-export default function ColletionLisitng() {
+export default function CategoryListing() {
     return (
         <>
-            <Box component="section" className="collectionListingWrapper">
+            <Box component="section" className="collectionListingWrapper ">
                 <Box className="bannerPic">
                     <Image src={BannerPic} alt="banner pic" />
                 </Box>
@@ -27,7 +28,7 @@ export default function ColletionLisitng() {
             </Box>
             <Box
                 component="section"
-                className="collectionListingProductWrapper"
+                className="collectionListingProductWrapper categoryListingProductWrapper"
                 sx={{
                     backgroundImage: `url(${BackgroundPattern.src})`,
                     backgroundSize: "cover",
@@ -132,31 +133,103 @@ export default function ColletionLisitng() {
                             <Box className="productResultOuter">
                                 <Stack direction="row" className="productResultHeader" spacing={2} flexWrap="wrap" alignItems="center" justifyContent="space-between">
                                     <Box className="productResultHeaderTitle">
-                                        <Typography variant="h3">Handmade Singing Bowl</Typography>
+                                        <Typography variant="h3">Jam/Bengali Bowl (200 gm - 35 kg)</Typography>
                                     </Box>
-                                    <Box className="productResultHeaderAction" sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: { xs: 1, sm: 2, md: 6, lg: 10 } }}>
-                                        <Box className="ComSliderNavigation" sx={{ marginTop: "0" }}>
-                                            <Box className="swiper-button-prev"></Box>
-                                            <Box className="swiper-button-next"></Box>
-                                        </Box>
-                                        <Button variant="outlined" className="outlineButton">
-                                            View Complete Range
-                                            <Icon className="icon" name="OutlineButtonArrow" width={36} height={36} style={{ marginBottom: "0" }} />
-                                        </Button>
-                                    </Box>
+
                                 </Stack>
                                 <Box className="productCardListOuter">
                                     <Grid container spacing={2} className="productCardList">
-                                        <Grid size={{ xs: 12, sm: 6, md: 6, lg: 4 }} className="productCard">
+                                        <Grid size={{ xs: 12, sm: 6, md: 6, lg: 4, xl: 3 }} className="productCard">
                                             <Box className="productCardInner">
                                                 <Box className="productCardImage">
                                                     <Image src={ProductImage} alt="product image" />
+                                                    <IconButton color="primary">
+                                                        <Icon name="wishList" width={20} height={40} />
+                                                    </IconButton>
                                                 </Box>
-                                                <Box className="productCardContent" sx={{ backgroundColor: "#FEF0EC" }}>
-                                                    <Typography variant="h3" className="productCardTitle">Jam/Bengali Bowl</Typography>
-                                                    <Typography variant="body1" className="productCardMeta" >(200 gm - 35 kg)</Typography>
-                                                    <IconButton >
-                                                        <Icon name="ViewProduct" width={40} height={40} />
+                                                <Box className="productCardContent" sx={{ backgroundColor: "#ffffff" }}>
+                                                    <Typography variant="body1" className="productCardSku" >SKU: HMSB001</Typography>
+                                                    <Typography variant="h3" className="productCardTitle">Indian Hand Made Singing Bowl</Typography>
+                                                    <Typography variant="body1" className="productCardMeta" >Weight (Grams) : ±1019</Typography>
+                                                    <Typography variant="body1" className="productCardMeta" >Size (Cm) : ±20</Typography>
+                                                    <IconButton color="primary">
+                                                        <Icon name="AddToCart" width={20} height={20} />
+                                                    </IconButton>
+                                                </Box>
+                                            </Box>
+                                        </Grid>
+                                        <Grid size={{ xs: 12, sm: 6, md: 6, lg: 4, xl: 3 }} className="productCard">
+                                            <Box className="productCardInner">
+                                                <Box className="productCardImage">
+                                                    <Image src={ProductImage} alt="product image" />
+                                                    <IconButton color="primary">
+                                                        <Icon name="wishList" width={20} height={40} />
+                                                    </IconButton>
+                                                </Box>
+                                                <Box className="productCardContent" sx={{ backgroundColor: "#ffffff" }}>
+                                                    <Typography variant="body1" className="productCardSku" >SKU: HMSB001</Typography>
+                                                    <Typography variant="h3" className="productCardTitle">Indian Hand Made Singing Bowl</Typography>
+                                                    <Typography variant="body1" className="productCardMeta" >Weight (Grams) : ±1019</Typography>
+                                                    <Typography variant="body1" className="productCardMeta" >Size (Cm) : ±20</Typography>
+                                                    <IconButton color="primary">
+                                                        <Icon name="AddToCart" width={20} height={20} />
+                                                    </IconButton>
+                                                </Box>
+                                            </Box>
+                                        </Grid>
+                                        <Grid size={{ xs: 12, sm: 6, md: 6, lg: 4, xl: 3 }} className="productCard">
+                                            <Box className="productCardInner">
+                                                <Box className="productCardImage">
+                                                    <Image src={ProductImage} alt="product image" />
+                                                    <IconButton color="primary">
+                                                        <Icon name="wishList" width={20} height={40} />
+                                                    </IconButton>
+                                                </Box>
+                                                <Box className="productCardContent" sx={{ backgroundColor: "#ffffff" }}>
+                                                    <Typography variant="body1" className="productCardSku" >SKU: HMSB001</Typography>
+                                                    <Typography variant="h3" className="productCardTitle">Indian Hand Made Singing Bowl</Typography>
+                                                    <Typography variant="body1" className="productCardMeta" >Weight (Grams) : ±1019</Typography>
+                                                    <Typography variant="body1" className="productCardMeta" >Size (Cm) : ±20</Typography>
+                                                    <IconButton color="primary">
+                                                        <Icon name="AddToCart" width={20} height={20} />
+                                                    </IconButton>
+                                                </Box>
+                                            </Box>
+                                        </Grid>
+                                        <Grid size={{ xs: 12, sm: 6, md: 6, lg: 4, xl: 3 }} className="productCard">
+                                            <Box className="productCardInner">
+                                                <Box className="productCardImage">
+                                                    <Image src={ProductImage} alt="product image" />
+                                                    <IconButton color="primary">
+                                                        <Icon name="wishList" width={20} height={40} />
+                                                    </IconButton>
+                                                </Box>
+                                                <Box className="productCardContent" sx={{ backgroundColor: "#ffffff" }}>
+                                                    <Typography variant="body1" className="productCardSku" >SKU: HMSB001</Typography>
+                                                    <Typography variant="h3" className="productCardTitle">Indian Hand Made Singing Bowl</Typography>
+                                                    <Typography variant="body1" className="productCardMeta" >Weight (Grams) : ±1019</Typography>
+                                                    <Typography variant="body1" className="productCardMeta" >Size (Cm) : ±20</Typography>
+                                                    <IconButton color="primary">
+                                                        <Icon name="AddToCart" width={20} height={20} />
+                                                    </IconButton>
+                                                </Box>
+                                            </Box>
+                                        </Grid>
+                                        <Grid size={{ xs: 12, sm: 6, md: 6, lg: 4, xl: 3 }} className="productCard">
+                                            <Box className="productCardInner">
+                                                <Box className="productCardImage">
+                                                    <Image src={ProductImage} alt="product image" />
+                                                    <IconButton color="primary">
+                                                        <Icon name="wishList" width={20} height={40} />
+                                                    </IconButton>
+                                                </Box>
+                                                <Box className="productCardContent" sx={{ backgroundColor: "#ffffff" }}>
+                                                    <Typography variant="body1" className="productCardSku" >SKU: HMSB001</Typography>
+                                                    <Typography variant="h3" className="productCardTitle">Indian Hand Made Singing Bowl</Typography>
+                                                    <Typography variant="body1" className="productCardMeta" >Weight (Grams) : ±1019</Typography>
+                                                    <Typography variant="body1" className="productCardMeta" >Size (Cm) : ±20</Typography>
+                                                    <IconButton color="primary">
+                                                        <Icon name="AddToCart" width={20} height={20} />
                                                     </IconButton>
                                                 </Box>
                                             </Box>

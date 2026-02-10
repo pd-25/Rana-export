@@ -6,9 +6,7 @@ import Image from "next/image"
 import { Swiper, SwiperSlide } from "swiper/react"
 import type { Swiper as SwiperType } from "swiper"
 import { Navigation, Pagination, Autoplay } from "swiper/modules"
-import "swiper/css"
-import "swiper/css/navigation"
-import "swiper/css/pagination"
+// Swiper global CSS is imported in app/layout.tsx
 
 import OtherProductImage1 from "@/public/home/other-product-pic-01.png"
 import OtherProductImage2 from "@/public/home/other-product-pic-02.png"

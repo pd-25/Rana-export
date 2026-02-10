@@ -9,9 +9,7 @@ import {
 import Image from "next/image"
 import { Swiper, SwiperSlide } from "swiper/react"
 import { EffectFade, Autoplay, Pagination } from "swiper/modules"
-import "swiper/css"
-import "swiper/css/effect-fade"
-import "swiper/css/pagination"
+// Swiper global CSS is imported in app/layout.tsx
 import BannerIcon from "@/public/home/banner-btn-icon.svg"
 import BannerImage1 from "@/public/home/banner-image-01.png"
 import BannerImage2 from "@/public/home/banner-image-02.png"

@@ -93,7 +93,7 @@ export default function Header() {
           Quick dispatch across all purchases
         </Typography>
       </Box>
-      <Box className={headerOuterClass} sx={{ backgroundColor: "#ffffff", padding: "15px 20px", }}>
+      <Box className={headerOuterClass} sx={{ backgroundColor: "#ffffff", padding: "15px 0", }}>
         <Container >
           <Box
             sx={{

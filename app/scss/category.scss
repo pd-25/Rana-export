@@ -1,0 +1,79 @@
+.collectionListingProductWrapper {
+    &.categoryListingProductWrapper {
+
+        .mainContent {
+
+
+            .productResultOuter {
+                .productCardListOuter {
+                    margin-top: 40px;
+
+                    .productCardList {
+                        .productCard {
+                            .productCardInner {
+                                background-color: #ffffff;
+                                box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+                                height: 100%;
+                                position: relative;
+                                overflow: hidden;
+                                border-radius: 16px;
+
+                                .productCardImage {
+                                    aspect-ratio: 355/355;
+                                    position: relative;
+
+                                    img {
+                                        object-fit: contain;
+                                    }
+
+                                    .MuiButtonBase-root {
+                                        position: absolute;
+                                        top: 10px;
+                                        right: 10px;
+                                        padding: 0;
+                                        width: 35px;
+                                        height: 35px;
+                                    }
+                                }
+
+                                .productCardContent {
+                                    text-align: left;
+                                    padding: 20px;
+                                    position: relative;
+                                    border-top: 1px solid #DDDDDD;
+
+                                    .productCardSku {
+                                        font-size: 12px;
+                                        font-weight: 700;
+                                        color: #9E9E9E;
+                                        margin-bottom: 8px;
+                                    }
+
+                                    h3 {
+                                        color: #000000;
+                                        font-size: 15px;
+                                        font-weight: 600;
+                                        margin-bottom: 8px;
+                                    }
+
+                                    .productCardMeta {
+                                        font-size: 12px;
+                                        font-weight: 400;
+                                        margin-bottom: 5px;
+                                    }
+
+                                    .MuiButtonBase-root {
+                                        position: absolute;
+                                        bottom: 10px;
+                                        right: 10px;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+            }
+        }
+    }
+}
