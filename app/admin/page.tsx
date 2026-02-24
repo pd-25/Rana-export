@@ -1,109 +1,247 @@
 import React from "react";
+import { prisma } from "@/lib/prisma";
+import {
+  Card,
+  CardContent,
+  Typography,
+  Box,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Chip,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  ListItemIcon,
+  Button,
+  IconButton,
+} from "@mui/material";
+import {
+  ShoppingCart,
+  People,
+  Category as CategoryIcon,
+  Inventory as ProductIcon,
+  Dashboard as DashboardIcon,
+  Straighten as StraightenIcon,
+  Visibility as ViewIcon,
+} from "@mui/icons-material";
+import Link from "next/link";
 
-export default function AdminDashboard() {
+export default async function AdminDashboard() {
+  const [productCount, categoryCount, customerCount, orderCount, recentOrders] = await Promise.all([
+    (prisma as any).product.count(),
+    (prisma as any).category.count(),
+    (prisma as any).customer.count(),
+    (prisma as any).order.count(),
+    (prisma as any).order.findMany({
+      take: 5,
+      orderBy: { createdAt: 'desc' },
+      include: { customer: true }
+    })
+  ]);
+
+  const stats = [
+    {
+      title: "Total Products",
+      value: productCount,
+      icon: <ProductIcon />,
+      color: "#2e7d32",
+      bg: "#e8f5e9",
+      path: "/admin/products"
+    },
+    {
+      title: "Total Categories",
+      value: categoryCount,
+      icon: <CategoryIcon />,
+      color: "#0288d1",
+      bg: "#e1f5fe",
+      path: "/admin/categories"
+    },
+    {
+      title: "Total Customers",
+      value: customerCount,
+      icon: <People />,
+      color: "#ed6c02",
+      bg: "#fff3e0",
+      path: "/admin/customers"
+    },
+    {
+      title: "Total Orders",
+      value: orderCount,
+      icon: <ShoppingCart />,
+      color: "#9c27b0",
+      bg: "#f3e5f5",
+      path: "/admin/orders"
+    },
+  ];
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "DELIVERED": return "success";
+      case "SHIPPED": return "info";
+      case "PROCESSING": return "warning";
+      case "CANCELLED": return "error";
+      default: return "default";
+    }
+  };
+
   return (
-    <div className="container-fluid">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1 className="h3 mb-0 text-gray-800">Dashboard Overview</h1>
-        <button className="btn btn-primary btn-sm">
-          <i className="bi bi-download me-2"></i>Generate Report
-        </button>
-      </div>
+    <Box>
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h4" sx={{ fontWeight: 800, color: "text.primary", letterSpacing: "-0.5px" }}>
+          Dashboard Overview
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Monitor your store metrics and manage recent activities
+        </Typography>
+      </Box>
 
-      <div className="row g-4 mb-4">
-        <div className="col-md-3">
-          <div className="admin-card">
-            <div className="stat-icon bg-primary bg-opacity-10 text-primary">
-              <i className="bi bi-currency-dollar"></i>
-            </div>
-            <h6 className="text-muted mb-1">Total Sales</h6>
-            <h3 className="mb-0">$24,500</h3>
-          </div>
-        </div>
-        <div className="col-md-3">
-          <div className="admin-card">
-            <div className="stat-icon bg-success bg-opacity-10 text-success">
-              <i className="bi bi-cart-check"></i>
-            </div>
-            <h6 className="text-muted mb-1">New Orders</h6>
-            <h3 className="mb-0">125</h3>
-          </div>
-        </div>
-        <div className="col-md-3">
-          <div className="admin-card">
-            <div className="stat-icon bg-info bg-opacity-10 text-info">
-              <i className="bi bi-people"></i>
-            </div>
-            <h6 className="text-muted mb-1">Total Customers</h6>
-            <h3 className="mb-0">842</h3>
-          </div>
-        </div>
-        <div className="col-md-3">
-          <div className="admin-card">
-            <div className="stat-icon bg-warning bg-opacity-10 text-warning">
-              <i className="bi bi-graph-up"></i>
-            </div>
-            <h6 className="text-muted mb-1">Growth</h6>
-            <h3 className="mb-0">+12%</h3>
-          </div>
-        </div>
-      </div>
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr 1fr' }, gap: 3, mb: 4 }}>
+        {stats.map((stat) => (
+          <Box key={stat.title}>
+            <Link href={stat.path} style={{ textDecoration: 'none' }}>
+              <Card sx={{ 
+                borderRadius: 3, 
+                boxShadow: "0 4px 12px rgba(0,0,0,0.05)", 
+                border: "1px solid", 
+                borderColor: "divider",
+                transition: "transform 0.2s, box-shadow 0.2s",
+                "&:hover": {
+                  transform: "translateY(-4px)",
+                  boxShadow: "0 8px 24px rgba(0,0,0,0.1)"
+                }
+              }}>
+                <CardContent sx={{ display: "flex", alignItems: "center" }}>
+                  <Box
+                    sx={{
+                      p: 1.5,
+                      borderRadius: 2,
+                      bgcolor: stat.bg,
+                      color: stat.color,
+                      mr: 2,
+                      display: "flex",
+                    }}
+                  >
+                    {React.cloneElement(stat.icon as React.ReactElement<any>, { fontSize: 'medium' })}
+                  </Box>
+                  <Box>
 
-      <div className="row">
-        <div className="col-lg-8">
-          <div className="admin-card">
-            <h5 className="mb-4">Recent Transactions</h5>
-            <div className="table-responsive">
-              <table className="table table-hover align-middle">
-                <thead className="table-light">
-                  <tr>
-                    <th>Template</th>
-                    <th>Date</th>
-                    <th>Status</th>
-                    <th>Amount</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>Modern Portfolio</td>
-                    <td>Jan 24, 2026</td>
-                    <td><span className="badge bg-success-subtle text-success">Completed</span></td>
-                    <td>$89.00</td>
-                  </tr>
-                  <tr>
-                    <td>E-commerce Pro</td>
-                    <td>Jan 23, 2026</td>
-                    <td><span className="badge bg-warning-subtle text-warning">Pending</span></td>
-                    <td>$129.00</td>
-                  </tr>
-                  <tr>
-                    <td>Minimalist Blog</td>
-                    <td>Jan 22, 2026</td>
-                    <td><span className="badge bg-success-subtle text-success">Completed</span></td>
-                    <td>$45.00</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-        <div className="col-lg-4">
-          <div className="admin-card">
-            <h5 className="mb-4">Quick Links</h5>
-            <div className="list-group list-group-flush">
-              <a href="/admin/categories" className="list-group-item list-group-item-action px-0 border-0 d-flex justify-content-between">
-                Manage Categories <i className="bi bi-chevron-right"></i>
-              </a>
-              <a href="/admin/products" className="list-group-item list-group-item-action px-0 border-0 d-flex justify-content-between">
-                Manage Products <i className="bi bi-chevron-right"></i>
-              </a>
-              <a href="/" className="list-group-item list-group-item-action px-0 border-0 d-flex justify-content-between">
-                View Site <i className="bi bi-box-arrow-up-right"></i>
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+                    <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                      {stat.title}
+                    </Typography>
+                    <Typography variant="h5" sx={{ fontWeight: 800 }}>
+                      {stat.value}
+                    </Typography>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Link>
+          </Box>
+        ))}
+      </Box>
+
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: '2fr 1fr' }, gap: 3 }}>
+        <Box>
+          <Typography variant="h6" sx={{ mb: 2, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1 }}>
+            <ShoppingCart fontSize="small" color="action" />
+            Recent Orders
+          </Typography>
+          <TableContainer component={Paper} sx={{ borderRadius: 3, boxShadow: "0 4px 24px rgba(0,0,0,0.06)", border: "1px solid", borderColor: "divider" }}>
+            <Table>
+              <TableHead sx={{ bgcolor: "grey.50" }}>
+                <TableRow>
+                  <TableCell sx={{ fontWeight: 700, fontSize: "0.75rem", color: "text.secondary" }}>ORDER ID</TableCell>
+                  <TableCell sx={{ fontWeight: 700, fontSize: "0.75rem", color: "text.secondary" }}>CUSTOMER</TableCell>
+                  <TableCell sx={{ fontWeight: 700, fontSize: "0.75rem", color: "text.secondary" }}>STATUS</TableCell>
+                  <TableCell sx={{ fontWeight: 700, fontSize: "0.75rem", color: "text.secondary" }}>DATE</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 700, fontSize: "0.75rem", color: "text.secondary" }}>ACTIONS</TableCell>
+                </TableRow>
+
+              </TableHead>
+              <TableBody>
+                {recentOrders.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5} align="center" sx={{ py: 4 }}>
+                      <Typography variant="body2" color="text.secondary">No orders yet</Typography>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  recentOrders.map((order: any) => (
+                    <TableRow key={order.id} hover>
+                      <TableCell sx={{ fontWeight: 700 }}>#{order.id.toString().padStart(5, '0')}</TableCell>
+                      <TableCell>{order.customer.name}</TableCell>
+                      <TableCell>
+                        <Chip
+                          label={order.status}
+                          size="small"
+                          color={getStatusColor(order.status) as any}
+                          sx={{ fontWeight: 700, fontSize: '0.65rem' }}
+                        />
+                      </TableCell>
+                      <TableCell sx={{ color: 'text.secondary', fontSize: '0.875rem' }}>
+                        {new Date(order.createdAt).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell align="right">
+                        <Link href={`/admin/orders/${order.id}`} passHref>
+                          <IconButton size="small" color="primary">
+                            <ViewIcon fontSize="small" />
+                          </IconButton>
+                        </Link>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <Box sx={{ mt: 2, textAlign: 'right' }}>
+            <Link href="/admin/orders" style={{ textDecoration: 'none' }}>
+              <Button size="small" endIcon={<ViewIcon fontSize="small" />}>View All Orders</Button>
+            </Link>
+          </Box>
+        </Box>
+
+        <Box>
+          <Typography variant="h6" sx={{ mb: 2, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1 }}>
+            <DashboardIcon fontSize="small" color="action" />
+            Quick Management
+          </Typography>
+          <Card sx={{ borderRadius: 3, boxShadow: "0 4px 12px rgba(0,0,0,0.05)", border: "1px solid", borderColor: "divider" }}>
+            <List sx={{ p: 1 }}>
+              {[
+                { title: "Manage Products", icon: <ProductIcon />, path: "/admin/products" },
+                { title: "Manage Categories", icon: <CategoryIcon />, path: "/admin/categories" },
+                { title: "Manage Customers", icon: <People />, path: "/admin/customers" },
+                { title: "Manage Orders", icon: <ShoppingCart />, path: "/admin/orders" },
+                { title: "Variant Groups", icon: <StraightenIcon />, path: "/admin/variants" },
+              ].map((item) => (
+                <ListItem key={item.title} disablePadding sx={{ mb: 0.5 }}>
+                  <Link href={item.path} style={{ textDecoration: 'none', width: '100%', color: 'inherit' }}>
+                    <ListItemButton 
+                      sx={{ 
+                        borderRadius: 1.5,
+                        "&:hover": { bgcolor: "primary.50", color: "primary.main" }
+                      }}
+                    >
+                      <ListItemIcon sx={{ minWidth: 40, color: "inherit" }}>
+                        {React.cloneElement(item.icon as React.ReactElement<any>, { fontSize: 'small' })}
+                      </ListItemIcon>
+                      <ListItemText primary={item.title} primaryTypographyProps={{ fontWeight: 600, fontSize: "0.9rem" }} />
+                    </ListItemButton>
+                  </Link>
+                </ListItem>
+              ))}
+            </List>
+          </Card>
+        </Box>
+      </Box>
+
+
+    </Box>
   );
 }

@@ -1,43 +1,94 @@
 import React from "react";
 import { prisma } from "@/lib/prisma";
-import { createCategory } from "../actions";
 import Link from "next/link";
 import CategoryForm from "@/app/admin/categories/new/CategoryForm";
+import {
+  Box,
+  Typography,
+  Breadcrumbs,
+  Link as MuiLink,
+  Container,
+  Grid,
+  Paper,
+  Stack,
+} from "@mui/material";
+import { NavigateBefore as BackIcon } from "@mui/icons-material";
 
 export default async function NewCategoryPage() {
-  // Fetch potential parents for the dropdown
   const parents = await (prisma as any).category.findMany({
-    where: { parentId: null },
-    select: { id: true, name: true }
+    select: { id: true, name: true, parentId: true },
+    orderBy: { name: 'asc' }
   });
 
   return (
-    <div className="container-fluid">
-      <div className="mb-4">
-        <Link href="/admin/categories" className="text-decoration-none small">
-          <i className="bi bi-arrow-left me-1"></i> Back to Categories
-        </Link>
-        <h1 className="h3 mt-2">Add New Category</h1>
-      </div>
+    <Box>
+      <Box sx={{ mb: 4 }}>
+        <Breadcrumbs aria-label="breadcrumb" sx={{ mb: 1 }}>
+          <Link href="/admin/categories" passHref style={{ textDecoration: 'none' }}>
+            <MuiLink
+              underline="hover"
+              color="primary.main"
+              sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                fontSize: '0.875rem',
+                fontWeight: 600
+              }}
+              component="span"
+            >
+              <BackIcon sx={{ mr: 0.5 }} fontSize="inherit" />
+              Categories
+            </MuiLink>
+          </Link>
+          <Typography color="text.secondary" sx={{ fontSize: '0.875rem' }}>
+            New Category Registration
+          </Typography>
+        </Breadcrumbs>
+        <Typography variant="h4" sx={{ fontWeight: 700 }}>
+          Add New Category
+        </Typography>
+      </Box>
 
-      <div className="row">
-        <div className="col-lg-8">
-          <div className="admin-card">
+      <Grid container spacing={4}>
+        <Grid size={{ xs: 12, lg: 8 }}>
+          <Paper sx={{ p: 4, borderRadius: 2, boxShadow: "0 2px 10px rgba(0,0,0,0.05)" }}>
             <CategoryForm parents={parents} />
-          </div>
-        </div>
-        <div className="col-lg-4">
-          <div className="admin-card bg-light border-0">
-            <h5>Tips</h5>
-            <ul className="small text-muted ps-3 mt-3">
-              <li className="mb-2"><strong>Slugs</strong> are generated automatically from the name.</li>
-              <li className="mb-2"><strong>Parents</strong> allow you to create subcategories.</li>
-              <li className="mb-2"><strong>Images</strong> should be around 400x400px for best results.</li>
-              <li>Inactive categories won't show on the frontend.</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
+          </Paper>
+        </Grid>
+        <Grid size={{ xs: 12, lg: 4 }}>
+          <Paper sx={{ p: 4, borderRadius: 3, bgcolor: 'primary.50', border: '1px solid', borderColor: 'primary.100', boxShadow: 'none' }}>
+            <Typography variant="h6" color="primary.main" gutterBottom sx={{ fontWeight: 700, mb: 3 }}>
+              Quick Tips
+            </Typography>
+            <Stack spacing={2.5}>
+              <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
+                <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: 'primary.main', mt: 1, flexShrink: 0 }} />
+                <Typography variant="body2" color="text.secondary">
+                  <strong>Names</strong> should be unique and descriptive for your shop.
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
+                <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: 'primary.main', mt: 1, flexShrink: 0 }} />
+                <Typography variant="body2" color="text.secondary">
+                  <strong>Slugs</strong> are automatically generated for URL friendliness.
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
+                <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: 'primary.main', mt: 1, flexShrink: 0 }} />
+                <Typography variant="body2" color="text.secondary">
+                  <strong>Hierarchy</strong>: Select a parent to create a sub-category.
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
+                <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: 'primary.main', mt: 1, flexShrink: 0 }} />
+                <Typography variant="body2" color="text.secondary">
+                  <strong>Visuals</strong>: Upload a high-quality image to represent the category.
+                </Typography>
+              </Box>
+            </Stack>
+          </Paper>
+        </Grid>
+      </Grid>
+    </Box>
   );
 }

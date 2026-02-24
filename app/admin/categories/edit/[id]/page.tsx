@@ -3,6 +3,15 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import CategoryFormEdit from "@/app/admin/categories/edit/[id]/CategoryFormEdit";
 import { notFound } from "next/navigation";
+import {
+  Box,
+  Typography,
+  Breadcrumbs,
+  Link as MuiLink,
+  Grid,
+  Paper,
+} from "@mui/material";
+import { NavigateBefore as BackIcon } from "@mui/icons-material";
 
 export default async function EditCategoryPage({ params }: { params: { id: string } }) {
   const { id } = await params;
@@ -17,26 +26,47 @@ export default async function EditCategoryPage({ params }: { params: { id: strin
   if (!category) return notFound();
 
   const parents = await (prisma as any).category.findMany({
-    where: { parentId: null, id: { not: categoryId } },
-    select: { id: true, name: true }
+    where: { id: { not: categoryId } },
+    select: { id: true, name: true, parentId: true },
+    orderBy: { name: 'asc' }
   });
 
   return (
-    <div className="container-fluid">
-      <div className="mb-4">
-        <Link href="/admin/categories" className="text-decoration-none small">
-          <i className="bi bi-arrow-left me-1"></i> Back to Categories
-        </Link>
-        <h1 className="h3 mt-2">Edit Category: {category.name}</h1>
-      </div>
+    <Box>
+      <Box sx={{ mb: 4 }}>
+        <Breadcrumbs aria-label="breadcrumb" sx={{ mb: 1 }}>
+          <Link href="/admin/categories" passHref style={{ textDecoration: 'none' }}>
+            <MuiLink
+              underline="hover"
+              color="primary.main"
+              sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                fontSize: '0.875rem',
+                fontWeight: 600
+              }}
+              component="span"
+            >
+              <BackIcon sx={{ mr: 0.5 }} fontSize="inherit" />
+              Categories
+            </MuiLink>
+          </Link>
+          <Typography color="text.primary" sx={{ fontSize: '0.875rem' }}>
+            Edit Category
+          </Typography>
+        </Breadcrumbs>
+        <Typography variant="h4" sx={{ fontWeight: 700 }}>
+          Edit Category: {category.name}
+        </Typography>
+      </Box>
 
-      <div className="row">
-        <div className="col-lg-8">
-          <div className="admin-card">
+      <Grid container spacing={4}>
+        <Grid size={{ xs: 12, lg: 8 }}>
+          <Paper sx={{ p: 4, borderRadius: 2, boxShadow: "0 2px 10px rgba(0,0,0,0.05)" }}>
             <CategoryFormEdit category={category} parents={parents} />
-          </div>
-        </div>
-      </div>
-    </div>
+          </Paper>
+        </Grid>
+      </Grid>
+    </Box>
   );
 }
