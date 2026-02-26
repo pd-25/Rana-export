@@ -19,8 +19,15 @@ import {
 } from "@mui/material";
 import { Save as SaveIcon } from "@mui/icons-material";
 
-export default function CategoryFormEdit({ category, parents }: { category: any, parents: any[] }) {
+export default function CategoryFormEdit({
+  category,
+  parents,
+}: {
+  category: any;
+  parents: any[];
+}) {
   const [loading, setLoading] = useState(false);
+  const [parentId, setParentId] = useState(category.parentId || "");
 
   return (
     <Box
@@ -43,6 +50,16 @@ export default function CategoryFormEdit({ category, parents }: { category: any,
           sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
         />
 
+        <TextField
+          label="Sub Heading"
+          name="subHeading"
+          defaultValue={category.subHeading || ""}
+          placeholder="e.g. Quality Fabrics for Your Needs"
+          fullWidth
+          variant="outlined"
+          sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+        />
+
         <FormControl fullWidth>
           <InputLabel id="parent-label">Parent Category (Optional)</InputLabel>
           <Select
@@ -50,7 +67,8 @@ export default function CategoryFormEdit({ category, parents }: { category: any,
             id="parent-select"
             name="parentId"
             label="Parent Category (Optional)"
-            defaultValue={category.parentId || ""}
+            value={parentId}
+            onChange={(e) => setParentId(e.target.value)}
             sx={{ borderRadius: 2 }}
           >
             <MenuItem value="">
@@ -58,11 +76,29 @@ export default function CategoryFormEdit({ category, parents }: { category: any,
             </MenuItem>
             {parents.map((p) => (
               <MenuItem key={p.id} value={p.id}>
-                {p.parentId ? "— " : ""}{p.name}
+                {p.parentId ? "— " : ""}
+                {p.name}
               </MenuItem>
             ))}
           </Select>
         </FormControl>
+
+        {parentId === "" && (
+          <FormControlLabel
+            control={
+              <Switch
+                name="showOnHome"
+                defaultChecked={category.showOnHome}
+                color="primary"
+              />
+            }
+            label={
+              <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                Show on Home Page
+              </Typography>
+            }
+          />
+        )}
 
         <TextField
           label="Description"
@@ -76,14 +112,25 @@ export default function CategoryFormEdit({ category, parents }: { category: any,
         />
 
         <Box>
-          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600, color: "text.secondary", ml: 0.5 }}>
+          <Typography
+            variant="subtitle2"
+            gutterBottom
+            sx={{ fontWeight: 600, color: "text.secondary", ml: 0.5 }}
+          >
             Current Image
           </Typography>
           {category.image && (
             <Avatar
               src={category.image}
               variant="rounded"
-              sx={{ width: 100, height: 100, mb: 2, border: '1px solid', borderColor: 'divider', boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}
+              sx={{
+                width: 100,
+                height: 100,
+                mb: 2,
+                border: "1px solid",
+                borderColor: "divider",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+              }}
             />
           )}
           <TextField
@@ -101,7 +148,13 @@ export default function CategoryFormEdit({ category, parents }: { category: any,
         </Box>
 
         <FormControlLabel
-          control={<Switch name="isActive" defaultChecked={category.isActive} color="success" />}
+          control={
+            <Switch
+              name="isActive"
+              defaultChecked={category.isActive}
+              color="success"
+            />
+          }
           label={
             <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
               Active (Visible on site)

@@ -57,6 +57,9 @@ export async function createCategory(formData: FormData) {
   const parentIdStr = formData.get("parentId") as string;
   const parentId = parentIdStr ? parseInt(parentIdStr) : null;
 
+  const showOnHome = formData.get("showOnHome") === "on";
+  const subHeading = formData.get("subHeading") as string;
+
   const slug = await generateSlug(name);
   const imageUrl = await handleFileUpload(imageFile);
 
@@ -67,6 +70,8 @@ export async function createCategory(formData: FormData) {
       description, 
       image: imageUrl, 
       isActive,
+      showOnHome: parentId ? false : showOnHome, // Only parent can show on home
+      subHeading,
       parentId: parentId || null
     },
   });
@@ -83,10 +88,15 @@ export async function updateCategory(id: number, formData: FormData) {
   const parentIdStr = formData.get("parentId") as string;
   const parentId = parentIdStr ? parseInt(parentIdStr) : null;
 
+  const showOnHome = formData.get("showOnHome") === "on";
+  const subHeading = formData.get("subHeading") as string;
+
   const updateData: any = { 
     name, 
     description, 
     isActive,
+    showOnHome: parentId ? false : showOnHome, // Only parent can show on home
+    subHeading,
     parentId: parentId || null
   };
   

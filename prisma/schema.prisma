@@ -22,11 +22,12 @@ model Category {
   slug        String  @unique
   description String? @db.Text
   image       String?
-  isActive    Boolean @default(true)
-
-  parentId Int?
-  parent   Category?  @relation("CategoryToCategory", fields: [parentId], references: [id], onDelete: Cascade)
-  children Category[] @relation("CategoryToCategory")
+  isActive    Boolean   @default(true)
+  showOnHome  Boolean   @default(false)
+  subHeading  String?
+  parentId    Int?
+  parent      Category?  @relation("CategoryToCategory", fields: [parentId], references: [id], onDelete: Cascade)
+  children    Category[] @relation("CategoryToCategory")
 
   products Product[]
 
@@ -49,6 +50,7 @@ model Product {
   origin          String? // Country of Origin
   shippingDetails String? @db.Text
   isActive        Boolean @default(true)
+  showOnHome      Boolean @default(false)
 
   categoryId Int
   category   Category @relation(fields: [categoryId], references: [id])

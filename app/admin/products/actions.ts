@@ -72,6 +72,7 @@ export async function createProduct(formData: FormData) {
   const origin = formData.get("origin") as string;
   const shippingDetails = formData.get("shippingDetails") as string;
   const isActive = formData.get("isActive") === "on";
+  const showOnHome = formData.get("showOnHome") === "on";
 
   const mainImageFile = formData.get("mainImage") as File;
   const variantImageFile = formData.get("variantImage") as File;
@@ -110,6 +111,7 @@ export async function createProduct(formData: FormData) {
       origin,
       shippingDetails,
       isActive,
+      showOnHome,
       mainImage: mainImageUrl,
     },
   });
@@ -206,6 +208,7 @@ export async function updateProduct(id: number, formData: FormData) {
     origin,
     shippingDetails,
     isActive,
+    showOnHome: formData.get("showOnHome") === "on",
   };
 
   if (mainImageUrl) {

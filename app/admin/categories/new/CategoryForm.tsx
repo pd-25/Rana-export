@@ -20,6 +20,7 @@ import { Save as SaveIcon } from "@mui/icons-material";
 
 export default function CategoryForm({ parents }: { parents: any[] }) {
   const [loading, setLoading] = useState(false);
+  const [parentId, setParentId] = useState("");
 
   return (
     <Box
@@ -41,6 +42,15 @@ export default function CategoryForm({ parents }: { parents: any[] }) {
           sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
         />
 
+        <TextField
+          label="Sub Heading"
+          name="subHeading"
+          placeholder="e.g. Quality Fabrics for Your Needs"
+          fullWidth
+          variant="outlined"
+          sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+        />
+
         <FormControl fullWidth>
           <InputLabel id="parent-label">Parent Category (Optional)</InputLabel>
           <Select
@@ -48,7 +58,8 @@ export default function CategoryForm({ parents }: { parents: any[] }) {
             id="parent-select"
             name="parentId"
             label="Parent Category (Optional)"
-            defaultValue=""
+            value={parentId}
+            onChange={(e) => setParentId(e.target.value)}
             sx={{ borderRadius: 2 }}
           >
             <MenuItem value="">
@@ -56,11 +67,23 @@ export default function CategoryForm({ parents }: { parents: any[] }) {
             </MenuItem>
             {parents.map((p) => (
               <MenuItem key={p.id} value={p.id}>
-                {p.parentId ? "— " : ""}{p.name}
+                {p.parentId ? "— " : ""}
+                {p.name}
               </MenuItem>
             ))}
           </Select>
         </FormControl>
+
+        {parentId === "" && (
+          <FormControlLabel
+            control={<Switch name="showOnHome" color="primary" />}
+            label={
+              <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                Show on Home Page
+              </Typography>
+            }
+          />
+        )}
 
         <TextField
           label="Description"
@@ -74,7 +97,11 @@ export default function CategoryForm({ parents }: { parents: any[] }) {
         />
 
         <Box>
-          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600, color: "text.secondary", ml: 0.5 }}>
+          <Typography
+            variant="subtitle2"
+            gutterBottom
+            sx={{ fontWeight: 600, color: "text.secondary", ml: 0.5 }}
+          >
             Category Image
           </Typography>
           <TextField

@@ -42,7 +42,9 @@ export default async function ProductsPage({
     where: {
       AND: [
         search ? { name: { contains: search } } : {},
-        category && category !== "all" ? { categoryId: parseInt(category) } : {},
+        category && category !== "all"
+          ? { categoryId: parseInt(category) }
+          : {},
       ],
     },
     include: {
@@ -54,16 +56,34 @@ export default async function ProductsPage({
 
   return (
     <Box>
-      <Box sx={{ mb: 4, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <Box
+        sx={{
+          mb: 4,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
         <Box>
-          <Typography variant="h4" sx={{ fontWeight: 800, color: "text.primary", letterSpacing: "-0.5px" }}>
+          <Typography
+            variant="h4"
+            sx={{
+              fontWeight: 800,
+              color: "text.primary",
+              letterSpacing: "-0.5px",
+            }}
+          >
             Products
           </Typography>
           <Typography variant="body2" color="text.secondary">
             Manage your store inventory and product details
           </Typography>
         </Box>
-        <Link href="/admin/products/new" passHref style={{ textDecoration: "none" }}>
+        <Link
+          href="/admin/products/new"
+          passHref
+          style={{ textDecoration: "none" }}
+        >
           <Button
             variant="contained"
             startIcon={<AddIcon />}
@@ -83,18 +103,62 @@ export default async function ProductsPage({
 
       <TableContainer
         component={Paper}
-        sx={{ borderRadius: 3, boxShadow: "0 4px 24px rgba(0,0,0,0.06)", border: "1px solid", borderColor: "divider" }}
+        sx={{
+          borderRadius: 3,
+          boxShadow: "0 4px 24px rgba(0,0,0,0.06)",
+          border: "1px solid",
+          borderColor: "divider",
+        }}
       >
         <Table>
           <TableHead sx={{ bgcolor: "grey.50" }}>
             <TableRow>
-              <TableCell sx={{ fontWeight: 700, fontSize: "0.75rem", color: "text.secondary", pl: 4 }}>
+              <TableCell
+                sx={{
+                  fontWeight: 700,
+                  fontSize: "0.75rem",
+                  color: "text.secondary",
+                  pl: 4,
+                }}
+              >
                 PRODUCT
               </TableCell>
-              <TableCell sx={{ fontWeight: 700, fontSize: "0.75rem", color: "text.secondary" }}>CATEGORY</TableCell>
-              <TableCell sx={{ fontWeight: 700, fontSize: "0.75rem", color: "text.secondary" }}>VARIANTS</TableCell>
-              <TableCell sx={{ fontWeight: 700, fontSize: "0.75rem", color: "text.secondary" }}>STATUS</TableCell>
-              <TableCell align="right" sx={{ fontWeight: 700, fontSize: "0.75rem", color: "text.secondary", pr: 4 }}>
+              <TableCell
+                sx={{
+                  fontWeight: 700,
+                  fontSize: "0.75rem",
+                  color: "text.secondary",
+                }}
+              >
+                CATEGORY
+              </TableCell>
+              <TableCell
+                sx={{
+                  fontWeight: 700,
+                  fontSize: "0.75rem",
+                  color: "text.secondary",
+                }}
+              >
+                VARIANTS
+              </TableCell>
+              <TableCell
+                sx={{
+                  fontWeight: 700,
+                  fontSize: "0.75rem",
+                  color: "text.secondary",
+                }}
+              >
+                STATUS
+              </TableCell>
+              <TableCell
+                align="right"
+                sx={{
+                  fontWeight: 700,
+                  fontSize: "0.75rem",
+                  color: "text.secondary",
+                  pr: 4,
+                }}
+              >
                 ACTIONS
               </TableCell>
             </TableRow>
@@ -107,7 +171,13 @@ export default async function ProductsPage({
                     <Avatar
                       src={prod.mainImage}
                       variant="rounded"
-                      sx={{ width: 48, height: 48, bgcolor: "background.default", border: "1px solid", borderColor: "divider" }}
+                      sx={{
+                        width: 48,
+                        height: 48,
+                        bgcolor: "background.default",
+                        border: "1px solid",
+                        borderColor: "divider",
+                      }}
                     >
                       <ProductIcon />
                     </Avatar>
@@ -132,17 +202,32 @@ export default async function ProductsPage({
                   </Typography>
                 </TableCell>
                 <TableCell>
-                  <Chip
-                    label={prod.isActive ? "Live" : "Draft"}
-                    size="small"
-                    color={prod.isActive ? "success" : "default"}
-                    sx={{ fontWeight: 700, fontSize: "0.7rem" }}
-                  />
+                  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+                    <Chip
+                      label={prod.isActive ? "Live" : "Draft"}
+                      size="small"
+                      color={prod.isActive ? "success" : "default"}
+                      sx={{ fontWeight: 700, fontSize: "0.7rem" }}
+                    />
+                    {prod.showOnHome && (
+                      <Chip
+                        label="Home Page"
+                        size="small"
+                        color="primary"
+                        sx={{ fontWeight: 700, fontSize: "0.7rem" }}
+                      />
+                    )}
+                  </Box>
                 </TableCell>
                 <TableCell align="right" sx={{ pr: 4 }}>
-                  <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1 }}>
+                  <Box
+                    sx={{ display: "flex", justifyContent: "flex-end", gap: 1 }}
+                  >
                     <Link href={`/admin/products/edit/${prod.id}`} passHref>
-                      <IconButton size="small" sx={{ color: "primary.main", bgcolor: "primary.50" }}>
+                      <IconButton
+                        size="small"
+                        sx={{ color: "primary.main", bgcolor: "primary.50" }}
+                      >
                         <EditIcon fontSize="small" />
                       </IconButton>
                     </Link>
@@ -152,7 +237,11 @@ export default async function ProductsPage({
                         await deleteProduct(prod.id);
                       }}
                     >
-                      <IconButton type="submit" size="small" sx={{ color: "error.main", bgcolor: "error.50" }}>
+                      <IconButton
+                        type="submit"
+                        size="small"
+                        sx={{ color: "error.main", bgcolor: "error.50" }}
+                      >
                         <DeleteIcon fontSize="small" />
                       </IconButton>
                     </form>
