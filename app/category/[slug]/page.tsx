@@ -9,6 +9,7 @@ interface PageProps {
 export default async function CollectionListingPage({ params }: PageProps) {
   const { slug } = await params;
 
+  // Fetch the current category with its children and products
   const category = await (prisma as any).category.findUnique({
     where: { slug },
     include: {
@@ -40,12 +41,29 @@ export default async function CollectionListingPage({ params }: PageProps) {
     },
   });
 
+  // Fetch all top-level categories for the sidebar
+  const allCategories = await (prisma as any).category.findMany({
+    where: { parentId: null, isActive: true },
+    include: {
+      children: {
+        where: { isActive: true },
+      },
+    },
+    orderBy: { createdAt: "asc" },
+  });
+
   if (!category) {
     notFound();
   }
 
   // Serialize the data for the client component
   const serializedCategory = JSON.parse(JSON.stringify(category));
+  const serializedAllCategories = JSON.parse(JSON.stringify(allCategories));
 
-  return <ColletionLisitng category={serializedCategory} />;
+  return (
+    <ColletionLisitng
+      category={serializedCategory}
+      allCategories={serializedAllCategories}
+    />
+  );
 }
