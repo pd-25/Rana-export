@@ -1,6 +1,6 @@
 import React from "react";
 import { prisma } from "@/lib/prisma";
-import { deleteProduct } from "./actions";
+import { deleteProduct, duplicateProduct } from "./actions";
 import Link from "next/link";
 import {
   Box,
@@ -23,6 +23,7 @@ import {
   Edit as EditIcon,
   Delete as DeleteIcon,
   Inventory as ProductIcon,
+  ContentCopy as DuplicateIcon,
 } from "@mui/icons-material";
 
 import ProductFilters from "./ProductFilters";
@@ -224,26 +225,46 @@ export default async function ProductsPage({
                     sx={{ display: "flex", justifyContent: "flex-end", gap: 1 }}
                   >
                     <Link href={`/admin/products/edit/${prod.id}`} passHref>
-                      <IconButton
-                        size="small"
-                        sx={{ color: "primary.main", bgcolor: "primary.50" }}
-                      >
-                        <EditIcon fontSize="small" />
-                      </IconButton>
+                      <Tooltip title="Edit Product">
+                        <IconButton
+                          size="small"
+                          sx={{ color: "primary.main", bgcolor: "primary.50" }}
+                        >
+                          <EditIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
                     </Link>
+                    <form
+                      action={async () => {
+                        "use server";
+                        await duplicateProduct(prod.id);
+                      }}
+                    >
+                      <Tooltip title="Duplicate Product">
+                        <IconButton
+                          type="submit"
+                          size="small"
+                          sx={{ color: "info.main", bgcolor: "info.50" }}
+                        >
+                          <DuplicateIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </form>
                     <form
                       action={async () => {
                         "use server";
                         await deleteProduct(prod.id);
                       }}
                     >
-                      <IconButton
-                        type="submit"
-                        size="small"
-                        sx={{ color: "error.main", bgcolor: "error.50" }}
-                      >
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
+                      <Tooltip title="Delete Product">
+                        <IconButton
+                          type="submit"
+                          size="small"
+                          sx={{ color: "error.main", bgcolor: "error.50" }}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
                     </form>
                   </Box>
                 </TableCell>

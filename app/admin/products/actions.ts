@@ -34,6 +34,29 @@ async function generateProductSlug(name: string, excludeId?: number) {
   return slug;
 }
 
+async function generateUniqueProductName(originalName: string) {
+  // Strip existing suffix if it matches " (Number)"
+  const suffixMatch = originalName.match(/\s\((\d+)\)$/);
+  let baseName = originalName;
+  if (suffixMatch) {
+    baseName = originalName.replace(/\s\((\d+)\)$/, "");
+  }
+
+  let count = 1;
+  let finalName = `${baseName} (${count})`;
+
+  while (true) {
+    const existing = await productModel.findFirst({
+      where: { name: finalName },
+    });
+    if (!existing) break;
+    count++;
+    finalName = `${baseName} (${count})`;
+  }
+
+  return finalName;
+}
+
 async function handleFileUpload(file: File | null, subfolder: string = "products") {
   if (!file || file.size === 0 || !(file instanceof File)) return null;
 
@@ -297,6 +320,77 @@ export async function updateProduct(id: number, formData: FormData) {
 export async function deleteProduct(id: number) {
   await productModel.delete({ where: { id } });
   revalidatePath("/admin/products");
+}
+
+export async function duplicateProduct(id: number) {
+  const original = await productModel.findUnique({
+    where: { id },
+    include: {
+      variants: true,
+      gallery: true,
+      documents: true,
+    },
+  });
+
+  if (!original) throw new Error("Product not found");
+
+  const newName = await generateUniqueProductName(original.name);
+  const newSlug = await generateProductSlug(newName);
+
+  // Extract base SKU and add incremental suffix to ensure uniqueness
+  let newSku = original.sku;
+  if (original.sku) {
+    const baseSku = original.sku.replace(/-COPY(-\d+)?$/, "");
+    let count = 1;
+    newSku = `${baseSku}-COPY-${count}`;
+    while (true) {
+      const existing = await productModel.findFirst({ where: { sku: newSku } });
+      if (!existing) break;
+      count++;
+      newSku = `${baseSku}-COPY-${count}`;
+    }
+  }
+
+  const product = await productModel.create({
+    data: {
+      name: newName,
+      slug: newSlug,
+      sku: newSku,
+      modelNo: original.modelNo,
+      ean: original.ean,
+      description: original.description,
+      categoryId: original.categoryId,
+      material: original.material,
+      packaging: original.packaging,
+      origin: original.origin,
+      shippingDetails: original.shippingDetails,
+      mainImage: original.mainImage,
+      variantImage: original.variantImage,
+      isActive: false, // Set to draft by default
+      showOnHome: original.showOnHome,
+      relatedCategoryId: original.relatedCategoryId,
+      youMightAlsoCategoryId: original.youMightAlsoCategoryId,
+      variants: {
+        create: original.variants.map((v: any) => ({
+          data: v.data,
+        })),
+      },
+      gallery: {
+        create: original.gallery.map((img: any) => ({
+          url: img.url,
+        })),
+      },
+      documents: {
+        create: original.documents.map((doc: any) => ({
+          name: doc.name,
+          url: doc.url,
+        })),
+      },
+    },
+  });
+
+  revalidatePath("/admin/products");
+  return product;
 }
 
 export async function deleteProductDocument(docId: number, productId: number) {

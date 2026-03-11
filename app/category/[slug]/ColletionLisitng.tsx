@@ -290,7 +290,6 @@ export default function ColletionLisitng({
   const backgrounds = [
     { pattern: true, cardBg: "#FEF0EC", isLightNav: false },
     { color: "#fbf3e0", cardBg: "#FBE8D0", isLightNav: false },
-    { color: "#fdfcf8", cardBg: "#FEF0EC", isLightNav: true },
   ];
 
   // Consolidate content into visible sections

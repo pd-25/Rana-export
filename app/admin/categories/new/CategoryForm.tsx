@@ -16,11 +16,38 @@ import {
   Stack,
   Divider,
 } from "@mui/material";
-import { Save as SaveIcon } from "@mui/icons-material";
+import {
+  Save as SaveIcon,
+  SubdirectoryArrowRight as SubcategoryIcon,
+} from "@mui/icons-material";
 
 export default function CategoryForm({ parents }: { parents: any[] }) {
   const [loading, setLoading] = useState(false);
   const [parentId, setParentId] = useState("");
+
+  const formatCategories = (allCats: any[]) => {
+    const flattened: any[] = [];
+    const map: Record<number, any> = {};
+    allCats.forEach((cat) => (map[cat.id] = { ...cat, children: [] }));
+    const roots: any[] = [];
+    allCats.forEach((cat) => {
+      if (cat.parentId && map[cat.parentId]) {
+        map[cat.parentId].children.push(map[cat.id]);
+      } else {
+        roots.push(map[cat.id]);
+      }
+    });
+    const traverse = (nodes: any[], depth = 0) => {
+      nodes.forEach((node) => {
+        flattened.push({ ...node, depth });
+        if (node.children) traverse(node.children, depth + 1);
+      });
+    };
+    traverse(roots);
+    return flattened;
+  };
+
+  const formattedCategories = formatCategories(parents);
 
   return (
     <Box
@@ -65,10 +92,35 @@ export default function CategoryForm({ parents }: { parents: any[] }) {
             <MenuItem value="">
               <em>None (Top Level)</em>
             </MenuItem>
-            {parents.map((p) => (
-              <MenuItem key={p.id} value={p.id}>
-                {p.parentId ? "— " : ""}
-                {p.name}
+            {formattedCategories.map((cat) => (
+              <MenuItem
+                key={cat.id}
+                value={cat.id}
+                sx={{
+                  pl: cat.depth * 3 + 2,
+                  py: 1.5,
+                  borderBottom: "1px solid",
+                  borderColor: "grey.100",
+                  "&:last-child": { borderBottom: 0 },
+                }}
+              >
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  {cat.depth > 0 && (
+                    <SubcategoryIcon
+                      sx={{
+                        fontSize: "1rem",
+                        color: "text.secondary",
+                        opacity: 0.6,
+                      }}
+                    />
+                  )}
+                  <Typography
+                    variant="body2"
+                    sx={{ fontWeight: cat.depth === 0 ? 700 : 400 }}
+                  >
+                    {cat.name}
+                  </Typography>
+                </Stack>
               </MenuItem>
             ))}
           </Select>
