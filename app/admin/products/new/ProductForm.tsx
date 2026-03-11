@@ -337,6 +337,88 @@ export default function ProductForm({
                   rows={4}
                   sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
                 />
+                <FormControl fullWidth>
+                  <InputLabel id="related-category-label">
+                    See Related Items — Category
+                  </InputLabel>
+                  <Select
+                    labelId="related-category-label"
+                    name="relatedCategoryId"
+                    label="See Related Items — Category"
+                    defaultValue=""
+                    sx={{ borderRadius: 2 }}
+                  >
+                    <MenuItem value="">
+                      <em>Same as product category (default)</em>
+                    </MenuItem>
+                    {formattedCategories.map((cat) => (
+                      <MenuItem
+                        key={cat.id}
+                        value={cat.id}
+                        sx={{ pl: cat.depth * 3 + 2, py: 1.5 }}
+                      >
+                        <Stack direction="row" alignItems="center" spacing={1}>
+                          {cat.depth > 0 && (
+                            <SubcategoryIcon
+                              sx={{
+                                fontSize: "1rem",
+                                color: "text.secondary",
+                                opacity: 0.6,
+                              }}
+                            />
+                          )}
+                          <Typography
+                            variant="body2"
+                            sx={{ fontWeight: cat.depth === 0 ? 700 : 400 }}
+                          >
+                            {cat.name}
+                          </Typography>
+                        </Stack>
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <FormControl fullWidth>
+                  <InputLabel id="you-might-also-label">
+                    You Might Also Like — Category
+                  </InputLabel>
+                  <Select
+                    labelId="you-might-also-label"
+                    name="youMightAlsoCategoryId"
+                    label="You Might Also Like — Category"
+                    defaultValue=""
+                    sx={{ borderRadius: 2 }}
+                  >
+                    <MenuItem value="">
+                      <em>Same as product category (default)</em>
+                    </MenuItem>
+                    {formattedCategories.map((cat) => (
+                      <MenuItem
+                        key={cat.id}
+                        value={cat.id}
+                        sx={{ pl: cat.depth * 3 + 2, py: 1.5 }}
+                      >
+                        <Stack direction="row" alignItems="center" spacing={1}>
+                          {cat.depth > 0 && (
+                            <SubcategoryIcon
+                              sx={{
+                                fontSize: "1rem",
+                                color: "text.secondary",
+                                opacity: 0.6,
+                              }}
+                            />
+                          )}
+                          <Typography
+                            variant="body2"
+                            sx={{ fontWeight: cat.depth === 0 ? 700 : 400 }}
+                          >
+                            {cat.name}
+                          </Typography>
+                        </Stack>
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
               </Stack>
             </Paper>
 

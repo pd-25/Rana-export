@@ -74,6 +74,12 @@ export async function createProduct(formData: FormData) {
   const isActive = formData.get("isActive") === "on";
   const showOnHome = formData.get("showOnHome") === "on";
 
+  const relatedCategoryIdStr = formData.get("relatedCategoryId") as string;
+  const relatedCategoryId = relatedCategoryIdStr ? parseInt(relatedCategoryIdStr) : null;
+
+  const youMightAlsoCategoryIdStr = formData.get("youMightAlsoCategoryId") as string;
+  const youMightAlsoCategoryId = youMightAlsoCategoryIdStr ? parseInt(youMightAlsoCategoryIdStr) : null;
+
   const mainImageFile = formData.get("mainImage") as File;
   const variantImageFile = formData.get("variantImage") as File;
   const galleryFiles = formData.getAll("gallery") as File[];
@@ -113,6 +119,8 @@ export async function createProduct(formData: FormData) {
       isActive,
       showOnHome,
       mainImage: mainImageUrl,
+      relatedCategoryId: relatedCategoryId && !isNaN(relatedCategoryId) ? relatedCategoryId : null,
+      youMightAlsoCategoryId: youMightAlsoCategoryId && !isNaN(youMightAlsoCategoryId) ? youMightAlsoCategoryId : null,
     },
   });
 
@@ -186,6 +194,12 @@ export async function updateProduct(id: number, formData: FormData) {
   const shippingDetails = formData.get("shippingDetails") as string;
   const isActive = formData.get("isActive") === "on";
 
+  const relatedCategoryIdStr = formData.get("relatedCategoryId") as string;
+  const relatedCategoryId = relatedCategoryIdStr ? parseInt(relatedCategoryIdStr) : null;
+
+  const youMightAlsoCategoryIdStr = formData.get("youMightAlsoCategoryId") as string;
+  const youMightAlsoCategoryId = youMightAlsoCategoryIdStr ? parseInt(youMightAlsoCategoryIdStr) : null;
+
   const mainImageFile = formData.get("mainImage") as File;
   const variantImageFile = formData.get("variantImage") as File;
   const galleryFiles = formData.getAll("gallery") as File[];
@@ -209,6 +223,8 @@ export async function updateProduct(id: number, formData: FormData) {
     shippingDetails,
     isActive,
     showOnHome: formData.get("showOnHome") === "on",
+    relatedCategoryId: relatedCategoryId && !isNaN(relatedCategoryId) ? relatedCategoryId : null,
+    youMightAlsoCategoryId: youMightAlsoCategoryId && !isNaN(youMightAlsoCategoryId) ? youMightAlsoCategoryId : null,
   };
 
   if (mainImageUrl) {
@@ -281,6 +297,13 @@ export async function updateProduct(id: number, formData: FormData) {
 export async function deleteProduct(id: number) {
   await productModel.delete({ where: { id } });
   revalidatePath("/admin/products");
+}
+
+export async function deleteProductDocument(docId: number, productId: number) {
+  await (prisma as any).productDocument.delete({
+    where: { id: docId }
+  });
+  revalidatePath(`/admin/products/edit/${productId}`);
 }
 
 export async function deleteProductImage(imageId: number, productId: number) {

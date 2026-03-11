@@ -29,7 +29,9 @@ model Category {
   parent      Category?  @relation("CategoryToCategory", fields: [parentId], references: [id], onDelete: Cascade)
   children    Category[] @relation("CategoryToCategory")
 
-  products Product[]
+  products        Product[] @relation("ProductCategory")
+  relatedProducts Product[] @relation("ProductRelatedCategory")
+  youMightAlso    Product[] @relation("ProductYouMightAlso")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -53,7 +55,13 @@ model Product {
   showOnHome      Boolean @default(false)
 
   categoryId Int
-  category   Category @relation(fields: [categoryId], references: [id])
+  category   Category @relation("ProductCategory", fields: [categoryId], references: [id])
+
+  relatedCategoryId Int?
+  relatedCategory   Category? @relation("ProductRelatedCategory", fields: [relatedCategoryId], references: [id])
+
+  youMightAlsoCategoryId Int?
+  youMightAlsoCategory   Category? @relation("ProductYouMightAlso", fields: [youMightAlsoCategoryId], references: [id])
 
   gallery   ProductImage[]
   variants  ProductVariant[]

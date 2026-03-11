@@ -1,7 +1,11 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { updateProduct, deleteProductImage } from "../../actions";
+import {
+  updateProduct,
+  deleteProductImage,
+  deleteProductDocument,
+} from "../../actions";
 import {
   Box,
   TextField,
@@ -344,6 +348,88 @@ export default function ProductFormEdit({
                   rows={4}
                   sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
                 />
+                <FormControl fullWidth>
+                  <InputLabel id="related-category-label">
+                    See Related Items — Category
+                  </InputLabel>
+                  <Select
+                    labelId="related-category-label"
+                    name="relatedCategoryId"
+                    label="See Related Items — Category"
+                    defaultValue={product.relatedCategoryId ?? ""}
+                    sx={{ borderRadius: 2 }}
+                  >
+                    <MenuItem value="">
+                      <em>Same as product category (default)</em>
+                    </MenuItem>
+                    {formattedCategories.map((cat) => (
+                      <MenuItem
+                        key={cat.id}
+                        value={cat.id}
+                        sx={{ pl: cat.depth * 3 + 2, py: 1.5 }}
+                      >
+                        <Stack direction="row" alignItems="center" spacing={1}>
+                          {cat.depth > 0 && (
+                            <SubcategoryIcon
+                              sx={{
+                                fontSize: "1rem",
+                                color: "text.secondary",
+                                opacity: 0.6,
+                              }}
+                            />
+                          )}
+                          <Typography
+                            variant="body2"
+                            sx={{ fontWeight: cat.depth === 0 ? 700 : 400 }}
+                          >
+                            {cat.name}
+                          </Typography>
+                        </Stack>
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <FormControl fullWidth>
+                  <InputLabel id="you-might-also-label">
+                    You Might Also Like — Category
+                  </InputLabel>
+                  <Select
+                    labelId="you-might-also-label"
+                    name="youMightAlsoCategoryId"
+                    label="You Might Also Like — Category"
+                    defaultValue={product.youMightAlsoCategoryId ?? ""}
+                    sx={{ borderRadius: 2 }}
+                  >
+                    <MenuItem value="">
+                      <em>Same as product category (default)</em>
+                    </MenuItem>
+                    {formattedCategories.map((cat) => (
+                      <MenuItem
+                        key={cat.id}
+                        value={cat.id}
+                        sx={{ pl: cat.depth * 3 + 2, py: 1.5 }}
+                      >
+                        <Stack direction="row" alignItems="center" spacing={1}>
+                          {cat.depth > 0 && (
+                            <SubcategoryIcon
+                              sx={{
+                                fontSize: "1rem",
+                                color: "text.secondary",
+                                opacity: 0.6,
+                              }}
+                            />
+                          )}
+                          <Typography
+                            variant="body2"
+                            sx={{ fontWeight: cat.depth === 0 ? 700 : 400 }}
+                          >
+                            {cat.name}
+                          </Typography>
+                        </Stack>
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
               </Stack>
             </Paper>
 
@@ -815,8 +901,29 @@ export default function ProductFormEdit({
                   multiple
                   hidden
                   accept="image/*"
+                  onChange={(e) => {
+                    const files = Array.from(e.target.files || []);
+                    setGalleryFiles((prev) => [...prev, ...files]);
+                  }}
                 />
               </Button>
+              {galleryFiles.length > 0 && (
+                <Stack spacing={0.5} sx={{ mt: 1 }}>
+                  <Typography variant="caption" color="text.secondary">
+                    New (not yet saved):
+                  </Typography>
+                  {galleryFiles.map((file, i) => (
+                    <Typography
+                      key={i}
+                      variant="caption"
+                      noWrap
+                      sx={{ maxWidth: "100%" }}
+                    >
+                      {file.name}
+                    </Typography>
+                  ))}
+                </Stack>
+              )}
             </Paper>
 
             <Paper
@@ -836,9 +943,61 @@ export default function ProductFormEdit({
                     <Box
                       key={doc.id}
                       sx={{
-                        p: 1,
+                        p: 1.5,
                         bgcolor: "grey.100",
                         borderRadius: 1,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        gap: 1,
+                      }}
+                    >
+                      <Typography
+                        variant="caption"
+                        noWrap
+                        sx={{ maxWidth: "60%", fontWeight: 600 }}
+                      >
+                        📄 {doc.name}
+                      </Typography>
+                      <Stack direction="row" spacing={0.5}>
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          href={doc.url}
+                          target="_blank"
+                          component="a"
+                          sx={{
+                            fontSize: "0.65rem",
+                            py: 0.3,
+                            px: 1,
+                            minWidth: 0,
+                          }}
+                        >
+                          View
+                        </Button>
+                        <IconButton
+                          size="small"
+                          onClick={async () => {
+                            if (confirm(`Delete "${doc.name}"?`))
+                              await deleteProductDocument(doc.id, product.id);
+                          }}
+                        >
+                          <DeleteIcon fontSize="inherit" color="error" />
+                        </IconButton>
+                      </Stack>
+                    </Box>
+                  ))}
+                </Stack>
+              )}
+              {documentFiles.length > 0 && (
+                <Stack spacing={0.5} sx={{ mb: 1 }}>
+                  <Typography variant="caption" color="text.secondary">
+                    New (not yet saved):
+                  </Typography>
+                  {documentFiles.map((file, i) => (
+                    <Box
+                      key={i}
+                      sx={{
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "space-between",
@@ -849,9 +1008,16 @@ export default function ProductFormEdit({
                         noWrap
                         sx={{ maxWidth: "80%" }}
                       >
-                        {doc.name}
+                        {file.name}
                       </Typography>
-                      <IconButton size="small">
+                      <IconButton
+                        size="small"
+                        onClick={() =>
+                          setDocumentFiles((prev) =>
+                            prev.filter((_, idx) => idx !== i),
+                          )
+                        }
+                      >
                         <DeleteIcon fontSize="inherit" color="error" />
                       </IconButton>
                     </Box>
@@ -872,6 +1038,10 @@ export default function ProductFormEdit({
                   multiple
                   hidden
                   accept="application/pdf"
+                  onChange={(e) => {
+                    const files = Array.from(e.target.files || []);
+                    setDocumentFiles((prev) => [...prev, ...files]);
+                  }}
                 />
               </Button>
             </Paper>

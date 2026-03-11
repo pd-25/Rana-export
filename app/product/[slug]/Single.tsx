@@ -83,6 +83,8 @@ interface Product {
   gallery: ProductImage[];
   variants: ProductVariant[];
   documents: ProductDocument[];
+  relatedProducts: RelatedProduct[];
+  youMightAlsoProducts: RelatedProduct[];
 }
 
 interface SingleProps {
@@ -105,9 +107,11 @@ export default function Single({ product, allCategories }: SingleProps) {
   const [selectedVariant, setSelectedVariant] = React.useState<number | "">(
     product.variants.length > 0 ? product.variants[0].id : "",
   );
+  const currentVariant = product.variants.find((v) => v.id === selectedVariant);
+  const currentVariantData = currentVariant?.data || {};
 
   const galleryImages = [
-    product.mainImage ? product.mainImage : ProductImage,
+    currentVariantData.variantImage || product.mainImage || ProductImage,
     ...(product.gallery || []).map((img) => img.url),
   ].filter(Boolean) as (string | typeof ProductImage)[];
   return (
@@ -323,7 +327,7 @@ export default function Single({ product, allCategories }: SingleProps) {
                     {product.name}
                   </Typography>
                   <Typography variant="body1" className="sku">
-                    SKU: {product.sku || "N/A"}
+                    SKU: {currentVariantData.SKU || product.sku || "N/A"}
                   </Typography>
                   <Stack
                     direction="row"
@@ -554,19 +558,23 @@ export default function Single({ product, allCategories }: SingleProps) {
                     <Box>
                       <Table sx={{ minWidth: 300 }}>
                         <TableBody>
-                          {product.modelNo && (
+                          {(currentVariantData["Model No"] ||
+                            product.modelNo) && (
                             <TableRow>
                               <TableCell
                                 sx={{ fontWeight: 600, border: 0, pl: 0 }}
                               >
-                                Product
+                                {currentVariantData["Model No"]
+                                  ? "Model No"
+                                  : "Product"}
                               </TableCell>
                               <TableCell sx={{ border: 0 }}>
-                                {product.modelNo}
+                                {currentVariantData["Model No"] ||
+                                  product.modelNo}
                               </TableCell>
                             </TableRow>
                           )}
-                          {product.ean && (
+                          {(currentVariantData.EAN || product.ean) && (
                             <TableRow>
                               <TableCell
                                 sx={{ fontWeight: 600, border: 0, pl: 0 }}
@@ -574,19 +582,12 @@ export default function Single({ product, allCategories }: SingleProps) {
                                 EAN
                               </TableCell>
                               <TableCell sx={{ border: 0 }}>
-                                {product.ean}
+                                {currentVariantData.EAN || product.ean}
                               </TableCell>
                             </TableRow>
                           )}
-                          {selectedVariant &&
-                            product.variants.find(
-                              (v) => v.id === selectedVariant,
-                            )?.data &&
-                            Object.entries(
-                              product.variants.find(
-                                (v) => v.id === selectedVariant,
-                              )!.data,
-                            )
+                          {currentVariantData &&
+                            Object.entries(currentVariantData)
                               .filter(
                                 ([key]) =>
                                   ![
@@ -699,8 +700,8 @@ export default function Single({ product, allCategories }: SingleProps) {
                   )}
                 </Grid>
               </Grid>
-              {product.category.products &&
-                product.category.products.length > 0 && (
+              {product.youMightAlsoProducts &&
+                product.youMightAlsoProducts.length > 0 && (
                   <>
                     <Box
                       className="relatedProductsOuter productResultOuter"
@@ -753,7 +754,7 @@ export default function Single({ product, allCategories }: SingleProps) {
                             }}
                             className="relatedProductsSlider"
                           >
-                            {product.category.products.map((p, idx) => (
+                            {product.youMightAlsoProducts.map((p, idx) => (
                               <SwiperSlide key={p.id}>
                                 <Box className="productCard">
                                   <Box className="productCardInner">
@@ -794,8 +795,17 @@ export default function Single({ product, allCategories }: SingleProps) {
                                         {p.name}
                                       </Typography>
                                       {p.variants?.[0]?.data &&
-                                        Object.entries(p.variants[0].data).map(
-                                          ([key, value]) => (
+                                        Object.entries(p.variants[0].data)
+                                          .filter(
+                                            ([key]) =>
+                                              ![
+                                                "EAN",
+                                                "SKU",
+                                                "Model No",
+                                                "variantImage",
+                                              ].includes(key),
+                                          )
+                                          .map(([key, value]) => (
                                             <Typography
                                               key={key}
                                               variant="body1"
@@ -803,8 +813,7 @@ export default function Single({ product, allCategories }: SingleProps) {
                                             >
                                               {key} : {String(value)}
                                             </Typography>
-                                          ),
-                                        )}
+                                          ))}
                                       <IconButton color="primary">
                                         <Icon
                                           name="AddToCart"
@@ -821,103 +830,112 @@ export default function Single({ product, allCategories }: SingleProps) {
                         </Box>
                       </Box>
                     </Box>
-                    <Box
-                      className="relatedProductsOuter productResultOuter"
-                      sx={{ backgroundColor: "#F6EDD9" }}
-                    >
-                      <Box className="productResultHeader">
-                        <Box className="productResultHeaderTitle">
-                          <Typography variant="h3">
-                            See Related Items
-                          </Typography>
-                        </Box>
-                        <Box className="ComSliderNavigation">
-                          <Box
-                            className="swiper-button-prev"
-                            ref={prevRef2}
-                          ></Box>
-                          <Box
-                            className="swiper-button-next"
-                            ref={nextRef2}
-                          ></Box>
-                        </Box>
+                  </>
+                )}
+              {product.relatedProducts &&
+                product.relatedProducts.length > 0 && (
+                  <Box
+                    className="relatedProductsOuter productResultOuter"
+                    sx={{ backgroundColor: "#F6EDD9" }}
+                  >
+                    <Box className="productResultHeader">
+                      <Box className="productResultHeaderTitle">
+                        <Typography variant="h3">See Related Items</Typography>
                       </Box>
-                      <Box className="productCardListOuter">
-                        <Box className="productCardList">
-                          <Swiper
-                            modules={[Navigation, Autoplay, Pagination]}
-                            spaceBetween={16}
-                            slidesPerView={4}
-                            navigation={{
-                              prevEl: prevRef2.current,
-                              nextEl: nextRef2.current,
-                            }}
-                            onBeforeInit={(swiper: any) => {
-                              swiper.params.navigation.prevEl =
-                                prevRef2.current;
-                              swiper.params.navigation.nextEl =
-                                nextRef2.current;
-                            }}
-                            autoplay={{
-                              delay: 3000,
-                              disableOnInteraction: false,
-                            }}
-                            speed={1000}
-                            loop={false}
-                            breakpoints={{
-                              0: { slidesPerView: 1 },
-                              600: { slidesPerView: 2 },
-                              900: { slidesPerView: 3 },
-                              1200: { slidesPerView: 4 },
-                            }}
-                            className="relatedProductsSlider"
-                          >
-                            {[...product.category.products]
-                              .reverse()
-                              .map((p) => (
-                                <SwiperSlide key={p.id}>
-                                  <Box className="productCard">
-                                    <Box className="productCardInner">
-                                      <Box className="productCardImage">
-                                        <Image
-                                          src={
-                                            p.variantImage ||
-                                            p.mainImage ||
-                                            ProductImage
-                                          }
-                                          alt={p.name}
-                                          width={300}
-                                          height={300}
-                                          style={{ objectFit: "cover" }}
+                      <Box className="ComSliderNavigation">
+                        <Box
+                          className="swiper-button-prev"
+                          ref={prevRef2}
+                        ></Box>
+                        <Box
+                          className="swiper-button-next"
+                          ref={nextRef2}
+                        ></Box>
+                      </Box>
+                    </Box>
+                    <Box className="productCardListOuter">
+                      <Box className="productCardList">
+                        <Swiper
+                          modules={[Navigation, Autoplay, Pagination]}
+                          spaceBetween={16}
+                          slidesPerView={4}
+                          navigation={{
+                            prevEl: prevRef2.current,
+                            nextEl: nextRef2.current,
+                          }}
+                          onBeforeInit={(swiper: any) => {
+                            swiper.params.navigation.prevEl = prevRef2.current;
+                            swiper.params.navigation.nextEl = nextRef2.current;
+                          }}
+                          autoplay={{
+                            delay: 3000,
+                            disableOnInteraction: false,
+                          }}
+                          speed={1000}
+                          loop={false}
+                          breakpoints={{
+                            0: { slidesPerView: 1 },
+                            600: { slidesPerView: 2 },
+                            900: { slidesPerView: 3 },
+                            1200: { slidesPerView: 4 },
+                          }}
+                          className="relatedProductsSlider"
+                        >
+                          {[...product.relatedProducts]
+                            .reverse()
+
+                            .map((p) => (
+                              <SwiperSlide key={p.id}>
+                                <Box className="productCard">
+                                  <Box className="productCardInner">
+                                    <Box className="productCardImage">
+                                      <Image
+                                        src={
+                                          p.variantImage ||
+                                          p.mainImage ||
+                                          ProductImage
+                                        }
+                                        alt={p.name}
+                                        width={300}
+                                        height={300}
+                                        style={{ objectFit: "cover" }}
+                                      />
+                                      <IconButton color="primary">
+                                        <Icon
+                                          name="wishList"
+                                          width={20}
+                                          height={40}
                                         />
-                                        <IconButton color="primary">
-                                          <Icon
-                                            name="wishList"
-                                            width={20}
-                                            height={40}
-                                          />
-                                        </IconButton>
-                                      </Box>
-                                      <Box
-                                        className="productCardContent"
-                                        sx={{ backgroundColor: "#ffffff" }}
+                                      </IconButton>
+                                    </Box>
+                                    <Box
+                                      className="productCardContent"
+                                      sx={{ backgroundColor: "#ffffff" }}
+                                    >
+                                      <Typography
+                                        variant="body1"
+                                        className="productCardSku"
                                       >
-                                        <Typography
-                                          variant="body1"
-                                          className="productCardSku"
-                                        >
-                                          SKU: {p.sku || "N/A"}
-                                        </Typography>
-                                        <Typography
-                                          variant="h3"
-                                          className="productCardTitle"
-                                        >
-                                          {p.name}
-                                        </Typography>
-                                        {p.variants?.[0]?.data &&
-                                          Object.entries(
-                                            p.variants[0].data,
-                                          ).map(([key, value]) => (
+                                        SKU: {p.sku || "N/A"}
+                                      </Typography>
+                                      <Typography
+                                        variant="h3"
+                                        className="productCardTitle"
+                                      >
+                                        {p.name}
+                                      </Typography>
+                                      {p.variants?.[0]?.data &&
+                                        Object.entries(p.variants[0].data)
+                                          .filter(
+                                            ([key]) =>
+                                              ![
+                                                "EAN",
+                                                "SKU",
+                                                "Model No",
+                                                "variantImage",
+                                              ].includes(key),
+                                          )
+                                          .map(([key, value]) => (
                                             <Typography
                                               key={key}
                                               variant="body1"
@@ -926,23 +944,22 @@ export default function Single({ product, allCategories }: SingleProps) {
                                               {key} : {String(value)}
                                             </Typography>
                                           ))}
-                                        <IconButton color="primary">
-                                          <Icon
-                                            name="AddToCart"
-                                            width={20}
-                                            height={20}
-                                          />
-                                        </IconButton>
-                                      </Box>
+                                      <IconButton color="primary">
+                                        <Icon
+                                          name="AddToCart"
+                                          width={20}
+                                          height={20}
+                                        />
+                                      </IconButton>
                                     </Box>
                                   </Box>
-                                </SwiperSlide>
-                              ))}
-                          </Swiper>
-                        </Box>
+                                </Box>
+                              </SwiperSlide>
+                            ))}
+                        </Swiper>
                       </Box>
                     </Box>
-                  </>
+                  </Box>
                 )}
             </Box>
           </Stack>
