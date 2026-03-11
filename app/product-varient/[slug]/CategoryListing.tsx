@@ -196,7 +196,9 @@ export default function CategoryListing({
                   justifyContent="space-between"
                 >
                   <Box className="productResultHeaderTitle">
-                    <Typography variant="h3">{product.name}</Typography>
+                    <Typography variant="h3">
+                      {product.name} (200 gm - 35 kg)
+                    </Typography>
                   </Box>
                 </Stack>
                 <Box className="productCardListOuter">
@@ -230,6 +232,18 @@ export default function CategoryListing({
                               className="productCardContent"
                               sx={{ backgroundColor: "#ffffff" }}
                             >
+                              <Typography
+                                variant="body1"
+                                className="productCardSku"
+                              >
+                                SKU: {variant.data.SKU}
+                              </Typography>
+                              <Typography
+                                variant="h3"
+                                className="productCardTitle"
+                              >
+                                {product.name}
+                              </Typography>
                               {Object.entries(variant.data)
                                 .filter(
                                   ([key]) =>
