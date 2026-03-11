@@ -74,19 +74,26 @@ const ProductCard = ({
   cardBg: string;
 }) => (
   <Box className="productCardInner">
-    <Box className="productCardImage">
-      <Image
-        src={product.mainImage || ProductImagePlaceholder}
-        alt={product.name}
-        width={400}
-        height={400}
-        style={{ objectFit: "contain" }}
-      />
-    </Box>
+    <Link href={`/product/${product.slug}`} style={{ textDecoration: "none" }}>
+      <Box className="productCardImage">
+        <Image
+          src={product.mainImage || ProductImagePlaceholder}
+          alt={product.name}
+          width={400}
+          height={400}
+          style={{ objectFit: "contain" }}
+        />
+      </Box>
+    </Link>
     <Box className="productCardContent" sx={{ backgroundColor: cardBg }}>
-      <Typography variant="h3" className="productCardTitle">
-        {product.name}
-      </Typography>
+      <Link
+        href={`/product/${product.slug}`}
+        style={{ textDecoration: "none", color: "inherit" }}
+      >
+        <Typography variant="h3" className="productCardTitle">
+          {product.name}
+        </Typography>
+      </Link>
       <Typography variant="body1" className="productCardMeta">
         {getWeightRange(product.variants)}
       </Typography>

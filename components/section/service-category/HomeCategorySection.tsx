@@ -38,13 +38,15 @@ function ProductSlideCard({
   return (
     <Box className="serviceCategorySliderItem">
       <Box className="imageHolder">
-        <Image
-          src={image}
-          alt={alt}
-          width={400}
-          height={480}
-          style={{ objectFit: "contain" }}
-        />
+        <Link href={`/product/${slug}`} style={{ textDecoration: "none" }}>
+          <Image
+            src={image}
+            alt={alt}
+            width={400}
+            height={480}
+            style={{ objectFit: "contain" }}
+          />
+        </Link>
         <IconButton
           sx={{ backgroundColor: "#F4F4F4" }}
           aria-label="Add to wishlist"

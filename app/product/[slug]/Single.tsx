@@ -786,13 +786,24 @@ export default function Single({ product, allCategories }: SingleProps) {
                                         variant="body1"
                                         className="productCardSku"
                                       >
-                                        SKU: {p.sku || "N/A"}
+                                        SKU:{" "}
+                                        {p.sku ||
+                                          p.variants?.[0]?.data?.SKU ||
+                                          "N/A"}
                                       </Typography>
                                       <Typography
                                         variant="h3"
                                         className="productCardTitle"
                                       >
-                                        {p.name}
+                                        <Link
+                                          href={`/product/${p.slug}`}
+                                          style={{
+                                            textDecoration: "none",
+                                            color: "inherit",
+                                          }}
+                                        >
+                                          {p.name}
+                                        </Link>
                                       </Typography>
                                       {p.variants?.[0]?.data &&
                                         Object.entries(p.variants[0].data)
@@ -916,13 +927,24 @@ export default function Single({ product, allCategories }: SingleProps) {
                                         variant="body1"
                                         className="productCardSku"
                                       >
-                                        SKU: {p.sku || "N/A"}
+                                        SKU:{" "}
+                                        {p.sku ||
+                                          p.variants?.[0]?.data?.SKU ||
+                                          "N/A"}
                                       </Typography>
                                       <Typography
                                         variant="h3"
                                         className="productCardTitle"
                                       >
-                                        {p.name}
+                                        <Link
+                                          href={`/product/${p.slug}`}
+                                          style={{
+                                            textDecoration: "none",
+                                            color: "inherit",
+                                          }}
+                                        >
+                                          {p.name}
+                                        </Link>
                                       </Typography>
                                       {p.variants?.[0]?.data &&
                                         Object.entries(p.variants[0].data)

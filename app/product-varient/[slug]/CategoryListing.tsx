@@ -213,17 +213,19 @@ export default function CategoryListing({
                         >
                           <Box className="productCardInner">
                             <Box className="productCardImage">
-                              <Image
-                                src={
-                                  variant.data.variantImage
-                                    ? `${variant.data.variantImage}`
-                                    : ProductImage
-                                }
-                                alt={product.name}
-                                width={300}
-                                height={340}
-                                style={{ objectFit: "cover" }}
-                              />
+                              <Link href={`/product/${product.slug}`}>
+                                <Image
+                                  src={
+                                    variant.data.variantImage
+                                      ? `${variant.data.variantImage}`
+                                      : ProductImage
+                                  }
+                                  alt={product.name}
+                                  width={300}
+                                  height={340}
+                                  style={{ objectFit: "cover" }}
+                                />
+                              </Link>
                               <IconButton color="primary">
                                 <Icon name="wishList" width={20} height={40} />
                               </IconButton>
@@ -242,7 +244,15 @@ export default function CategoryListing({
                                 variant="h3"
                                 className="productCardTitle"
                               >
-                                {product.name}
+                                <Link
+                                  href={`/product/${product.slug}`}
+                                  style={{
+                                    textDecoration: "none",
+                                    color: "inherit",
+                                  }}
+                                >
+                                  {product.name}
+                                </Link>
                               </Typography>
                               {Object.entries(variant.data)
                                 .filter(
