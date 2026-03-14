@@ -7,11 +7,42 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Role {
+  ADMIN
+  USER
+}
+
 model User {
   id        Int      @id @default(autoincrement())
   email     String   @unique
   password  String
   name      String?
+  role      Role     @default(USER)
+  cart      CartItem[]
+  wishlist  WishlistItem[]
+  orders    Order[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CartItem {
+  id        Int     @id @default(autoincrement())
+  userId    Int
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId Int
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  quantity  Int     @default(1)
+  variantId Int?    // Optional: link to a specific variant
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model WishlistItem {
+  id        Int     @id @default(autoincrement())
+  userId    Int
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId Int
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -69,6 +100,8 @@ model Product {
 
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
+  cart      CartItem[]
+  wishlist  WishlistItem[]
   OrderItem OrderItem[]
 }
 
@@ -121,14 +154,33 @@ model Customer {
   updatedAt DateTime @updatedAt
 }
 
+model DeliveryPartner {
+  id          Int      @id @default(autoincrement())
+  name        String
+  logo        String?
+  contactInfo String?
+  isActive    Boolean  @default(true)
+  orders      Order[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
 model Order {
-  id         Int         @id @default(autoincrement())
-  customerId Int
-  customer   Customer    @relation(fields: [customerId], references: [id])
-  status     String      @default("PENDING") // PENDING, PROCESSING, SHIPPED, DELIVERED, CANCELLED
-  items      OrderItem[]
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
+  id                Int             @id @default(autoincrement())
+  userId            Int?
+  user              User?           @relation(fields: [userId], references: [id])
+  deliveryPartnerId Int?
+  deliveryPartner   DeliveryPartner? @relation(fields: [deliveryPartnerId], references: [id])
+  customerName      String
+  customerPhone     String
+  customerAddress   String          @db.Text
+  status            String          @default("PENDING") // PENDING, PROCESSING, SHIPPED, DELIVERED, CANCELLED
+  items             OrderItem[]
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  customerId Int?
+  customer   Customer?    @relation(fields: [customerId], references: [id])
 }
 
 model OrderItem {

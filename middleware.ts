@@ -2,42 +2,55 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { jwtVerify } from 'jose';
 
+const secret = new TextEncoder().encode(
+  process.env.JWT_SECRET || 'supersecretkey123'
+);
+
+async function verifyToken(token: string | undefined) {
+  if (!token) return null;
+  try {
+    const { payload } = await jwtVerify(token, secret);
+    return payload;
+  } catch {
+    return null;
+  }
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const token = request.cookies.get('admin_token')?.value;
 
-  // Secret for JWT verification
-  const secret = new TextEncoder().encode(
-    process.env.JWT_SECRET || 'supersecret'
-  );
+  // ── Admin routes ──────────────────────────────────────────────────────────
+  const adminToken = request.cookies.get('admin_token')?.value;
+  const isAdminVerified = await verifyToken(adminToken);
 
-  // Helper to verify token
-  const verifyToken = async (token: string | undefined) => {
-    if (!token) return null;
-    try {
-      const { payload } = await jwtVerify(token, secret);
-      return payload;
-    } catch (err) {
-      return null;
-    }
-  };
-
-  const isVerified = await verifyToken(token);
-
-  // 1. Protection: If trying to access /admin and NOT verified
-  if (pathname.startsWith('/admin') && pathname !== '/admin/login' && !isVerified) {
+  if (pathname.startsWith('/admin') && pathname !== '/admin/login' && !isAdminVerified) {
     return NextResponse.redirect(new URL('/admin/login', request.url));
   }
-
-  // 2. Redirection: If already verified and trying to access /admin/login
-  if (pathname === '/admin/login' && isVerified) {
+  if (pathname === '/admin/login' && isAdminVerified) {
     return NextResponse.redirect(new URL('/admin', request.url));
+  }
+
+  // ── User routes ───────────────────────────────────────────────────────────
+  const userSession = request.cookies.get('user_session')?.value;
+  const isUserLoggedIn = await verifyToken(userSession);
+
+  // Protected pages: require login
+  const protectedPaths = ['/profile', '/cart', '/wishlist'];
+  if (protectedPaths.some((p) => pathname.startsWith(p)) && !isUserLoggedIn) {
+    const loginUrl = new URL('/login', request.url);
+    loginUrl.searchParams.set('redirect', pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  // Auth pages: redirect to profile if already logged in
+  const authPaths = ['/login', '/register'];
+  if (authPaths.includes(pathname) && isUserLoggedIn) {
+    return NextResponse.redirect(new URL('/profile', request.url));
   }
 
   return NextResponse.next();
 }
 
-// Config to match only admin routes
 export const config = {
-  matcher: ['/admin/:path*'],
+  matcher: ['/admin/:path*', '/profile', '/cart', '/wishlist', '/login', '/register'],
 };

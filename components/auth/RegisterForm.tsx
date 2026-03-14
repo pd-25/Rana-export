@@ -14,9 +14,9 @@ import {
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import Link from "next/link";
-import { loginUser } from "@/app/actions/authActions";
+import { registerUser } from "@/app/actions/authActions";
 
-export default function LoginForm() {
+export default function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -24,7 +24,7 @@ export default function LoginForm() {
   const handleSubmit = async (formData: FormData) => {
     setError("");
     setLoading(true);
-    const result = await loginUser(null, formData);
+    const result = await registerUser(null, formData);
     if (result?.error) {
       setError(result.error);
       setLoading(false);
@@ -42,10 +42,10 @@ export default function LoginForm() {
         <Stack spacing={3}>
           <Box textAlign="center">
             <Typography variant="h4" fontWeight="bold" gutterBottom>
-              Welcome Back
+              Create Account
             </Typography>
             <Typography variant="body2" color="textSecondary">
-              Please enter your details to sign in
+              Join us today! Please enter your details.
             </Typography>
           </Box>
 
@@ -53,6 +53,13 @@ export default function LoginForm() {
 
           <Box component="form" action={handleSubmit}>
             <Stack spacing={3}>
+              <TextField
+                fullWidth
+                name="name"
+                label="Full Name"
+                variant="outlined"
+                required
+              />
               <TextField
                 fullWidth
                 name="email"
@@ -94,23 +101,23 @@ export default function LoginForm() {
                   "&:hover": { backgroundColor: "#444" },
                 }}
               >
-                {loading ? "Signing In..." : "Sign In"}
+                {loading ? "Creating Account..." : "Sign Up"}
               </Button>
             </Stack>
           </Box>
 
           <Box textAlign="center">
             <Typography variant="body2">
-              Don't have an account?{" "}
+              Already have an account?{" "}
               <Link
-                href="/register"
+                href="/login"
                 style={{
                   color: "#222",
                   fontWeight: "bold",
                   textDecoration: "none",
                 }}
               >
-                Create one
+                Log in
               </Link>
             </Typography>
           </Box>

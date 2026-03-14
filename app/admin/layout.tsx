@@ -31,6 +31,7 @@ import {
   Person as PersonIcon,
   Straighten as StraightenIcon,
   ShoppingBag as OrderIcon,
+  LocalShipping as ShippingIcon,
 } from "@mui/icons-material";
 import Link from "next/link";
 import { logoutAdmin } from "./logout/actions";
@@ -107,11 +108,19 @@ export default function AdminLayout({
     { text: "Dashboard", icon: <DashboardIcon />, path: "/admin" },
     { text: "Categories", icon: <CategoryIcon />, path: "/admin/categories" },
     { text: "Products", icon: <ProductIcon />, path: "/admin/products" },
-    { text: "Variant Groups", icon: <StraightenIcon />, path: "/admin/variants" },
+    {
+      text: "Variant Groups",
+      icon: <StraightenIcon />,
+      path: "/admin/variants",
+    },
     { text: "Customers", icon: <PersonIcon />, path: "/admin/customers" },
     { text: "Orders", icon: <OrderIcon />, path: "/admin/orders" },
+    {
+      text: "Delivery Partners",
+      icon: <ShippingIcon />,
+      path: "/admin/partners",
+    },
   ];
-
 
   return (
     <ThemeProvider theme={adminTheme}>
@@ -139,12 +148,17 @@ export default function AdminLayout({
           }}
         >
           <Toolbar>
-            <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1, fontWeight: 700, color: 'primary.main' }}>
+            <Typography
+              variant="h6"
+              noWrap
+              component="div"
+              sx={{ flexGrow: 1, fontWeight: 700, color: "primary.main" }}
+            >
               RANA EXPORT ADMIN
             </Typography>
             <div>
               <IconButton onClick={handleMenu} color="inherit">
-                <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main' }}>
+                <Avatar sx={{ width: 32, height: 32, bgcolor: "primary.main" }}>
                   <PersonIcon />
                 </Avatar>
               </IconButton>
@@ -194,7 +208,10 @@ export default function AdminLayout({
                   <ListItemButton
                     component={Link}
                     href={item.path}
-                    selected={pathname === item.path || (item.path !== '/admin' && pathname.startsWith(item.path))}
+                    selected={
+                      pathname === item.path ||
+                      (item.path !== "/admin" && pathname.startsWith(item.path))
+                    }
                     sx={{
                       mx: 1,
                       borderRadius: 1,
@@ -223,7 +240,14 @@ export default function AdminLayout({
                     <ListItemIcon sx={{ minWidth: 40, color: "inherit" }}>
                       {item.icon}
                     </ListItemIcon>
-                    <ListItemText primary={item.text} primaryTypographyProps={{ fontSize: '0.9rem', fontWeight: 500, color: 'inherit' }} />
+                    <ListItemText
+                      primary={item.text}
+                      primaryTypographyProps={{
+                        fontSize: "0.9rem",
+                        fontWeight: 500,
+                        color: "inherit",
+                      }}
+                    />
                   </ListItemButton>
                 </ListItem>
               ))}

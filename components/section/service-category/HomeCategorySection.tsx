@@ -7,6 +7,8 @@ import {
   IconButton,
   Stack,
   Typography,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import Icon from "@/components/ui/icon/Icon";
 import Image from "next/image";
@@ -14,6 +16,15 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import type { Swiper as SwiperType } from "swiper";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import Link from "next/link";
+import {
+  getWishlistedIds,
+  toggleWishlist,
+} from "@/app/actions/wishlistActions";
+import { addToCart } from "@/app/actions/cartActions";
+import {
+  notifyCartUpdated,
+  notifyWishlistUpdated,
+} from "@/context/CartWishlistContext";
 
 const SWIPER_BREAKPOINTS = {
   768: { slidesPerView: 2 },
@@ -28,13 +39,64 @@ function ProductSlideCard({
   meta,
   alt = "product",
   slug,
+  productId,
 }: {
   image: string;
   title: string;
   meta: string[];
   alt?: string;
   slug: string;
+  productId: number;
 }) {
+  const [wishlisted, setWishlisted] = useState(false);
+  const [snackbar, setSnackbar] = useState<{
+    open: boolean;
+    message: string;
+    severity: "success" | "error";
+  }>({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+
+  // Check if product is wishlisted on mount
+  useEffect(() => {
+    const checkWishlist = async () => {
+      const ids = await getWishlistedIds([productId]);
+      if (ids.includes(productId)) {
+        setWishlisted(true);
+      }
+    };
+    checkWishlist();
+  }, [productId]);
+
+  const handleWishlist = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    const res = await toggleWishlist(productId);
+    if (res?.error) {
+      setSnackbar({ open: true, message: res.error, severity: "error" });
+    } else if (res?.success) {
+      setWishlisted(res.action === "added");
+      setSnackbar({ open: true, message: res.success, severity: "success" });
+      notifyWishlistUpdated(); // Instant header update
+    }
+  };
+
+  const handleAddToCart = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    const res = await addToCart(productId);
+    if (res?.error) {
+      setSnackbar({ open: true, message: res.error, severity: "error" });
+    } else {
+      setSnackbar({
+        open: true,
+        message: "Added to cart!",
+        severity: "success",
+      });
+      notifyCartUpdated(); // Instant header update
+    }
+  };
+
   return (
     <Box className="serviceCategorySliderItem">
       <Box className="imageHolder">
@@ -48,10 +110,24 @@ function ProductSlideCard({
           />
         </Link>
         <IconButton
-          sx={{ backgroundColor: "#F4F4F4" }}
+          sx={{
+            backgroundColor: wishlisted ? "rgba(192,113,122,0.12)" : "#F4F4F4",
+            "&:hover": { backgroundColor: "rgba(192,113,122,0.2)" },
+            transition: "background 0.2s, transform 0.2s",
+            "&:active": { transform: "scale(0.85)" },
+          }}
           aria-label="Add to wishlist"
+          onClick={handleWishlist}
         >
-          <Icon name="wishList" width={24} height={24} />
+          <Icon
+            name={wishlisted ? "wishListFilled" : "wishList"}
+            width={24}
+            height={24}
+            style={{
+              transition: "transform 0.25s cubic-bezier(0.34,1.56,0.64,1)",
+              transform: wishlisted ? "scale(1.18)" : "scale(1)",
+            }}
+          />
         </IconButton>
       </Box>
       <Box className="contentHolder">
@@ -75,18 +151,31 @@ function ProductSlideCard({
             <IconButton
               sx={{ backgroundColor: "#FFFFFF" }}
               aria-label="3D view"
+              component={Link}
+              href={`/product/${slug}`}
             >
               <Icon name="Product3DView" width={20} height={20} />
             </IconButton>
             <IconButton
               sx={{ backgroundColor: "#FFFFFF" }}
               aria-label="Add to cart"
+              onClick={handleAddToCart}
             >
               <Icon name="AddToCart" width={20} height={20} />
             </IconButton>
           </Box>
         </Stack>
       </Box>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={2500}
+        onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert severity={snackbar.severity} sx={{ width: "100%" }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }
@@ -226,6 +315,7 @@ export default function HomeCategorySection({
                       title={product.name}
                       meta={meta.slice(0, 2)}
                       slug={product.slug}
+                      productId={product.id}
                     />
                   </SwiperSlide>
                 );

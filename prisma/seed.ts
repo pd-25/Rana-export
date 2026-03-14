@@ -37,7 +37,7 @@ async function main() {
   console.log("Admin seeded:", admin.email);
 
   // Helper functions for naming and slugs
-  const slugify = (text) => text.toLowerCase().replace(/[\s\/]+/g, '-').replace(/[^\w-]+/g, '');
+  const slugify = (text: string) => text.toLowerCase().replace(/[\s\/]+/g, '-').replace(/[^\w-]+/g, '');
 
   // --- SINGING BOWL ---
   const catSingingBowl = await prisma.category.create({

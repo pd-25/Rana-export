@@ -15,6 +15,8 @@ import {
   TableBody,
   TableRow,
   TableCell,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import Icon from "@/components/ui/icon/Icon";
 import BannerPic from "@/public/category/category-listing-banner.png";
@@ -25,8 +27,17 @@ import BackgroundPattern from "@/public/collection/background-pattern.png";
 import React from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay, Thumbs } from "swiper/modules";
-
 import Link from "next/link";
+import {
+  getWishlistedIds,
+  toggleWishlist,
+} from "@/app/actions/wishlistActions";
+import { addToCart } from "@/app/actions/cartActions";
+import {
+  notifyCartUpdated,
+  notifyWishlistUpdated,
+  useCartWishlist,
+} from "@/context/CartWishlistContext";
 
 interface Category {
   id: number;
@@ -92,6 +103,139 @@ interface SingleProps {
   allCategories: Category[];
 }
 
+// ── Shared card for "You Might Also Like" & "See Related Items" ──────────────
+function RelatedProductCard({
+  p,
+  cardBg = "#ffffff",
+  onNotify,
+}: {
+  p: RelatedProduct;
+  cardBg?: string;
+  onNotify: (msg: string, severity: "success" | "error") => void;
+}) {
+  const [wishlisted, setWishlisted] = React.useState(false);
+  const { openAuthModal, isLoggedIn } = useCartWishlist();
+
+  // Check initial wishlist state
+  React.useEffect(() => {
+    const checkWishlist = async () => {
+      const ids = await getWishlistedIds([p.id]);
+      if (ids.includes(p.id)) setWishlisted(true);
+    };
+    checkWishlist();
+  }, [p.id]);
+
+  const handleWishlist = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const res = await toggleWishlist(p.id);
+    if (res?.error) {
+      openAuthModal();
+    } else if (res?.success) {
+      setWishlisted(res.action === "added");
+      onNotify(res.success, "success");
+      notifyWishlistUpdated();
+    }
+  };
+
+  const handleAddToCart = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const res = await addToCart(p.id, null, 1);
+    if (res?.error) {
+      openAuthModal();
+    } else {
+      onNotify("Added to cart!", "success");
+      notifyCartUpdated();
+    }
+  };
+
+  return (
+    <Box className="productCard">
+      <Box className="productCardInner">
+        <Box className="productCardImage" sx={{ position: "relative" }}>
+          <Link href={`/product/${p.slug}`} style={{ display: "block" }}>
+            <Image
+              src={p.variantImage || p.mainImage || ProductImage}
+              alt={p.name}
+              width={300}
+              height={300}
+              style={{ objectFit: "cover", width: "100%", height: "auto" }}
+            />
+          </Link>
+          <IconButton
+            color="primary"
+            size="small"
+            onClick={handleWishlist}
+            sx={{
+              position: "absolute",
+              top: 8,
+              right: 8,
+              background: wishlisted
+                ? "rgba(192,113,122,0.12)"
+                : "rgba(255,255,255,0.85)",
+              "&:hover": { background: "rgba(192,113,122,0.18)" },
+              transition: "background 0.2s, transform 0.2s",
+              "&:active": { transform: "scale(0.88)" },
+            }}
+          >
+            <Icon
+              name={wishlisted ? "wishListFilled" : "wishList"}
+              width={20}
+              height={20}
+              style={{
+                transition: "transform 0.25s cubic-bezier(0.34,1.56,0.64,1)",
+                transform: wishlisted ? "scale(1.15)" : "scale(1)",
+              }}
+            />
+          </IconButton>
+        </Box>
+        <Box className="productCardContent" sx={{ backgroundColor: cardBg }}>
+          <Typography variant="body1" className="productCardSku">
+            SKU: {p.sku || p.variants?.[0]?.data?.SKU || "N/A"}
+          </Typography>
+          <Typography variant="h3" className="productCardTitle">
+            <Link
+              href={`/product/${p.slug}`}
+              style={{ textDecoration: "none", color: "inherit" }}
+            >
+              {p.name}
+            </Link>
+          </Typography>
+          {p.variants?.[0]?.data &&
+            Object.entries(p.variants[0].data)
+              .filter(
+                ([key]) =>
+                  !["EAN", "SKU", "Model No", "variantImage"].includes(key),
+              )
+              .slice(0, 2)
+              .map(([key, value]) => (
+                <Typography
+                  key={key}
+                  variant="body1"
+                  className="productCardMeta"
+                >
+                  {key}: {String(value)}
+                </Typography>
+              ))}
+          <IconButton
+            color="primary"
+            size="small"
+            onClick={handleAddToCart}
+            sx={{
+              mt: 1,
+              "&:hover": { background: "#fff3e0" },
+              transition: "background 0.2s",
+            }}
+          >
+            <Icon name="AddToCart" width={20} height={20} />
+          </IconButton>
+        </Box>
+      </Box>
+    </Box>
+  );
+}
+
 export default function Single({ product, allCategories }: SingleProps) {
   const [readMoreOpen, setReadMoreOpen] = React.useState(false);
   const toggleReadMoreParent = () => setReadMoreOpen((prev) => !prev);
@@ -109,6 +253,56 @@ export default function Single({ product, allCategories }: SingleProps) {
   );
   const currentVariant = product.variants.find((v) => v.id === selectedVariant);
   const currentVariantData = currentVariant?.data || {};
+
+  const { openAuthModal, isLoggedIn } = useCartWishlist();
+
+  // Wishlist & Cart state
+  const [wishlisted, setWishlisted] = React.useState(false);
+  const [snackbar, setSnackbar] = React.useState<{
+    open: boolean;
+    message: string;
+    severity: "success" | "error";
+  }>({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+
+  // Check initial wishlist state
+  React.useEffect(() => {
+    const checkWishlist = async () => {
+      const ids = await getWishlistedIds([product.id]);
+      if (ids.includes(product.id)) setWishlisted(true);
+    };
+    checkWishlist();
+  }, [product.id]);
+
+  const handleWishlist = async () => {
+    const res = await toggleWishlist(product.id);
+    if (res?.error) {
+      openAuthModal();
+    } else if (res?.success) {
+      setWishlisted(res.action === "added");
+      setSnackbar({ open: true, message: res.success, severity: "success" });
+      notifyWishlistUpdated();
+    }
+  };
+
+  const handleAddToCart = async () => {
+    const variantId =
+      typeof selectedVariant === "number" ? selectedVariant : null;
+    const res = await addToCart(product.id, variantId, quantity);
+    if (res?.error) {
+      openAuthModal();
+    } else {
+      setSnackbar({
+        open: true,
+        message: `${quantity} item(s) added to cart!`,
+        severity: "success",
+      });
+      notifyCartUpdated();
+    }
+  };
 
   const galleryImages = [
     currentVariantData.variantImage || product.mainImage || ProductImage,
@@ -235,8 +429,26 @@ export default function Single({ product, allCategories }: SingleProps) {
                   <Box className="productSingleGalleryInner">
                     <Box className="productSingleGalleryMainImageBox">
                       <Box className="actionBtn">
-                        <IconButton color="primary">
-                          <Icon name="wishListGray" width={30} height={30} />
+                        <IconButton
+                          color="primary"
+                          onClick={handleWishlist}
+                          sx={{
+                            transition: "transform 0.2s",
+                            "&:active": { transform: "scale(0.85)" },
+                          }}
+                        >
+                          <Icon
+                            name={
+                              wishlisted ? "wishListGrayFilled" : "wishListGray"
+                            }
+                            width={30}
+                            height={30}
+                            style={{
+                              transition:
+                                "transform 0.25s cubic-bezier(0.34,1.56,0.64,1)",
+                              transform: wishlisted ? "scale(1.2)" : "scale(1)",
+                            }}
+                          />
                         </IconButton>
                         <IconButton color="primary">
                           <Icon name="share" width={30} height={30} />
@@ -342,8 +554,15 @@ export default function Single({ product, allCategories }: SingleProps) {
                         variant="outlined"
                         color="primary"
                         className="productSingleLoginInfoItemButton"
+                        onClick={() => {
+                          if (!isLoggedIn) {
+                            openAuthModal("login");
+                          } else {
+                            window.location.href = "/profile";
+                          }
+                        }}
                       >
-                        Login/Signup
+                        {isLoggedIn ? "Profile" : "Login/Signup"}
                       </Button>
                       <Typography
                         variant="body1"
@@ -543,6 +762,7 @@ export default function Single({ product, allCategories }: SingleProps) {
                         color="primary"
                         className="productSingleAddToCartButton"
                         sx={{ width: "100%" }}
+                        onClick={handleAddToCart}
                       >
                         Add to Cart
                       </Button>
@@ -754,87 +974,19 @@ export default function Single({ product, allCategories }: SingleProps) {
                             }}
                             className="relatedProductsSlider"
                           >
-                            {product.youMightAlsoProducts.map((p, idx) => (
+                            {product.youMightAlsoProducts.map((p) => (
                               <SwiperSlide key={p.id}>
-                                <Box className="productCard">
-                                  <Box className="productCardInner">
-                                    <Box className="productCardImage">
-                                      <Image
-                                        src={
-                                          p.variantImage ||
-                                          p.mainImage ||
-                                          ProductImage
-                                        }
-                                        alt={p.name}
-                                        width={300}
-                                        height={300}
-                                        style={{ objectFit: "cover" }}
-                                      />
-                                      <IconButton color="primary">
-                                        <Icon
-                                          name="wishList"
-                                          width={20}
-                                          height={40}
-                                        />
-                                      </IconButton>
-                                    </Box>
-                                    <Box
-                                      className="productCardContent"
-                                      sx={{ backgroundColor: "#ffffff" }}
-                                    >
-                                      <Typography
-                                        variant="body1"
-                                        className="productCardSku"
-                                      >
-                                        SKU:{" "}
-                                        {p.sku ||
-                                          p.variants?.[0]?.data?.SKU ||
-                                          "N/A"}
-                                      </Typography>
-                                      <Typography
-                                        variant="h3"
-                                        className="productCardTitle"
-                                      >
-                                        <Link
-                                          href={`/product/${p.slug}`}
-                                          style={{
-                                            textDecoration: "none",
-                                            color: "inherit",
-                                          }}
-                                        >
-                                          {p.name}
-                                        </Link>
-                                      </Typography>
-                                      {p.variants?.[0]?.data &&
-                                        Object.entries(p.variants[0].data)
-                                          .filter(
-                                            ([key]) =>
-                                              ![
-                                                "EAN",
-                                                "SKU",
-                                                "Model No",
-                                                "variantImage",
-                                              ].includes(key),
-                                          )
-                                          .map(([key, value]) => (
-                                            <Typography
-                                              key={key}
-                                              variant="body1"
-                                              className="productCardMeta"
-                                            >
-                                              {key} : {String(value)}
-                                            </Typography>
-                                          ))}
-                                      <IconButton color="primary">
-                                        <Icon
-                                          name="AddToCart"
-                                          width={20}
-                                          height={20}
-                                        />
-                                      </IconButton>
-                                    </Box>
-                                  </Box>
-                                </Box>
+                                <RelatedProductCard
+                                  p={p}
+                                  cardBg="#ffffff"
+                                  onNotify={(msg, sev) =>
+                                    setSnackbar({
+                                      open: true,
+                                      message: msg,
+                                      severity: sev,
+                                    })
+                                  }
+                                />
                               </SwiperSlide>
                             ))}
                           </Swiper>
@@ -892,92 +1044,21 @@ export default function Single({ product, allCategories }: SingleProps) {
                           }}
                           className="relatedProductsSlider"
                         >
-                          {[...product.relatedProducts]
-                            .reverse()
-
-                            .map((p) => (
-                              <SwiperSlide key={p.id}>
-                                <Box className="productCard">
-                                  <Box className="productCardInner">
-                                    <Box className="productCardImage">
-                                      <Image
-                                        src={
-                                          p.variantImage ||
-                                          p.mainImage ||
-                                          ProductImage
-                                        }
-                                        alt={p.name}
-                                        width={300}
-                                        height={300}
-                                        style={{ objectFit: "cover" }}
-                                      />
-                                      <IconButton color="primary">
-                                        <Icon
-                                          name="wishList"
-                                          width={20}
-                                          height={40}
-                                        />
-                                      </IconButton>
-                                    </Box>
-                                    <Box
-                                      className="productCardContent"
-                                      sx={{ backgroundColor: "#ffffff" }}
-                                    >
-                                      <Typography
-                                        variant="body1"
-                                        className="productCardSku"
-                                      >
-                                        SKU:{" "}
-                                        {p.sku ||
-                                          p.variants?.[0]?.data?.SKU ||
-                                          "N/A"}
-                                      </Typography>
-                                      <Typography
-                                        variant="h3"
-                                        className="productCardTitle"
-                                      >
-                                        <Link
-                                          href={`/product/${p.slug}`}
-                                          style={{
-                                            textDecoration: "none",
-                                            color: "inherit",
-                                          }}
-                                        >
-                                          {p.name}
-                                        </Link>
-                                      </Typography>
-                                      {p.variants?.[0]?.data &&
-                                        Object.entries(p.variants[0].data)
-                                          .filter(
-                                            ([key]) =>
-                                              ![
-                                                "EAN",
-                                                "SKU",
-                                                "Model No",
-                                                "variantImage",
-                                              ].includes(key),
-                                          )
-                                          .map(([key, value]) => (
-                                            <Typography
-                                              key={key}
-                                              variant="body1"
-                                              className="productCardMeta"
-                                            >
-                                              {key} : {String(value)}
-                                            </Typography>
-                                          ))}
-                                      <IconButton color="primary">
-                                        <Icon
-                                          name="AddToCart"
-                                          width={20}
-                                          height={20}
-                                        />
-                                      </IconButton>
-                                    </Box>
-                                  </Box>
-                                </Box>
-                              </SwiperSlide>
-                            ))}
+                          {[...product.relatedProducts].reverse().map((p) => (
+                            <SwiperSlide key={p.id}>
+                              <RelatedProductCard
+                                p={p}
+                                cardBg="#FDF6EE"
+                                onNotify={(msg, sev) =>
+                                  setSnackbar({
+                                    open: true,
+                                    message: msg,
+                                    severity: sev,
+                                  })
+                                }
+                              />
+                            </SwiperSlide>
+                          ))}
                         </Swiper>
                       </Box>
                     </Box>
@@ -987,6 +1068,16 @@ export default function Single({ product, allCategories }: SingleProps) {
           </Stack>
         </Container>
       </Box>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={2500}
+        onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert severity={snackbar.severity} sx={{ width: "100%" }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </>
   );
 }

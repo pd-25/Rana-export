@@ -12,6 +12,7 @@ import "swiper/css/thumbs";
 import Header from "@/components/layouts/Header";
 import Footer from "@/components/layouts/Footer";
 import ThemeRegistry from "./ThemeRegistry";
+import { CartWishlistProvider } from "@/context/CartWishlistContext";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -34,9 +35,11 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.variable} antialiased`}>
         <ThemeRegistry>
-          <Header />
-          {children}
-          <Footer />
+          <CartWishlistProvider>
+            <Header />
+            {children}
+            <Footer />
+          </CartWishlistProvider>
         </ThemeRegistry>
       </body>
     </html>

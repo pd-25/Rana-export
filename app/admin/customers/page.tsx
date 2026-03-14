@@ -20,7 +20,8 @@ import {
 import Link from "next/link";
 
 export default async function CustomersPage() {
-  const customers = await (prisma as any).customer.findMany({
+  const customers = await (prisma as any).user.findMany({
+    where: { role: "USER" },
     include: {
       _count: {
         select: { orders: true },
@@ -32,7 +33,14 @@ export default async function CustomersPage() {
   return (
     <Box>
       <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" sx={{ fontWeight: 800, color: "text.primary", letterSpacing: "-0.5px" }}>
+        <Typography
+          variant="h4"
+          sx={{
+            fontWeight: 800,
+            color: "text.primary",
+            letterSpacing: "-0.5px",
+          }}
+        >
           Customers
         </Typography>
         <Typography variant="body2" color="text.secondary">
@@ -40,57 +48,132 @@ export default async function CustomersPage() {
         </Typography>
       </Box>
 
-      <TableContainer component={Paper} sx={{ borderRadius: 3, boxShadow: "0 4px 24px rgba(0,0,0,0.06)", border: "1px solid", borderColor: "divider" }}>
+      <TableContainer
+        component={Paper}
+        sx={{
+          borderRadius: 3,
+          boxShadow: "0 4px 24px rgba(0,0,0,0.06)",
+          border: "1px solid",
+          borderColor: "divider",
+        }}
+      >
         <Table>
           <TableHead sx={{ bgcolor: "grey.50" }}>
             <TableRow>
-              <TableCell sx={{ fontWeight: 700, fontSize: "0.75rem", color: "text.secondary", pl: 4 }}>CUSTOMER</TableCell>
-              <TableCell sx={{ fontWeight: 700, fontSize: "0.75rem", color: "text.secondary" }}>EMAIL</TableCell>
-              <TableCell sx={{ fontWeight: 700, fontSize: "0.75rem", color: "text.secondary" }}>PHONE</TableCell>
-              <TableCell sx={{ fontWeight: 700, fontSize: "0.75rem", color: "text.secondary" }}>ORDERS</TableCell>
-              <TableCell sx={{ fontWeight: 700, fontSize: "0.75rem", color: "text.secondary" }}>JOINED</TableCell>
-              <TableCell align="right" sx={{ fontWeight: 700, fontSize: "0.75rem", color: "text.secondary", pr: 4 }}>ACTIONS</TableCell>
+              <TableCell
+                sx={{
+                  fontWeight: 700,
+                  fontSize: "0.75rem",
+                  color: "text.secondary",
+                  pl: 4,
+                }}
+              >
+                CUSTOMER
+              </TableCell>
+              <TableCell
+                sx={{
+                  fontWeight: 700,
+                  fontSize: "0.75rem",
+                  color: "text.secondary",
+                }}
+              >
+                EMAIL
+              </TableCell>
+              <TableCell
+                sx={{
+                  fontWeight: 700,
+                  fontSize: "0.75rem",
+                  color: "text.secondary",
+                }}
+              >
+                PHONE
+              </TableCell>
+              <TableCell
+                sx={{
+                  fontWeight: 700,
+                  fontSize: "0.75rem",
+                  color: "text.secondary",
+                }}
+              >
+                ORDERS
+              </TableCell>
+              <TableCell
+                sx={{
+                  fontWeight: 700,
+                  fontSize: "0.75rem",
+                  color: "text.secondary",
+                }}
+              >
+                JOINED
+              </TableCell>
+              <TableCell
+                align="right"
+                sx={{
+                  fontWeight: 700,
+                  fontSize: "0.75rem",
+                  color: "text.secondary",
+                  pr: 4,
+                }}
+              >
+                ACTIONS
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {customers.map((customer: any) => (
-              <TableRow key={customer.id} hover>
-                <TableCell sx={{ pl: 4 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Avatar sx={{ bgcolor: 'primary.50', color: 'primary.main' }}>
-                      <PersonIcon />
-                    </Avatar>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                      {customer.name}
-                    </Typography>
-                  </Box>
-                </TableCell>
-                <TableCell>
-                  <Typography variant="body2">{customer.email}</Typography>
-                </TableCell>
-                <TableCell>
-                  <Typography variant="body2">{customer.phone || "—"}</Typography>
-                </TableCell>
-                <TableCell>
-                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                    {customer._count.orders} Orders
+            {customers.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6} align="center" sx={{ py: 10 }}>
+                  <Typography variant="body1" color="text.secondary">
+                    No customers found in the database.
                   </Typography>
                 </TableCell>
-                <TableCell>
-                  <Typography variant="body2" color="text.secondary">
-                    {new Date(customer.createdAt).toLocaleDateString()}
-                  </Typography>
-                </TableCell>
-                <TableCell align="right" sx={{ pr: 4 }}>
-                  <Link href={`/admin/customers/${customer.id}`} passHref>
-                    <IconButton size="small" sx={{ color: 'primary.main', bgcolor: 'primary.50' }}>
-                      <ViewIcon fontSize="small" />
-                    </IconButton>
-                  </Link>
-                </TableCell>
-
               </TableRow>
-            ))}
+            ) : (
+              customers.map((customer: any) => (
+                <TableRow key={customer.id} hover>
+                  <TableCell sx={{ pl: 4 }}>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                      <Avatar
+                        sx={{ bgcolor: "primary.50", color: "primary.main" }}
+                      >
+                        <PersonIcon />
+                      </Avatar>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                        {customer.name}
+                      </Typography>
+                    </Box>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body2">{customer.email}</Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body2">
+                      {customer.phone || "—"}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      {customer._count.orders} Orders
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body2" color="text.secondary">
+                      {new Date(customer.createdAt).toLocaleDateString()}
+                    </Typography>
+                  </TableCell>
+                  <TableCell align="right" sx={{ pr: 4 }}>
+                    <Link href={`/admin/customers/${customer.id}`} passHref>
+                      <IconButton
+                        size="small"
+                        sx={{ color: "primary.main", bgcolor: "primary.50" }}
+                      >
+                        <ViewIcon fontSize="small" />
+                      </IconButton>
+                    </Link>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </TableContainer>
