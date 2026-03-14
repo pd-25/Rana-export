@@ -313,8 +313,8 @@ export default function HomeCategorySection({
                     <ProductSlideCard
                       image={product.mainImage || "/placeholder.png"}
                       title={
-                        product.name.length > 18
-                          ? `${product.name.substring(0, 18)}...`
+                        product.name.length > 21
+                          ? `${product.name.substring(0, 21)}`
                           : product.name
                       }
                       meta={meta.slice(0, 2)}
