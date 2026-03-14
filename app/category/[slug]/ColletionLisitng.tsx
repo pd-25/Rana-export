@@ -91,7 +91,9 @@ const ProductCard = ({
         style={{ textDecoration: "none", color: "inherit" }}
       >
         <Typography variant="h3" className="productCardTitle">
-          {product.name}
+          {product.name.length > 17
+            ? `${product.name.substring(0, 17)}...`
+            : product.name}
         </Typography>
       </Link>
       <Typography variant="body1" className="productCardMeta">

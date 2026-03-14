@@ -220,7 +220,10 @@ export default async function OrderDetailPage({
                 <Typography variant="h6" sx={{ mb: 2 }}>
                   Need Help?
                 </Typography>
-                <Typography variant="body2" sx={{ opacity: 0.8, mb: 3 }}>
+                <Typography
+                  variant="body2"
+                  sx={{ opacity: 0.8, mb: 3, color: "#fff" }}
+                >
                   If you have any questions regarding your order, please contact
                   our support team.
                 </Typography>

@@ -312,7 +312,11 @@ export default function HomeCategorySection({
                   <SwiperSlide key={`${product.id}-${index}`}>
                     <ProductSlideCard
                       image={product.mainImage || "/placeholder.png"}
-                      title={product.name}
+                      title={
+                        product.name.length > 18
+                          ? `${product.name.substring(0, 18)}...`
+                          : product.name
+                      }
                       meta={meta.slice(0, 2)}
                       slug={product.slug}
                       productId={product.id}

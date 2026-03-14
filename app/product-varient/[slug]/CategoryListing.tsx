@@ -155,7 +155,9 @@ function VariantCard({
             href={`/product/${productSlug}`}
             style={{ textDecoration: "none", color: "inherit" }}
           >
-            {productName}
+            {productName.length > 25
+              ? `${productName.substring(0, 25)}...`
+              : productName}
           </Link>
         </Typography>
         {Object.entries(variant.data)

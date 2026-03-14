@@ -199,7 +199,7 @@ function RelatedProductCard({
               href={`/product/${p.slug}`}
               style={{ textDecoration: "none", color: "inherit" }}
             >
-              {p.name}
+              {p.name.length > 17 ? `${p.name.substring(0, 17)}...` : p.name}
             </Link>
           </Typography>
           {p.variants?.[0]?.data &&
