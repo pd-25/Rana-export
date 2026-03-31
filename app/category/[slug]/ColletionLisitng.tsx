@@ -186,7 +186,7 @@ const ProductListSection = ({
               </IconButton>
             </Box>
           )}
-          <Link href={`/category/${categorySlug}`} passHref legacyBehavior>
+          <Link href={`/categories/${categorySlug}`} passHref legacyBehavior>
             <Button
               variant="outlined"
               className="outlineButton viewCompleteRangeButton"
@@ -262,7 +262,7 @@ const ProductListSection = ({
             marginTop: "40px",
           }}
         >
-          <Link href={`/category/${categorySlug}`} passHref legacyBehavior>
+          <Link href={`/categories/${categorySlug}`} passHref legacyBehavior>
             <Button
               variant="outlined"
               className="outlineButton viewCompleteRangeButton"

@@ -438,7 +438,7 @@
 
                 .actionButton {
                     background-color: $colorWhite;
-                    padding: 10px 40px;
+                    padding: 10px 10px;
                     border-radius: 30px 30px 0 0;
                     position: relative;
 
@@ -456,12 +456,13 @@
                     }
 
                     &::before {
-                        left: -37px;
+                        left: -35px;
                     }
 
                     &::after {
-                        right: -37px;
+                        right: -35px;
                         transform: rotateY(180deg);
+                        z-index: -1;
                     }
 
                     .MuiButtonBase-root {
@@ -606,8 +607,8 @@
     align-items: center;
     justify-content: center;
     gap: 10px;
-    font-size: 18px;
-    font-weight: 500;
+    font-size: 20px !important;
+    font-weight: 500 !important;
     letter-spacing: 1.4px;
     text-transform: uppercase;
     color: #fff;
