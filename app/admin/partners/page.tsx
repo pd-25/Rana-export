@@ -37,7 +37,7 @@ export default async function DeliveryPartnersPage() {
         mb={4}
       >
         <Typography variant="h4" fontWeight="bold">
-          Delivery Partners
+          Shipping Modes
         </Typography>
         <Link
           href="/admin/partners/add"
@@ -45,7 +45,7 @@ export default async function DeliveryPartnersPage() {
           style={{ textDecoration: "none" }}
         >
           <Button variant="contained" startIcon={<AddIcon />}>
-            Add Partner
+            Add Shipping Mode
           </Button>
         </Link>
       </Box>
@@ -58,7 +58,7 @@ export default async function DeliveryPartnersPage() {
         <Table>
           <TableHead sx={{ bgcolor: "#f5f5f5" }}>
             <TableRow>
-              <TableCell>Name</TableCell>
+              <TableCell>Mode Name</TableCell>
               <TableCell>Contact Info</TableCell>
               <TableCell>Status</TableCell>
               <TableCell align="right">Actions</TableCell>

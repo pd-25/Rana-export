@@ -47,7 +47,11 @@ export default async function OrderDetailPage({
       deliveryPartner: true,
       items: {
         include: {
-          product: true,
+          product: {
+            include: {
+              variants: true,
+            },
+          },
         },
       },
     },
@@ -144,7 +148,13 @@ export default async function OrderDetailPage({
                                 variant="caption"
                                 color="textSecondary"
                               >
-                                SKU: {item.product.sku || "N/A"}
+                                SKU: {
+                                  (() => {
+                                    const variant = item.product.variants?.find((v: any) => v.id === item.variantId) || item.product.variants?.[0];
+                                    const data = variant?.data || {};
+                                    return data.SKU || data.sku || item.product.sku || item.product.modelNo || "N/A";
+                                  })()
+                                }
                               </Typography>
                             </Box>
                           </Box>

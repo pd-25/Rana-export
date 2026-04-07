@@ -82,3 +82,36 @@ export async function placeOrder(formData: FormData) {
     return { error: "Failed to place order" };
   }
 }
+
+export async function getOrderItems(orderId: number) {
+  try {
+    return await (prisma as any).orderItem.findMany({
+      where: { orderId },
+      include: {
+        product: {
+          include: {
+            variants: true,
+          },
+        },
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    return [];
+  }
+}
+
+export async function getOrderDetails(orderId: number) {
+  try {
+    return await (prisma as any).order.findUnique({
+      where: { id: orderId },
+      include: {
+        customer: true,
+        deliveryPartner: true,
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
+}

@@ -116,7 +116,7 @@ export default function AdminLayout({
     { text: "Customers", icon: <PersonIcon />, path: "/admin/customers" },
     { text: "Orders", icon: <OrderIcon />, path: "/admin/orders" },
     {
-      text: "Delivery Partners",
+      text: "Shipping Modes",
       icon: <ShippingIcon />,
       path: "/admin/partners",
     },

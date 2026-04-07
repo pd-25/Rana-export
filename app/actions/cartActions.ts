@@ -88,3 +88,24 @@ export async function clearCart() {
     return { error: "Failed to clear cart" };
   }
 }
+
+export async function getCartItems() {
+  const session = await getSession();
+  if (!session) return [];
+
+  try {
+    return await (prisma as any).cartItem.findMany({
+      where: { userId: session.userId },
+      include: {
+        product: {
+          include: {
+            variants: true,
+          },
+        },
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    return [];
+  }
+}

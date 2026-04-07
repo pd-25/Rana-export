@@ -192,7 +192,7 @@ function RelatedProductCard({
         </Box>
         <Box className="productCardContent" sx={{ backgroundColor: cardBg }}>
           <Typography variant="body1" className="productCardSku">
-            SKU: {p.sku || p.variants?.[0]?.data?.SKU || "N/A"}
+            SKU: {p.sku || p.variants?.[0]?.data?.SKU || p.variants?.[0]?.data?.sku || "N/A"}
           </Typography>
           <Typography variant="h3" className="productCardTitle">
             <Link
@@ -539,7 +539,7 @@ export default function Single({ product, allCategories }: SingleProps) {
                     {product.name}
                   </Typography>
                   <Typography variant="body1" className="sku">
-                    SKU: {currentVariantData.SKU || product.sku || "N/A"}
+                    SKU: {currentVariantData.SKU || currentVariantData.sku || product.sku || "N/A"}
                   </Typography>
                   <Stack
                     direction="row"

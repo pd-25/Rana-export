@@ -38,7 +38,7 @@ export default async function EditPartnerPage({
   return (
     <Box maxWidth="sm">
       <Typography variant="h4" fontWeight="bold" mb={4}>
-        Edit Delivery Partner
+        Edit Shipping Mode
       </Typography>
 
       <Paper elevation={0} sx={{ p: 4, border: "1px solid #eee" }}>
@@ -47,7 +47,7 @@ export default async function EditPartnerPage({
             <TextField
               required
               fullWidth
-              label="Partner Name"
+              label="Mode Name"
               name="name"
               defaultValue={partner.name}
             />
@@ -82,7 +82,7 @@ export default async function EditPartnerPage({
                 <Button>Cancel</Button>
               </Link>
               <Button type="submit" variant="contained">
-                Update Partner
+                Update Mode
               </Button>
             </Box>
           </Stack>

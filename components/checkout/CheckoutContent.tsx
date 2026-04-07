@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Box,
   Container,
@@ -40,6 +41,7 @@ export default function CheckoutContent({
   partners,
   initialUser,
 }: CheckoutContentProps) {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -52,16 +54,18 @@ export default function CheckoutContent({
     setError(null);
 
     const formData = new FormData(event.currentTarget);
-    const result = await placeOrder(formData);
 
-    if (result.error) {
-      setError(result.error);
-      setLoading(false);
-    } else {
-      setSuccess("Your order has been placed successfully!");
-      notifyCartUpdated();
-      // Keep loading true to prevent multiple clicks while success screen shows
-    }
+    // Redirect to invoice for review instead of placing order immediately
+    const params = new URLSearchParams();
+    formData.forEach((value, key) => {
+      if (typeof value === "string") params.append(key, value);
+    });
+
+    // Set status as review
+    params.append("status", "review");
+
+    // Redirect immediately
+    router.push(`/invoice?${params.toString()}`);
   };
 
   if (success) {
@@ -152,13 +156,41 @@ export default function CheckoutContent({
                         helperText="For order updates"
                       />
                     </Grid>
-                    <Grid size={{ xs: 12 }}>
+                    <Grid size={{ xs: 12, md: 6 }}>
                       <TextField
                         required
                         fullWidth
                         label="Phone Number"
                         name="phone"
                         variant="outlined"
+                      />
+                    </Grid>
+                    <Grid size={{ xs: 12, md: 6 }}>
+                      <TextField
+                        fullWidth
+                        label="Tax ID (If any)"
+                        name="taxId"
+                        variant="outlined"
+                        placeholder="GST/VAT/TIN"
+                      />
+                    </Grid>
+                    <Grid size={{ xs: 12, md: 6 }}>
+                      <TextField
+                        required
+                        fullWidth
+                        label="ZIP Code"
+                        name="zipCode"
+                        variant="outlined"
+                        placeholder="721242"
+                      />
+                    </Grid>
+                    <Grid size={{ xs: 12, md: 6 }}>
+                      <TextField
+                        fullWidth
+                        label="Website"
+                        name="website"
+                        variant="outlined"
+                        placeholder="www.ranaexports.com"
                       />
                     </Grid>
                     <Grid size={{ xs: 12 }}>
@@ -168,35 +200,57 @@ export default function CheckoutContent({
                         label="Complete Address"
                         name="address"
                         multiline
-                        rows={4}
+                        rows={3}
                         variant="outlined"
                       />
                     </Grid>
                   </Grid>
                 </Paper>
 
-                {/* Delivery Partner */}
+                {/* Shipping Mode & Ports */}
                 <Paper
                   elevation={0}
                   sx={{ p: 4, borderRadius: 5, border: "1px solid #EAEAEA" }}
                 >
                   <Typography variant="h5" fontWeight="800" sx={{ mb: 4 }}>
-                    Choose Delivery Partner
+                    Shiping Mode & Destination
                   </Typography>
-                  <FormControl fullWidth required>
-                    <InputLabel>Delivery Partner</InputLabel>
-                    <Select
-                      name="deliveryPartnerId"
-                      label="Delivery Partner"
-                      defaultValue=""
-                    >
-                      {partners.map((partner) => (
-                        <MenuItem key={partner.id} value={partner.id}>
-                          {partner.name}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
+                  <Grid container spacing={3}>
+                    <Grid size={{ xs: 12 }}>
+                      <FormControl fullWidth required>
+                        <InputLabel>Shiping Mode</InputLabel>
+                        <Select
+                          name="shippingMode"
+                          label="Shiping Mode"
+                          defaultValue={partners?.[0]?.name || "Door to Door"}
+                        >
+                          {partners.map((partner) => (
+                            <MenuItem key={partner.id} value={partner.name}>
+                              {partner.name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                    <Grid size={{ xs: 12, md: 6 }}>
+                      <TextField
+                        fullWidth
+                        label="Nearest Port"
+                        name="nearestPort"
+                        variant="outlined"
+                        placeholder="e.g. Kolkata Port"
+                      />
+                    </Grid>
+                    <Grid size={{ xs: 12, md: 6 }}>
+                      <TextField
+                        fullWidth
+                        label="Your CHA Details (Optional)"
+                        name="chaDetails"
+                        variant="outlined"
+                        placeholder="Custom House Agent"
+                      />
+                    </Grid>
+                  </Grid>
                 </Paper>
               </Stack>
             </Grid>
@@ -308,7 +362,7 @@ export default function CheckoutContent({
                     {loading ? (
                       <CircularProgress size={24} color="inherit" />
                     ) : (
-                      "Place Order"
+                      "Review & Preview Invoice"
                     )}
                   </Button>
 

@@ -300,9 +300,8 @@ export default function HomeCategorySection({
                 // Extract some data from variants if possible, or use general info
                 if (product.variants?.[0]?.data) {
                   const data = product.variants[0].data as any;
-                  if (data["Weight (gm)"])
-                    meta.push(`${data["Weight (gm)"]} gm`);
-                  if (data["Size (cm)"]) meta.push(`${data["Size (cm)"]} cm`);
+                  if (data["Weight (gm)"]) meta.push(`${data["Weight (gm)"]}`);
+                  if (data["Size (cm)"]) meta.push(`${data["Size (cm)"]}`);
                   if (data["Weight"]) meta.push(`${data["Weight"]}`);
                   if (data["Size"]) meta.push(`${data["Size"]}`);
                   if (data["Liter"]) meta.push(`${data["Liter"]} L`);

@@ -21,7 +21,7 @@ export default function AddPartnerPage() {
   return (
     <Box maxWidth="sm">
       <Typography variant="h4" fontWeight="bold" mb={4}>
-        Add Delivery Partner
+        Add Shipping Mode
       </Typography>
 
       <Paper elevation={0} sx={{ p: 4, border: "1px solid #eee" }}>
@@ -30,9 +30,9 @@ export default function AddPartnerPage() {
             <TextField
               required
               fullWidth
-              label="Partner Name"
+              label="Mode Name"
               name="name"
-              placeholder="e.g. DHL, FedEx"
+              placeholder="e.g. Door to Door, Airport, Sea"
             />
             <TextField
               fullWidth
@@ -55,7 +55,7 @@ export default function AddPartnerPage() {
                 <Button>Cancel</Button>
               </Link>
               <Button type="submit" variant="contained">
-                Save Partner
+                Save Mode
               </Button>
             </Box>
           </Stack>

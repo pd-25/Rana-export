@@ -19,11 +19,8 @@ export default async function CartPage() {
     where: { userId: session.userId },
     include: {
       product: {
-        select: {
-          id: true,
-          name: true,
-          slug: true,
-          mainImage: true,
+        include: {
+          variants: true,
         },
       },
     },

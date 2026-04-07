@@ -29,6 +29,7 @@ import {
   Dashboard as DashboardIcon,
   Straighten as StraightenIcon,
   Visibility as ViewIcon,
+  LocalShipping as ShippingIcon,
 } from "@mui/icons-material";
 import Link from "next/link";
 
@@ -361,6 +362,11 @@ export default async function AdminDashboard() {
                   title: "Variant Groups",
                   icon: <StraightenIcon />,
                   path: "/admin/variants",
+                },
+                {
+                  title: "Shipping Modes",
+                  icon: <ShippingIcon />,
+                  path: "/admin/partners",
                 },
               ].map((item) => (
                 <ListItem key={item.title} disablePadding sx={{ mb: 0.5 }}>

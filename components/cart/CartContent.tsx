@@ -28,11 +28,15 @@ import BackgroundPattern from "@/public/collection/background-pattern.png";
 interface CartItem {
   id: number;
   quantity: number;
+  variantId: number | null;
   product: {
     id: number;
+    sku: string | null;
+    modelNo: string | null;
     name: string;
     slug: string;
     mainImage: string | null;
+    variants: any[];
   };
 }
 
@@ -193,7 +197,13 @@ export default function CartContent({ items }: { items: CartItem[] }) {
                           {item.product.name}
                         </Typography>
                         <Typography variant="body2" color="textSecondary">
-                          Product SKU: {item.product.id}
+                          Product SKU: {
+                            (() => {
+                              const variant = item.product.variants?.find((v: any) => v.id === item.variantId) || item.product.variants?.[0];
+                              const data = variant?.data || {};
+                              return data.SKU || data.sku || item.product.sku || item.product.modelNo || "N/A";
+                            })()
+                          }
                         </Typography>
                       </Grid>
                       <Grid size={{ xs: 12, sm: 4 }}>

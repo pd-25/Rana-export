@@ -340,3 +340,108 @@ li {
     margin-top: 40px;
   }
 }
+@media print {
+  /* ── Preserve exact background colors ── */
+  html,
+  body {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    background: #fff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* ── Hide non-invoice UI elements ── */
+  .no-print,
+  .invoice-no-print,
+  header,
+  footer,
+  nav,
+  .header,
+  .headerTopBar,
+  .footerTopInfoWrapper,
+  .footerMapWrapper,
+  .footerCopyrightWrapper {
+    display: none !important;
+  }
+
+  /* ── Collapse outer wrappers ── */
+  .MuiContainer-root {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* ── THE MAIN GAP FIX: kill minHeight:100vh and pb on the page wrapper ── */
+  .invoice-page-wrapper {
+    min-height: 0 !important;
+    height: auto !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: transparent !important;
+  }
+
+  /* ── Invoice paper: full width, no shadow ── */
+  .invoice-print-area {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    /* Prevent the paper itself from breaking mid-content */
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* ── Keep each section together, no orphan breaks ── */
+  .invoice-print-area > *,
+  .invoice-print-area .MuiBox-root {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* ── Tighten typography for compact print ── */
+  .invoice-print-area .MuiTypography-root {
+    font-size: 0.78rem !important;
+    line-height: 1.3 !important;
+  }
+
+  /* ── Tighten table cells ── */
+  .invoice-print-area th,
+  .invoice-print-area td {
+    font-size: 0.75rem !important;
+    padding: 3px 6px !important;
+    line-height: 1.3 !important;
+  }
+
+  /* ── Tighten table filler rows ── */
+  .invoice-print-area tr {
+    height: 22px !important;
+  }
+
+  /* ── Tighten internal padding of sections ── */
+  .invoice-print-area .MuiBox-root[class*="css-"] {
+    padding-top: 6px !important;
+    padding-bottom: 6px !important;
+  }
+
+  /* ── Remove bottom padding from outer wrapper ── */
+  body > div,
+  body > div > div {
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+  }
+
+  /* ── Page layout: A4 landscape, tight margins ── */
+  @page {
+    size: A4 landscape;
+    margin: 6mm 8mm;
+  }
+}
+
+
+

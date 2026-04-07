@@ -65,11 +65,13 @@ function VariantCard({
   variant,
   productName,
   productSlug,
+  productSku,
   onNotify,
 }: {
   variant: ProductVariant;
   productName: string;
   productSlug: string;
+  productSku: string | null;
   onNotify: (msg: string, severity: "success" | "error") => void;
 }) {
   const [wishlisted, setWishlisted] = useState(false);
@@ -148,7 +150,7 @@ function VariantCard({
       </Box>
       <Box className="productCardContent" sx={{ backgroundColor: "#ffffff" }}>
         <Typography variant="body1" className="productCardSku">
-          SKU: {variant.data.SKU}
+          SKU: {variant.data.SKU || variant.data.sku || productSku || "N/A"}
         </Typography>
         <Typography variant="h3" className="productCardTitle">
           <Link
@@ -359,6 +361,7 @@ export default function CategoryListing({
                           variant={variant}
                           productName={product.name}
                           productSlug={product.slug}
+                          productSku={product.sku}
                           onNotify={handleNotify}
                         />
                       </Grid>
