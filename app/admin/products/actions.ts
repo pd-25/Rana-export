@@ -96,6 +96,8 @@ export async function createProduct(formData: FormData) {
   const shippingDetails = formData.get("shippingDetails") as string;
   const isActive = formData.get("isActive") === "on";
   const showOnHome = formData.get("showOnHome") === "on";
+  const isOurCollection = formData.get("isOurCollection") === "on";
+  const isCraftedSelection = formData.get("isCraftedSelection") === "on";
 
   const relatedCategoryIdStr = formData.get("relatedCategoryId") as string;
   const relatedCategoryId = relatedCategoryIdStr ? parseInt(relatedCategoryIdStr) : null;
@@ -141,6 +143,8 @@ export async function createProduct(formData: FormData) {
       shippingDetails,
       isActive,
       showOnHome,
+      isOurCollection,
+      isCraftedSelection,
       mainImage: mainImageUrl,
       relatedCategoryId: relatedCategoryId && !isNaN(relatedCategoryId) ? relatedCategoryId : null,
       youMightAlsoCategoryId: youMightAlsoCategoryId && !isNaN(youMightAlsoCategoryId) ? youMightAlsoCategoryId : null,
@@ -216,6 +220,8 @@ export async function updateProduct(id: number, formData: FormData) {
   const origin = formData.get("origin") as string;
   const shippingDetails = formData.get("shippingDetails") as string;
   const isActive = formData.get("isActive") === "on";
+  const isOurCollection = formData.get("isOurCollection") === "on";
+  const isCraftedSelection = formData.get("isCraftedSelection") === "on";
 
   const relatedCategoryIdStr = formData.get("relatedCategoryId") as string;
   const relatedCategoryId = relatedCategoryIdStr ? parseInt(relatedCategoryIdStr) : null;
@@ -246,6 +252,8 @@ export async function updateProduct(id: number, formData: FormData) {
     shippingDetails,
     isActive,
     showOnHome: formData.get("showOnHome") === "on",
+    isOurCollection,
+    isCraftedSelection,
     relatedCategoryId: relatedCategoryId && !isNaN(relatedCategoryId) ? relatedCategoryId : null,
     youMightAlsoCategoryId: youMightAlsoCategoryId && !isNaN(youMightAlsoCategoryId) ? youMightAlsoCategoryId : null,
   };
@@ -368,6 +376,8 @@ export async function duplicateProduct(id: number) {
       variantImage: original.variantImage,
       isActive: false, // Set to draft by default
       showOnHome: original.showOnHome,
+      isOurCollection: original.isOurCollection,
+      isCraftedSelection: original.isCraftedSelection,
       relatedCategoryId: original.relatedCategoryId,
       youMightAlsoCategoryId: original.youMightAlsoCategoryId,
       variants: {

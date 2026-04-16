@@ -31,9 +31,9 @@ import ProductFilters from "./ProductFilters";
 export default async function ProductsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ search?: string; category?: string }>;
+  searchParams: Promise<{ search?: string; category?: string; type?: string }>;
 }) {
-  const { search, category } = await searchParams;
+  const { search, category, type } = await searchParams;
 
   const categories = await (prisma as any).category.findMany({
     orderBy: { name: "asc" },
@@ -46,6 +46,8 @@ export default async function ProductsPage({
         category && category !== "all"
           ? { categoryId: parseInt(category) }
           : {},
+        type === "our-collection" ? { isOurCollection: true } : {},
+        type === "crafted-selection" ? { isCraftedSelection: true } : {},
       ],
     },
     include: {
@@ -215,6 +217,22 @@ export default async function ProductsPage({
                         label="Home Page"
                         size="small"
                         color="primary"
+                        sx={{ fontWeight: 700, fontSize: "0.7rem" }}
+                      />
+                    )}
+                    {prod.isOurCollection && (
+                      <Chip
+                        label="Our Collection"
+                        size="small"
+                        color="secondary"
+                        sx={{ fontWeight: 700, fontSize: "0.7rem" }}
+                      />
+                    )}
+                    {prod.isCraftedSelection && (
+                      <Chip
+                        label="Crafted Selection"
+                        size="small"
+                        color="warning"
                         sx={{ fontWeight: 700, fontSize: "0.7rem" }}
                       />
                     )}

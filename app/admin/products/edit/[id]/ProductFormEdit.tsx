@@ -801,7 +801,35 @@ export default function ProductFormEdit({
                 }
                 label={
                   <Typography sx={{ fontWeight: 700 }}>
-                    Show in Home Page
+                    Show on Home Page
+                  </Typography>
+                }
+              />
+              <FormControlLabel
+                control={
+                  <Switch
+                    name="isOurCollection"
+                    defaultChecked={product.isOurCollection}
+                    color="secondary"
+                  />
+                }
+                label={
+                  <Typography sx={{ fontWeight: 700 }}>
+                    Our Collection
+                  </Typography>
+                }
+              />
+              <FormControlLabel
+                control={
+                  <Switch
+                    name="isCraftedSelection"
+                    defaultChecked={product.isCraftedSelection}
+                    color="warning"
+                  />
+                }
+                label={
+                  <Typography sx={{ fontWeight: 700 }}>
+                    Crafted Selection
                   </Typography>
                 }
               />

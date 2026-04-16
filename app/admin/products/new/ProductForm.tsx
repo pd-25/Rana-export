@@ -785,6 +785,22 @@ export default function ProductForm({
                   </Typography>
                 }
               />
+              <FormControlLabel
+                control={<Switch name="isOurCollection" color="secondary" />}
+                label={
+                  <Typography sx={{ fontWeight: 700 }}>
+                    Our Collection
+                  </Typography>
+                }
+              />
+              <FormControlLabel
+                control={<Switch name="isCraftedSelection" color="warning" />}
+                label={
+                  <Typography sx={{ fontWeight: 700 }}>
+                    Crafted Selection
+                  </Typography>
+                }
+              />
               <Divider sx={{ my: 2 }} />
               <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 2 }}>
                 Main Display Image

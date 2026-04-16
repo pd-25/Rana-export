@@ -98,6 +98,9 @@ model Product {
   variants  ProductVariant[]
   documents ProductDocument[]
 
+  isOurCollection Boolean @default(false)
+  isCraftedSelection Boolean @default(false)
+  
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
   cart      CartItem[]

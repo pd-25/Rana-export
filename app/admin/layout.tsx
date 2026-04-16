@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   Box,
   Drawer,
@@ -32,6 +32,8 @@ import {
   Straighten as StraightenIcon,
   ShoppingBag as OrderIcon,
   LocalShipping as ShippingIcon,
+  Collections as CollectionsIcon,
+  AutoAwesome as CraftedIcon,
 } from "@mui/icons-material";
 import Link from "next/link";
 import { logoutAdmin } from "./logout/actions";
@@ -67,6 +69,8 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const currentType = searchParams.get("type");
   const router = useRouter();
   const isLoginPage = pathname === "/admin/login";
 
@@ -108,6 +112,8 @@ export default function AdminLayout({
     { text: "Dashboard", icon: <DashboardIcon />, path: "/admin" },
     { text: "Categories", icon: <CategoryIcon />, path: "/admin/categories" },
     { text: "Products", icon: <ProductIcon />, path: "/admin/products" },
+    { text: "Our Collection", icon: <CollectionsIcon />, path: "/admin/products?type=our-collection" },
+    { text: "Crafted Selections", icon: <CraftedIcon />, path: "/admin/products?type=crafted-selection" },
     {
       text: "Variant Groups",
       icon: <StraightenIcon />,
@@ -208,10 +214,21 @@ export default function AdminLayout({
                   <ListItemButton
                     component={Link}
                     href={item.path}
-                    selected={
-                      pathname === item.path ||
-                      (item.path !== "/admin" && pathname.startsWith(item.path))
-                    }
+                    selected={(() => {
+                      if (item.path.includes("?type=our-collection")) {
+                        return pathname === "/admin/products" && currentType === "our-collection";
+                      }
+                      if (item.path.includes("?type=crafted-selection")) {
+                        return pathname === "/admin/products" && currentType === "crafted-selection";
+                      }
+                      if (item.path === "/admin/products") {
+                        return pathname === "/admin/products" && !currentType;
+                      }
+                      return (
+                        pathname === item.path ||
+                        (item.path !== "/admin" && pathname.startsWith(item.path))
+                      );
+                    })()}
                     sx={{
                       mx: 1,
                       borderRadius: 1,

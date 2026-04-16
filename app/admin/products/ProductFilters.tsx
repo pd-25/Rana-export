@@ -21,11 +21,13 @@ export default function ProductFilters({ categories }: { categories: any[] }) {
   
   const currentSearch = searchParams.get("search") || "";
   const currentCategory = searchParams.get("category") || "all";
+  const currentType = searchParams.get("type") || "all";
 
-  const updateFilters = (search: string, category: string) => {
+  const updateFilters = (search: string, category: string, type: string) => {
     const params = new URLSearchParams();
     if (search) params.set("search", search);
     if (category !== "all") params.set("category", category);
+    if (type !== "all") params.set("type", type);
     router.push(`/admin/products?${params.toString()}`);
   };
 
@@ -59,7 +61,7 @@ export default function ProductFilters({ categories }: { categories: any[] }) {
         placeholder="Search product name..."
         size="small"
         value={currentSearch}
-        onChange={(e) => updateFilters(e.target.value, currentCategory)}
+        onChange={(e) => updateFilters(e.target.value, currentCategory, currentType)}
         sx={{ flexGrow: 1, "& .MuiOutlinedInput-root": { borderRadius: 2, bgcolor: "background.paper" } }}
         slotProps={{
           input: {
@@ -80,7 +82,7 @@ export default function ProductFilters({ categories }: { categories: any[] }) {
           labelId="category-filter-label"
           label="Category"
           value={currentCategory}
-          onChange={(e) => updateFilters(currentSearch, e.target.value)}
+          onChange={(e) => updateFilters(currentSearch, e.target.value as string, currentType)}
           sx={{ borderRadius: 2, bgcolor: "background.paper" }}
           renderValue={(selected) => {
             if (selected === "all") return "All Categories";
@@ -109,6 +111,21 @@ export default function ProductFilters({ categories }: { categories: any[] }) {
               </Stack>
             </MenuItem>
           ))}
+        </Select>
+      </FormControl>
+
+      <FormControl size="small" sx={{ minWidth: 180 }}>
+        <InputLabel id="type-filter-label">Special Group</InputLabel>
+        <Select
+          labelId="type-filter-label"
+          label="Special Group"
+          value={currentType}
+          onChange={(e) => updateFilters(currentSearch, currentCategory, e.target.value as string)}
+          sx={{ borderRadius: 2, bgcolor: "background.paper" }}
+        >
+          <MenuItem value="all">All Products</MenuItem>
+          <MenuItem value="our-collection">Our Collection</MenuItem>
+          <MenuItem value="crafted-selection">Crafted Selection</MenuItem>
         </Select>
       </FormControl>
     </Stack>
