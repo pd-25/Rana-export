@@ -151,6 +151,7 @@ export default function AdminLayout({
       icon: <ShippingIcon />,
       path: "/admin/partners",
     },
+    { text: "Blogs", icon: <DashboardIcon />, path: "/admin/blogs" },
   ];
 
   return (

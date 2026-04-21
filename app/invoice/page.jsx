@@ -592,7 +592,7 @@ function InvoiceContent() {
                     {/* Middle: Enquiry Details Block */}
                     <Box
                       sx={{
-                        flex: "0 0 380px",
+                        flex: "0 0 28%",
                         p: 2.5,
                         display: "flex",
                         flexDirection: "column",

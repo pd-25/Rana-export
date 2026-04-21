@@ -294,6 +294,19 @@ export default function Footer() {
                 >
                   Testimonials
                 </Link>
+                <Link
+                  href="/blog"
+                  style={{
+                    color: "#ffffff",
+                    textDecoration: "none",
+                    fontSize: "16px",
+                    transition: "opacity 0.3s",
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.8")}
+                  onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+                >
+                  Blog
+                </Link>
               </Stack>
             </Box>
 

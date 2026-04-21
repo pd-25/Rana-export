@@ -837,3 +837,12 @@
         height: 300px;
     }
 }
+
+@media (max-width:768px) {
+
+    .gradientButtonAlt,
+    .gradientButton {
+        font-size: 12px !important ;
+    }
+
+}

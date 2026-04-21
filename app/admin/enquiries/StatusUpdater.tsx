@@ -9,7 +9,7 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
-import { updateEnquiryStatus } from "@/app/actions/enquiryActions";
+import { updateEnquiryStatus } from "../../actions/enquiryActions";
 
 export default function StatusUpdater({
   id,

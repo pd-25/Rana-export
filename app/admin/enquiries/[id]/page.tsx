@@ -19,7 +19,7 @@ import {
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import StatusUpdater from "./StatusUpdater";
+import StatusUpdater from "../StatusUpdater";
 
 export default async function EnquiryDetailsPage({
   params,
