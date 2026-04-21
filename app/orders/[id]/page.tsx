@@ -81,40 +81,26 @@ export default async function OrderDetailPage({
             </Typography>
           </Box>
           <Stack direction="row" spacing={2}>
-            <Link href={`/invoice?orderId=${order.id}`} passHref style={{ textDecoration: "none" }}>
+            <Link
+              href={`/invoice?orderId=${order.id}`}
+              passHref
+              style={{ textDecoration: "none" }}
+            >
               <Button
                 variant="outlined"
                 startIcon={<ReceiptIcon />}
-                sx={{ 
-                  color: "#2D2D2D", 
+                sx={{
+                  color: "#2D2D2D",
                   borderColor: "#2D2D2D",
                   textTransform: "none",
                   fontWeight: 700,
                   px: 3,
                   py: 1,
                   borderRadius: 2,
-                  '&:hover': { bgcolor: "#F5F5F5", borderColor: "#000" }
+                  "&:hover": { bgcolor: "#F5F5F5", borderColor: "#000" },
                 }}
               >
                 View Invoice
-              </Button>
-            </Link>
-            <Link href={`/invoice?orderId=${order.id}&download=true`} passHref style={{ textDecoration: "none" }}>
-              <Button
-                variant="contained"
-                startIcon={<DownloadIcon />}
-                sx={{ 
-                  bgcolor: "#2D2D2D", 
-                  color: "#fff", 
-                  textTransform: "none",
-                  fontWeight: 700,
-                  px: 3,
-                  py: 1,
-                  borderRadius: 2,
-                  '&:hover': { bgcolor: "#000" }
-                }}
-              >
-                Download Invoice
               </Button>
             </Link>
           </Stack>

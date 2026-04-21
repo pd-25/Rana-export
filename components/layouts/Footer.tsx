@@ -269,20 +269,7 @@ export default function Footer() {
               </Typography>
               <Stack direction="column" spacing={1.5}>
                 <Link
-                  href="/newsletter"
-                  style={{
-                    color: "#ffffff",
-                    textDecoration: "none",
-                    fontSize: "16px",
-                    transition: "opacity 0.3s",
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.8")}
-                  onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
-                >
-                  Newsletter
-                </Link>
-                <Link
-                  href="/become-customer"
+                  href="/contact"
                   style={{
                     color: "#ffffff",
                     textDecoration: "none",

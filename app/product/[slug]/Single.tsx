@@ -615,39 +615,87 @@ export default function Single({ product, allCategories }: SingleProps) {
                     </Box>
                   </Stack>
                   {product.variants.length > 0 && (
-                    <Stack
-                      direction="row"
-                      className="productSingleWeightInfo"
-                      spacing={1}
-                      alignItems="center"
-                    >
-                      <Typography
-                        variant="body1"
-                        className="productSingleWeightInfoItemTitle"
-                      >
-                        Weight Grams
-                      </Typography>
+                    <Stack spacing={3} sx={{ mt: 3, mb: 4 }}>
+                      {(() => {
+                        // 1. Identify all unique keys across all variants
+                        const allKeys = Array.from(
+                          new Set(
+                            product.variants.flatMap((v) => Object.keys(v.data))
+                          )
+                        ).filter(
+                          (key) =>
+                            ![
+                              "EAN",
+                              "SKU",
+                              "Model No",
+                              "variantImage",
+                            ].includes(key)
+                        );
 
-                      <Box className="productSingleWeightInfoItem">
-                        <FormControl size="small" sx={{ minWidth: 120 }}>
-                          <Select
-                            value={selectedVariant}
-                            onChange={(e) =>
-                              setSelectedVariant(e.target.value as number)
-                            }
-                            displayEmpty
-                            inputProps={{ "aria-label": "Weight Grams" }}
+                        // 2. Helper to get current value for a key from selectedVariant
+                        const getSelectedValue = (key: string) => {
+                          return currentVariantData[key] || "";
+                        };
+
+                        // 3. Helper to handle change
+                        const handleSubSelectionChange = (key: string, value: string) => {
+                          // Find a variant that matches this new value AND as many other current values as possible
+                          const matchingVariant = product.variants.find((v: any) => {
+                            // Perfect match check
+                            return v.data[key] === value && 
+                              Object.entries(currentVariantData)
+                                .filter(([k]) => k !== key && allKeys.includes(k))
+                                .every(([k, vVal]) => v.data[k] === vVal);
+                          }) || product.variants.find((v: any) => v.data[key] === value); // Fallback to just the new key match
+
+                          if (matchingVariant) {
+                            setSelectedVariant(matchingVariant.id);
+                          }
+                        };
+
+                        return allKeys.map((key) => (
+                          <Stack
+                            key={key}
+                            direction="row"
+                            className="productSingleWeightInfo"
+                            spacing={2}
+                            alignItems="center"
                           >
-                            {product.variants.map((v) => (
-                              <MenuItem key={v.id} value={v.id}>
-                                {v.data["Weight (gm)"] ||
-                                  v.data["Weight"] ||
-                                  JSON.stringify(v.data)}
-                              </MenuItem>
-                            ))}
-                          </Select>
-                        </FormControl>
-                      </Box>
+                            <Typography
+                              variant="body1"
+                              className="productSingleWeightInfoItemTitle"
+                              sx={{ flexShrink: 0, minWidth: 100, fontWeight: 600 }}
+                            >
+                              {key}
+                            </Typography>
+                            <Box className="productSingleWeightInfoItem" sx={{ flexGrow: 1 }}>
+                              <FormControl size="small" fullWidth>
+                                <Select
+                                  value={getSelectedValue(key)}
+                                  onChange={(e) => handleSubSelectionChange(key, e.target.value)}
+                                  sx={{
+                                    borderRadius: "8px",
+                                    bgcolor: "#fff",
+                                    "& .MuiSelect-select": { py: 1.5 },
+                                  }}
+                                >
+                                  {Array.from(
+                                    new Set(
+                                      product.variants
+                                        .map((v) => v.data[key])
+                                        .filter(Boolean)
+                                    )
+                                  ).map((val: any) => (
+                                    <MenuItem key={val} value={val}>
+                                      {val}
+                                    </MenuItem>
+                                  ))}
+                                </Select>
+                              </FormControl>
+                            </Box>
+                          </Stack>
+                        ));
+                      })()}
                     </Stack>
                   )}
                   <Box

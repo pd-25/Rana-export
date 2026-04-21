@@ -70,6 +70,24 @@ export default async function OrderDetailsPage({
         <Chip label={order.status} color="primary" sx={{ fontWeight: 700 }} />
         <Box sx={{ flexGrow: 1 }} />
         <StatusUpdate orderId={order.id} currentStatus={order.status} />
+        <Link
+          href={`/invoice?orderId=${order.id}`}
+          target="_blank"
+          style={{ textDecoration: "none" }}
+        >
+          <Button
+            variant="contained"
+            color="secondary"
+            sx={{
+              borderRadius: 2,
+              fontWeight: 700,
+              bgcolor: "#8B1E2B",
+              "&:hover": { bgcolor: "#6A1621" },
+            }}
+          >
+            View Invoice
+          </Button>
+        </Link>
       </Box>
 
       <Box

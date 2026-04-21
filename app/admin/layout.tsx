@@ -20,6 +20,7 @@ import {
   CssBaseline,
   ThemeProvider,
   createTheme,
+  Badge,
 } from "@mui/material";
 import {
   Dashboard as DashboardIcon,
@@ -34,9 +35,11 @@ import {
   LocalShipping as ShippingIcon,
   Collections as CollectionsIcon,
   AutoAwesome as CraftedIcon,
+  QuestionAnswer as EnquiriesIcon,
 } from "@mui/icons-material";
 import Link from "next/link";
 import { logoutAdmin } from "./logout/actions";
+import { getNewEnquiryCount } from "@/app/actions/enquiryActions";
 
 const drawerWidth = 260;
 
@@ -80,6 +83,19 @@ export default function AdminLayout({
     setAnchorEl(event.currentTarget);
   };
 
+  const [newEnquiryCount, setNewEnquiryCount] = useState(0);
+
+  React.useEffect(() => {
+    const fetchCount = async () => {
+      const count = await getNewEnquiryCount();
+      setNewEnquiryCount(count);
+    };
+    fetchCount();
+    // Refresh every 30 seconds
+    const interval = setInterval(fetchCount, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
   const handleClose = () => {
     setAnchorEl(null);
   };
@@ -110,6 +126,15 @@ export default function AdminLayout({
 
   const menuItems = [
     { text: "Dashboard", icon: <DashboardIcon />, path: "/admin" },
+    { 
+      text: "Enquiries", 
+      icon: (
+        <Badge badgeContent={newEnquiryCount} color="error" overlap="circular">
+          <EnquiriesIcon />
+        </Badge>
+      ), 
+      path: "/admin/enquiries" 
+    },
     { text: "Categories", icon: <CategoryIcon />, path: "/admin/categories" },
     { text: "Products", icon: <ProductIcon />, path: "/admin/products" },
     { text: "Our Collection", icon: <CollectionsIcon />, path: "/admin/products?type=our-collection" },
