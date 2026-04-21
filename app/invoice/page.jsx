@@ -238,6 +238,7 @@ function InvoiceContent() {
       sx={{
         bgcolor: "#FBF7F4",
         pb: isSuccess && !showDetails ? 0 : 10,
+        pt: isSuccess ? 0 : 10,
         minHeight: isSuccess && !showDetails ? "auto" : "100vh",
       }}
     >
