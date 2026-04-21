@@ -16,6 +16,8 @@ import {
   TableRow,
   Chip,
 } from "@mui/material";
+import ReceiptIcon from "@mui/icons-material/Receipt";
+import DownloadIcon from "@mui/icons-material/Download";
 import { getSession } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { redirect, notFound } from "next/navigation";
@@ -64,18 +66,58 @@ export default async function OrderDetailPage({
   return (
     <Box sx={{ bgcolor: "#F8F9FA", minHeight: "100vh", py: 10 }}>
       <Container maxWidth="lg">
-        <Box sx={{ mb: 6, display: "flex", alignItems: "center", gap: 2 }}>
-          <Link href="/orders" passHref style={{ textDecoration: "none" }}>
-            <Button
-              startIcon={<Icon name="arrowLeft" width={16} height={16} />}
-              sx={{ color: "#2D2D2D", textTransform: "none", fontWeight: 700 }}
-            >
-              Back to My Orders
-            </Button>
-          </Link>
-          <Typography variant="h3" fontWeight="900" sx={{ color: "#2D2D2D" }}>
-            Order Details
-          </Typography>
+        <Box sx={{ mb: 6, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 2 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Link href="/orders" passHref style={{ textDecoration: "none" }}>
+              <Button
+                startIcon={<Icon name="arrowLeft" width={16} height={16} />}
+                sx={{ color: "#2D2D2D", textTransform: "none", fontWeight: 700 }}
+              >
+                Back to My Orders
+              </Button>
+            </Link>
+            <Typography variant="h3" fontWeight="900" sx={{ color: "#2D2D2D" }}>
+              Order Details
+            </Typography>
+          </Box>
+          <Stack direction="row" spacing={2}>
+            <Link href={`/invoice?orderId=${order.id}`} passHref style={{ textDecoration: "none" }}>
+              <Button
+                variant="outlined"
+                startIcon={<ReceiptIcon />}
+                sx={{ 
+                  color: "#2D2D2D", 
+                  borderColor: "#2D2D2D",
+                  textTransform: "none",
+                  fontWeight: 700,
+                  px: 3,
+                  py: 1,
+                  borderRadius: 2,
+                  '&:hover': { bgcolor: "#F5F5F5", borderColor: "#000" }
+                }}
+              >
+                View Invoice
+              </Button>
+            </Link>
+            <Link href={`/invoice?orderId=${order.id}&download=true`} passHref style={{ textDecoration: "none" }}>
+              <Button
+                variant="contained"
+                startIcon={<DownloadIcon />}
+                sx={{ 
+                  bgcolor: "#2D2D2D", 
+                  color: "#fff", 
+                  textTransform: "none",
+                  fontWeight: 700,
+                  px: 3,
+                  py: 1,
+                  borderRadius: 2,
+                  '&:hover': { bgcolor: "#000" }
+                }}
+              >
+                Download Invoice
+              </Button>
+            </Link>
+          </Stack>
         </Box>
 
         <Grid container spacing={4}>

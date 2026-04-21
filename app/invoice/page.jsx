@@ -30,7 +30,6 @@ import CheckIcon from "@mui/icons-material/CheckCircle";
 import { getCartItems } from "@/app/actions/cartActions";
 
 const THEME_MAROON = "#8B1E2B";
-const BORDER_COLOR = "#D1D5DB";
 
 function InvoiceContent() {
   const searchParams = useSearchParams();
@@ -40,6 +39,7 @@ function InvoiceContent() {
   const [items, setItems] = useState([]);
   const [loadingItems, setLoadingItems] = useState(true);
   const [orderDetails, setOrderDetails] = useState(null);
+  const [currentPage, setCurrentPage] = useState(0);
 
   // Status check
   const isReview = searchParams.get("status") === "review";
@@ -58,7 +58,7 @@ function InvoiceContent() {
       try {
         if (isReview) {
           const cartItems = await getCartItems();
-          setItems(cartItems);
+          setItems(cartItems || []);
         } else if (orderId && !isNaN(parseInt(orderId))) {
           const [itemsData, detailsData] = await Promise.all([
             getOrderItems(parseInt(orderId)),
@@ -75,6 +75,21 @@ function InvoiceContent() {
     }
     fetchItems();
   }, [isReview, orderId]);
+
+  // Handle auto-download trigger
+  useEffect(() => {
+    if (
+      searchParams.get("download") === "true" &&
+      showDetails &&
+      !loadingItems &&
+      items.length > 0
+    ) {
+      const timer = setTimeout(() => {
+        triggerPrint();
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [searchParams, showDetails, loadingItems, items]);
 
   // Extract data with fallback to orderDetails or query params
   const name = isReview
@@ -126,12 +141,10 @@ function InvoiceContent() {
     }
   };
 
-  // ── Print invoice in a clean popup window ──
   const triggerPrint = () => {
-    const invoiceEl = document.querySelector(".invoice-print-area");
+    const invoiceEl = document.querySelector(".invoice-print-container");
     if (!invoiceEl) return;
 
-    // Collect all <style> and <link rel="stylesheet"> from the parent page
     const styleNodes = Array.from(
       document.head.querySelectorAll('style, link[rel="stylesheet"]'),
     )
@@ -158,9 +171,8 @@ function InvoiceContent() {
               margin: 0 !important;
               padding: 0 !important;
               background: #fff !important;
-              font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+              font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             }
-            /* Remove MUI Paper overflow restriction & stretch to 100% A4 Landscape */
             .invoice-print-area {
               width: 100% !important;
               overflow: visible !important;
@@ -168,30 +180,21 @@ function InvoiceContent() {
               border-radius: 0 !important;
               display: flex !important;
               flex-direction: column !important;
-              min-height: 100vh !important;
-              height: 100% !important;
+              min-height: 296mm !important;
+              height: auto !important;
             }
-            
-            /* Force the final pink box to lock to the absolute bottom if content is short */
+            .invoice-print-area:not(:last-child) {
+              page-break-after: always !important;
+            }
             .invoice-print-area > div:last-child {
               margin-top: auto !important;
             }
-            
-            /* Squeeze internal paddings and heights explicitly */
-            .invoice-print-area .MuiBox-root {
-              padding-top: 8px !important;
-              padding-bottom: 8px !important;
-            }
-            
-            /* Squeeze the grid gaps */
-            .invoice-print-area [class*="MuiBox"] {
-              gap: 4px !important;
-              min-height: 24px !important;
-            }
-
             @page {
-              size: A4 landscape;
-              margin: 4mm 6mm;
+              size: A4 portrait;
+              margin: 0;
+            }
+            @media print {
+              .no-print { display: none !important; }
             }
           </style>
         </head>
@@ -202,7 +205,6 @@ function InvoiceContent() {
     `);
     popup.document.close();
 
-    // Wait for images/fonts to load then print
     popup.onload = () => {
       setTimeout(() => {
         popup.focus();
@@ -210,15 +212,6 @@ function InvoiceContent() {
         popup.close();
       }, 400);
     };
-
-    // Fallback if onload already fired
-    setTimeout(() => {
-      if (!popup.closed) {
-        popup.focus();
-        popup.print();
-        popup.close();
-      }
-    }, 1200);
   };
 
   const today = new Date().toLocaleDateString("en-GB", {
@@ -226,6 +219,18 @@ function InvoiceContent() {
     month: "2-digit",
     year: "numeric",
   });
+
+  const firstPageSize = 6;
+  const otherPagesSize = 25;
+  const pages = [];
+  if (items && items.length > 0) {
+    pages.push(items.slice(0, firstPageSize));
+    for (let i = firstPageSize; i < items.length; i += otherPagesSize) {
+      pages.push(items.slice(i, i + otherPagesSize));
+    }
+  } else if (!loadingItems) {
+    pages.push([]);
+  }
 
   return (
     <Box
@@ -247,8 +252,7 @@ function InvoiceContent() {
             color: "#fff",
             p: 1.5,
             borderBottom: "4px solid #C0717A",
-            boxShadow: "0 4px 10px rgba(0,0,0,0.3)",
-            marginBottom: "20px",
+            mb: 4,
           }}
         >
           <Container maxWidth="lg">
@@ -257,34 +261,19 @@ function InvoiceContent() {
               justifyContent="space-between"
               alignItems="center"
             >
-              <Box>
-                <Typography
-                  variant="h6"
-                  fontWeight="900"
-                  sx={{ color: "#E19B8E" }}
-                >
-                  INVOICE PREVIEW MODE
-                </Typography>
-                <Typography variant="caption" sx={{ color: "#aaa" }}>
-                  Please review all details below. Click "Confirm" to finalize
-                  your order.
-                </Typography>
-              </Box>
-
+              <Typography
+                variant="h6"
+                fontWeight="900"
+                sx={{ color: "#E19B8E" }}
+              >
+                INVOICE PREVIEW MODE
+              </Typography>
               <Stack direction="row" spacing={2}>
                 <Button
                   onClick={() => router.back()}
                   disabled={confirming}
                   variant="outlined"
-                  startIcon={<BackIcon />}
-                  sx={{
-                    borderColor: "#555",
-                    color: "#fff",
-                    "&:hover": {
-                      borderColor: "#fff",
-                      bgcolor: "rgba(255,255,255,0.1)",
-                    },
-                  }}
+                  sx={{ color: "#fff", borderColor: "#555" }}
                 >
                   Edit Details
                 </Button>
@@ -292,25 +281,12 @@ function InvoiceContent() {
                   onClick={handleConfirm}
                   disabled={confirming}
                   variant="contained"
-                  startIcon={
-                    confirming ? <CircularProgress size={18} /> : <CheckIcon />
-                  }
-                  sx={{
-                    bgcolor: "#C0717A",
-                    px: 4,
-                    fontWeight: "bold",
-                    "&:hover": { bgcolor: "#A85D66" },
-                  }}
+                  sx={{ bgcolor: "#C0717A" }}
                 >
                   {confirming ? "Confirming..." : "Confirm & Place Order"}
                 </Button>
               </Stack>
             </Stack>
-            {error && (
-              <Alert severity="error" sx={{ mt: 1, py: 0 }}>
-                {error}
-              </Alert>
-            )}
           </Container>
         </Box>
       )}
@@ -321,901 +297,704 @@ function InvoiceContent() {
           sx={{
             py: 6,
             bgcolor: "#fff",
-            borderBottom: "1px solid #EAEAEA",
             textAlign: "center",
+            borderBottom: "1px solid #EAEAEA",
+            mb: 4,
           }}
         >
           <Container maxWidth="md">
-            <Box
-              sx={{
-                mb: 3,
-                display: "inline-flex",
-                bgcolor: "#E7F5E9",
-                p: 3,
-                borderRadius: "50%",
-                animation: "popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
-                "@keyframes popIn": {
-                  "0%": { transform: "scale(0)", opacity: 0 },
-                  "100%": { transform: "scale(1)", opacity: 1 },
-                },
-              }}
-            >
-              <CheckIcon sx={{ color: "#2E7D32", fontSize: 60 }} />
-            </Box>
-
+            <CheckIcon sx={{ color: "#2E7D32", fontSize: 60, mb: 2 }} />
             <Typography
               variant="h3"
               fontWeight="900"
-              sx={{
-                color: "#1B5E20",
-                mb: 1,
-                letterSpacing: "-1px",
-                textTransform: "uppercase",
-              }}
+              sx={{ color: "#1B5E20", mb: 1 }}
             >
               Thank You!
             </Typography>
-            <Typography
-              variant="h5"
-              fontWeight="700"
-              sx={{ color: "#444", mb: 1 }}
-            >
-              Your Enquiry Has Been Placed!
-            </Typography>
-            <Typography
-              variant="h6"
-              fontWeight="700"
-              sx={{ color: "#444", mb: 3 }}
-            >
+            <Typography variant="h6" sx={{ color: "#444", mb: 4 }}>
               Order ID: RETH# {orderId}
             </Typography>
-
-            <Typography
-              variant="body1"
-              sx={{ color: "#666", maxWidth: "600px", mx: "auto", mb: 5 }}
-            >
-              We've received your request and will get back to you shortly. In
-              the meantime, you can download your invoice or head back to the
-              store.
-            </Typography>
-
-            <Stack
-              direction="row"
-              spacing={2}
-              justifyContent="center"
-              sx={{ mb: 2 }}
-            >
-              {!showDetails && (
-                <Button
-                  variant="contained"
-                  onClick={() => setShowDetails(true)}
-                  startIcon={
-                    <Box component="span" sx={{ fontSize: 20 }}>
-                      📄
-                    </Box>
-                  }
-                  sx={{
-                    bgcolor: "#2D2D2D",
-                    px: 5,
-                    py: 1.5,
-                    borderRadius: 10,
-                    fontWeight: "bold",
-                    "&:hover": { bgcolor: "#000" },
-                  }}
-                >
-                  View Invoice
-                </Button>
-              )}
+            <Stack direction="row" spacing={2} justifyContent="center">
               <Button
                 variant="contained"
-                onClick={() => {
-                  if (!showDetails) {
-                    setShowDetails(true);
-                    setTimeout(() => triggerPrint(), 400);
-                  } else {
-                    triggerPrint();
-                  }
-                }}
-                startIcon={
-                  <Box component="span" sx={{ fontSize: 20 }}>
-                    🖨️
-                  </Box>
-                }
-                sx={{
-                  bgcolor: "#C0717A",
-                  px: 5,
-                  py: 1.5,
-                  borderRadius: 10,
-                  fontWeight: "bold",
-                  "&:hover": { bgcolor: "#A85D66" },
-                }}
+                onClick={() => setShowDetails(true)}
+                sx={{ bgcolor: "#2D2D2D" }}
+              >
+                View Invoice
+              </Button>
+              <Button
+                variant="contained"
+                onClick={triggerPrint}
+                sx={{ bgcolor: "#C0717A" }}
               >
                 Download Invoice
-              </Button>
-              <Button
-                variant="outlined"
-                onClick={() => router.push("/")}
-                sx={{
-                  color: "#2D2D2D",
-                  borderColor: "#2D2D2D",
-                  px: 5,
-                  py: 1.5,
-                  borderRadius: 10,
-                  fontWeight: "bold",
-                  "&:hover": { borderColor: "#000", bgcolor: "#F5F5F5" },
-                }}
-              >
-                Back to Products
-              </Button>
-              <Button
-                variant="outlined"
-                onClick={() => router.push("/profile")}
-                sx={{
-                  color: "#2D2D2D",
-                  borderColor: "#2D2D2D",
-                  px: 5,
-                  py: 1.5,
-                  borderRadius: 10,
-                  fontWeight: "bold",
-                  "&:hover": { borderColor: "#000", bgcolor: "#F5F5F5" },
-                }}
-              >
-                View My Orders
               </Button>
             </Stack>
           </Container>
         </Box>
       )}
 
-      <Container maxWidth="lg" sx={{ p: 0, mt: isReview ? 4 : 0 }}>
-        {showDetails && (
-          <Paper
-            elevation={0}
-            className="invoice-print-area"
-            sx={{
-              borderRadius: 0,
-              border: "1px solid #ddd",
-              overflow: "hidden",
-            }}
-          >
-            {/* Top Header */}
-            <Box
+      <Container
+        maxWidth="lg"
+        sx={{ p: 0 }}
+        className="invoice-print-container"
+      >
+        {showDetails &&
+          pages.map((pageItems, pageIndex) => (
+            <Paper
+              key={pageIndex}
+              elevation={0}
+              className={`invoice-print-area ${pageIndex === currentPage ? "active" : ""}`}
               sx={{
-                p: 2,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                borderBottom: "1px solid #eee",
-                background: "#F6EDD9",
+                borderRadius: 0,
+                border: "1px solid #ddd",
+                overflow: "hidden",
+                mb: 4,
+                display: {
+                  xs: pageIndex === currentPage ? "flex" : "none",
+                  print: "flex !important",
+                },
+                flexDirection: "column",
               }}
             >
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-                <Image
-                  src={logo}
-                  alt="Rana Export Logo"
-                  width={180}
-                  height={70}
-                />
-              </Box>
-
-              <Typography
-                variant="h4"
-                sx={{
-                  fontWeight: 800,
-                  color: THEME_MAROON,
-                  textAlign: "center",
-                  textTransform: "uppercase",
-                  letterSpacing: 0.5,
-                  mx: 2,
-                  flex: 1,
-                  fontSize: "24px",
-                  my: 0,
-                }}
-              >
-                PURCHASE ENQUIRIES FROM OVERSEAS BUYERS
-              </Typography>
-
-              <Box sx={{ textAlign: "center", width: 120 }}>
-                <Image
-                  src={logo2}
-                  alt="Rana Export Logo"
-                  width={68}
-                  height={67}
-                />
-              </Box>
-            </Box>
-
-            {/* Company & Info Section */}
-            <Box
-              sx={{
-                display: "flex",
-                borderBottom: `1px solid #eee`,
-                alignItems: "stretch",
-                position: "relative",
-              }}
-            >
-              {/* Left: Company Details */}
+              {/* 1. Top Header (EVERY PAGE) */}
               <Box
                 sx={{
-                  flex: "1 1 38%",
-                  p: 2.5,
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "center",
-                }}
-              >
-                <Typography
-                  sx={{
-                    fontWeight: 900,
-                    color: "#000",
-                    mb: 1,
-                    fontSize: "16px",
-                    letterSpacing: "0.2px",
-                  }}
-                >
-                  RANA EXPORT TRADING HOUSE
-                </Typography>
-                <Box
-                  sx={{
-                    fontSize: "0.85rem",
-                    color: "#444",
-                    lineHeight: 1.4,
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 0.2,
-                  }}
-                >
-                  <Typography variant="inherit">
-                    Ramjibanpur, Paschim Mednipur,
-                  </Typography>
-                  <Typography variant="inherit">
-                    Zip Code - 721242, WB, INDIA
-                  </Typography>
-                  <Typography variant="inherit">
-                    T: 0091 9002929605 (WhatsApp)
-                  </Typography>
-                  <Typography variant="inherit">
-                    E: tibetansingingbowl1@gmail.com
-                  </Typography>
-                  <Typography variant="inherit">
-                    W: www.ranaexports.com
-                  </Typography>
-                  <Typography
-                    variant="inherit"
-                    sx={{ fontWeight: "bold", color: "#000", mt: 0.5 }}
-                  >
-                    Contact Person : Chandi Rana
-                  </Typography>
-                </Box>
-              </Box>
-
-              {/* Dash Line 1 */}
-              <Box
-                sx={{
+                  p: 2,
                   display: "flex",
                   alignItems: "center",
-                  justifyContent: "center",
-                  width: 40,
+                  justifyContent: "space-between",
+                  borderBottom: "1px solid #eee",
+                  background: "#F6EDD9",
                 }}
               >
-                <Box
-                  sx={{
-                    height: "80%",
-                    borderRight: "1.5px dashed #BF5B5B",
-                  }}
-                />
-              </Box>
-
-              {/* Middle: Enquiry Details Block */}
-              <Box
-                sx={{
-                  flex: "0 0 380px",
-                  p: 2.5,
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "center",
-                }}
-              >
-                <Box
-                  sx={{
-                    width: "100%",
-                    // border: "1px solid #FAD7D2",
-                    borderRadius: 0,
-                    overflow: "hidden",
-                  }}
-                >
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      bgcolor: "rgba(253, 233, 230, 0.9)",
-                      p: 1.2,
-                      px: 1.5,
-                    }}
-                  >
-                    <Typography sx={{ fontWeight: 700, fontSize: "0.83rem" }}>
-                      Enquary No.
-                    </Typography>
-                    <Typography sx={{ fontSize: "0.83rem", color: "#333" }}>
-                      RETH# {orderId || "PREVIEW-001"}
-                    </Typography>
-                  </Box>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      bgcolor: "rgba(254, 245, 231, 0.9)",
-                      p: 1.2,
-                      px: 1.5,
-                      borderTop: "1px solid #FAD7D2",
-                    }}
-                  >
-                    <Typography sx={{ fontWeight: 700, fontSize: "0.83rem" }}>
-                      Date
-                    </Typography>
-                    <Typography sx={{ fontSize: "0.83rem", color: "#333" }}>
-                      {today}
-                    </Typography>
-                  </Box>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                  <Image
+                    src={logo}
+                    alt="Rana Export Logo"
+                    width={180}
+                    height={70}
+                  />
                 </Box>
-              </Box>
-
-              {/* Dash Line 2 */}
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  width: 40,
-                }}
-              >
-                <Box
-                  sx={{
-                    height: "80%",
-                    borderRight: "1.5px dashed #BF5B5B",
-                  }}
-                />
-              </Box>
-
-              {/* Right: Terms Grid */}
-              <Box
-                sx={{
-                  flex: "1 1 38%",
-                  p: 2.5,
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "center",
-                }}
-              >
-                <Box
-                  sx={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr 1fr",
-                    gap: 1,
-                    px: 2,
-                  }}
-                >
-                  {[
-                    ["Payment Terms", "Advance (100%)"],
-                    ["Shipping From", "Ramjibanpur, W.B."],
-                    ["Shipping Port", "Kolkata, W.B."],
-                    ["Shipping Terms", "Prepaid"],
-                  ].map(([label, value]) => (
-                    <React.Fragment key={label}>
-                      <Typography
-                        sx={{
-                          color: "#444",
-                          fontWeight: 400,
-                          fontSize: "0.85rem",
-                        }}
-                      >
-                        {label}
-                      </Typography>
-                      <Typography sx={{ fontWeight: 600, fontSize: "0.85rem" }}>
-                        {value}
-                      </Typography>
-                    </React.Fragment>
-                  ))}
-                </Box>
-              </Box>
-            </Box>
-
-            {/* Customer & Ship To Section */}
-            <Box
-              sx={{
-                display: "flex",
-                borderTop: "1.2px dotted #BF5B5B",
-                borderBottom: "1.2px dotted #BF5B5B",
-                alignItems: "stretch",
-                position: "relative",
-                py: 2,
-              }}
-            >
-              {/* Left: Customer Details */}
-              <Box
-                sx={{
-                  flex: 1,
-                  p: 2.5,
-                  display: "flex",
-                  flexDirection: "column",
-                  position: "relative",
-                }}
-              >
                 <Typography
-                  variant="subtitle2"
+                  variant="h4"
                   sx={{
-                    fontWeight: 900,
+                    fontWeight: 800,
                     color: THEME_MAROON,
-                    mb: 2.5,
-                    // borderBottom: `2.5px solid ${THEME_MAROON}`,
-                    display: "inline-block",
-                    width: "fit-content",
+                    textAlign: "center",
                     textTransform: "uppercase",
-                    pb: 0.5,
-                    fontSize: "0.95rem",
-                    letterSpacing: "0.5px",
+                    letterSpacing: 0.5,
+                    mx: 2,
+                    flex: 1,
+                    fontSize: "24px",
+                    my: 0,
                   }}
                 >
-                  CUSTOMER/VENDOR DETAILS:
+                  PURCHASE ENQUIRIES FROM OVERSEAS BUYERS
                 </Typography>
+                <Box sx={{ textAlign: "center", width: 120 }}>
+                  <Image
+                    src={logo2}
+                    alt="Rana Export Logo"
+                    width={68}
+                    height={67}
+                  />
+                </Box>
+              </Box>
+
+              {/* 2. Company & Info Section (PAGE 1 ONLY) */}
+              {pageIndex === 0 && (
                 <Box
-                  sx={{ display: "flex", flexDirection: "column", gap: 1.2 }}
+                  sx={{
+                    display: "flex",
+                    borderBottom: `1px solid #eee`,
+                    alignItems: "stretch",
+                    position: "relative",
+                  }}
                 >
-                  {[
-                    { label: "Name", value: name },
-                    { label: "Tax ID if any", value: taxId },
-                    { label: "Address", value: address },
-                    {
-                      label: "ZIP Code",
-                      value: zipCode,
-                      sub:
-                        zipCode === "Editable"
-                          ? "(Provided by the client)"
-                          : "",
-                    },
-                    {
-                      label: "Contact No.",
-                      value: phone,
-                    },
-                    { label: "Email", value: email },
-                    { label: "Website", value: website },
-                  ].map((field) => (
-                    <Box
-                      key={field.label}
+                  {/* Left: Company Details */}
+                  <Box
+                    sx={{
+                      flex: "1 1 38%",
+                      p: 2.5,
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Typography
                       sx={{
-                        display: "grid",
-                        gridTemplateColumns: "140px 1fr",
-                        alignItems: "center",
+                        fontWeight: 900,
+                        color: "#000",
+                        mb: 1,
+                        fontSize: "16px",
+                        letterSpacing: "0.2px",
                       }}
                     >
-                      <Typography
-                        sx={{ fontSize: "0.85rem", fontWeight: "bold" }}
-                      >
-                        {field.label}
+                      RANA EXPORT TRADING HOUSE
+                    </Typography>
+                    <Box
+                      sx={{
+                        fontSize: "0.85rem",
+                        color: "#444",
+                        lineHeight: 1.4,
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 0.2,
+                      }}
+                    >
+                      <Typography variant="inherit">
+                        Ramjibanpur, Paschim Mednipur,
                       </Typography>
+                      <Typography variant="inherit">
+                        Zip Code - 721242, WB, INDIA
+                      </Typography>
+                      <Typography variant="inherit">
+                        T: 0091 9002929605 (WhatsApp)
+                      </Typography>
+                      <Typography variant="inherit">
+                        E: tibetansingingbowl1@gmail.com
+                      </Typography>
+                      <Typography variant="inherit">
+                        W: www.ranaexports.com
+                      </Typography>
+                      <Typography
+                        variant="inherit"
+                        sx={{ fontWeight: "bold", color: "#000", mt: 0.5 }}
+                      >
+                        Contact Person : Chandi Rana
+                      </Typography>
+                    </Box>
+                  </Box>
+                  {/* Dash Line 1 */}
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      width: 40,
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        height: "80%",
+                        borderRight: "1.5px dashed #BF5B5B",
+                      }}
+                    />
+                  </Box>
+                  {/* Middle: Enquiry Details Block */}
+                  <Box
+                    sx={{
+                      flex: "0 0 380px",
+                      p: 2.5,
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        width: "100%",
+                        borderRadius: 0,
+                        overflow: "hidden",
+                      }}
+                    >
                       <Box
                         sx={{
-                          bgcolor: "#FEF5E7",
-                          p: 0.8,
-                          px: 1.5,
-                          borderRadius: 0,
-                          fontSize: "0.85rem",
-                          color: "#333",
-                          border: "1px solid #FAD7D2",
                           display: "flex",
+                          justifyContent: "space-between",
                           alignItems: "center",
-                          gap: 0.5,
-                          height: "36px",
-                          overflow: "hidden",
-                          whiteSpace: "nowrap",
+                          bgcolor: "rgba(253, 233, 230, 0.9)",
+                          p: 1.2,
+                          px: 1.5,
                         }}
                       >
-                        <Box
-                          sx={{
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            display: "inline-block",
-                          }}
+                        <Typography
+                          sx={{ fontWeight: 700, fontSize: "0.83rem" }}
                         >
-                          {field.value}
-                        </Box>
-                        {field.sub && (
-                          <Typography
-                            component="span"
-                            sx={{
-                              fontSize: "0.85rem",
-                              color: "#888",
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                            }}
-                          >
-                            {field.sub}
-                          </Typography>
-                        )}
+                          Enquary No.
+                        </Typography>
+                        <Typography sx={{ fontSize: "0.83rem", color: "#333" }}>
+                          RETH# {orderId || "PREVIEW-001"}
+                        </Typography>
+                      </Box>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          bgcolor: "rgba(254, 245, 231, 0.9)",
+                          p: 1.2,
+                          px: 1.5,
+                          borderTop: "1px solid #FAD7D2",
+                        }}
+                      >
+                        <Typography
+                          sx={{ fontWeight: 700, fontSize: "0.83rem" }}
+                        >
+                          Date
+                        </Typography>
+                        <Typography sx={{ fontSize: "0.83rem", color: "#333" }}>
+                          {today}
+                        </Typography>
                       </Box>
                     </Box>
-                  ))}
-                </Box>
-
-                {/* Vertical Dash Line */}
-                <Box
-                  sx={{
-                    position: "absolute",
-                    right: 0,
-                    top: "5%",
-                    bottom: "5%",
-                    width: "1px",
-                    borderRight: "1.5px dashed #BF5B5B",
-                  }}
-                />
-              </Box>
-
-              {/* Right: Ship To Details */}
-              <Box sx={{ flex: 1, p: 2.5 }}>
-                <Typography
-                  variant="subtitle2"
-                  sx={{
-                    fontWeight: 900,
-                    color: THEME_MAROON,
-                    mb: 2.5,
-                    // borderBottom: `2.5px solid ${THEME_MAROON}`,
-                    display: "inline-block",
-                    width: "fit-content",
-                    textTransform: "uppercase",
-                    pb: 0.5,
-                    fontSize: "0.95rem",
-                    letterSpacing: "0.5px",
-                  }}
-                >
-                  SHIP TO:
-                </Typography>
-                <Box
-                  sx={{ display: "flex", flexDirection: "column", gap: 1.2 }}
-                >
-                  {[
-                    {
-                      label: "Shipping Mode",
-                      value: shippingMode,
-                      sub: shippingMode === "Door to Door" ? "Drop Down" : "",
-                      isDropdown: true,
-                    },
-                    {
-                      label: "Nearest Port",
-                      value: nearestPort,
-                      sub:
-                        nearestPort === "Port Name" ? "(Input by client)." : "",
-                    },
-                    {
-                      label: "Zip Code",
-                      value:
-                        zipCode === "Editable"
-                          ? "Auto Fetch from Customer Details/Editable"
-                          : zipCode,
-                    },
-                    {
-                      label: "Your CHA Details",
-                      value: chaDetails,
-                      sub:
-                        chaDetails === "Custom House Agent Name"
-                          ? "(Input should be optional for customer)."
-                          : "",
-                    },
-                    {
-                      label: "Address",
-                      value:
-                        address === "Editable"
-                          ? "Auto Fetch from Customer Details/Editable"
-                          : address,
-                    },
-                    {
-                      label: "Contact No.",
-                      value:
-                        phone === "Editable"
-                          ? "Auto Fetch from Customer Details/Editable"
-                          : phone,
-                    },
-                    {
-                      label: "Email",
-                      value:
-                        email === "Editable"
-                          ? "Auto Fetch from Customer Details/Editable"
-                          : email,
-                    },
-                  ].map((field) => (
+                  </Box>
+                  {/* Dash Line 2 */}
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      width: 40,
+                    }}
+                  >
                     <Box
-                      key={field.label}
+                      sx={{
+                        height: "80%",
+                        borderRight: "1.5px dashed #BF5B5B",
+                      }}
+                    />
+                  </Box>
+                  {/* Right: Terms Grid */}
+                  <Box
+                    sx={{
+                      flex: "1 1 38%",
+                      p: 2.5,
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Box
                       sx={{
                         display: "grid",
-                        gridTemplateColumns: "140px 1fr",
-                        alignItems: "center",
+                        gridTemplateColumns: "1fr 1fr",
+                        gap: 1,
+                        px: 2,
                       }}
                     >
-                      <Typography
-                        sx={{ fontSize: "0.85rem", fontWeight: "bold" }}
-                      >
-                        {field.label}
-                      </Typography>
-                      <Box
-                        sx={{
-                          bgcolor: "#FEF5E7",
-                          p: 0.8,
-                          px: 1.5,
-                          borderRadius: 0,
-                          fontSize: "0.85rem",
-                          color: "#333",
-                          border: "1px solid #FAD7D2",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "space-between",
-                          height: "36px",
-                          overflow: "hidden",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
+                      {[
+                        ["Payment Terms", "Advance (100%)"],
+                        ["Shipping From", "Ramjibanpur, W.B."],
+                        ["Shipping Port", "Kolkata, W.B."],
+                        ["Shipping Terms", "Prepaid"],
+                      ].map(([label, value]) => (
+                        <React.Fragment key={label}>
+                          <Typography
+                            sx={{
+                              color: "#444",
+                              fontWeight: 400,
+                              fontSize: "0.85rem",
+                            }}
+                          >
+                            {label}
+                          </Typography>
+                          <Typography
+                            sx={{ fontWeight: 600, fontSize: "0.85rem" }}
+                          >
+                            {value}
+                          </Typography>
+                        </React.Fragment>
+                      ))}
+                    </Box>
+                  </Box>
+                </Box>
+              )}
+
+              {/* 3. Customer & Ship To Section (PAGE 1 ONLY) */}
+              {pageIndex === 0 && (
+                <Box
+                  sx={{
+                    display: "flex",
+                    borderTop: "1.2px dotted #BF5B5B",
+                    borderBottom: "1.2px dotted #BF5B5B",
+                    alignItems: "stretch",
+                    position: "relative",
+                    py: 2,
+                  }}
+                >
+                  {/* Left: Customer Details */}
+                  <Box
+                    sx={{
+                      flex: 1,
+                      p: 2.5,
+                      display: "flex",
+                      flexDirection: "column",
+                      position: "relative",
+                    }}
+                  >
+                    <Typography
+                      variant="subtitle2"
+                      sx={{
+                        fontWeight: 900,
+                        color: THEME_MAROON,
+                        mb: 2.5,
+                        textTransform: "uppercase",
+                        fontSize: "0.95rem",
+                        letterSpacing: "0.5px",
+                      }}
+                    >
+                      CUSTOMER/VENDOR DETAILS:
+                    </Typography>
+                    <Stack spacing={1.2}>
+                      {[
+                        ["Name", name],
+                        ["Tax ID if any", taxId],
+                        ["Address", address],
+                        ["ZIP Code", zipCode],
+                        ["Contact No.", phone],
+                        ["Email", email],
+                        ["Website", website],
+                      ].map(([label, val]) => (
                         <Box
+                          key={label}
                           sx={{
-                            display: "flex",
+                            display: "grid",
+                            gridTemplateColumns: "140px 1fr",
                             alignItems: "center",
-                            gap: 0.5,
-                            overflow: "hidden",
                           }}
                         >
+                          <Typography
+                            sx={{ fontSize: "0.85rem", fontWeight: "bold" }}
+                          >
+                            {label}
+                          </Typography>
                           <Box
                             sx={{
+                              bgcolor: "#FEF5E7",
+                              p: 0.8,
+                              px: 1.5,
+                              fontSize: "0.85rem",
+                              color: "#333",
+                              border: "1px solid #FAD7D2",
+                              height: "36px",
                               overflow: "hidden",
                               textOverflow: "ellipsis",
-                              display: "inline-block",
+                              whiteSpace: "nowrap",
                             }}
                           >
-                            {field.value}
+                            {val}
                           </Box>
-                          {field.sub && (
-                            <Typography
-                              component="span"
-                              sx={{
-                                fontSize: "0.85rem",
-                                color: field.isDropdown ? "#BF5B5B" : "#888",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                              }}
-                            >
-                              {field.sub}
-                            </Typography>
-                          )}
                         </Box>
-                        {field.isDropdown && (
+                      ))}
+                    </Stack>
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        right: 0,
+                        top: "5%",
+                        bottom: "5%",
+                        width: "1px",
+                        borderRight: "1.5px dashed #BF5B5B",
+                      }}
+                    />
+                  </Box>
+                  {/* Right: Ship To Details */}
+                  <Box sx={{ flex: 1, p: 2.5 }}>
+                    <Typography
+                      variant="subtitle2"
+                      sx={{
+                        fontWeight: 900,
+                        color: THEME_MAROON,
+                        mb: 2.5,
+                        textTransform: "uppercase",
+                        fontSize: "0.95rem",
+                        letterSpacing: "0.5px",
+                      }}
+                    >
+                      SHIP TO:
+                    </Typography>
+                    <Stack spacing={1.2}>
+                      {[
+                        ["Shipping Mode", shippingMode],
+                        ["Nearest Port", nearestPort],
+                        ["Zip Code", zipCode],
+                        ["Your CHA Details", chaDetails],
+                        ["Address", address],
+                        ["Contact No.", phone],
+                        ["Email", email],
+                      ].map(([label, val]) => (
+                        <Box
+                          key={label}
+                          sx={{
+                            display: "grid",
+                            gridTemplateColumns: "140px 1fr",
+                            alignItems: "center",
+                          }}
+                        >
                           <Typography
-                            sx={{ fontSize: "0.8rem", color: "#BF5B5B" }}
+                            sx={{ fontSize: "0.85rem", fontWeight: "bold" }}
                           >
-                            ▼
+                            {label}
                           </Typography>
-                        )}
-                      </Box>
-                    </Box>
-                  ))}
+                          <Box
+                            sx={{
+                              bgcolor: "#FEF5E7",
+                              p: 0.8,
+                              px: 1.5,
+                              fontSize: "0.85rem",
+                              color: "#333",
+                              border: "1px solid #FAD7D2",
+                              height: "36px",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {val}
+                          </Box>
+                        </Box>
+                      ))}
+                    </Stack>
+                  </Box>
                 </Box>
-              </Box>
-            </Box>
+              )}
 
-            {/* Details Table */}
-            <Box sx={{ p: 2.5 }}>
-              <Typography
-                variant="subtitle2"
-                sx={{
-                  fontWeight: 900,
-                  color: THEME_MAROON,
-                  mb: 2.5,
-                  display: "inline-block",
-                  width: "fit-content",
-                  textTransform: "uppercase",
-                  pb: 0.5,
-                  fontSize: "0.95rem",
-                  letterSpacing: "0.5px",
-                }}
-              >
-                PURCHASE ORDER/ENQUIRE DETAILS:
-              </Typography>
-
-              <TableContainer
-                component={Box}
-                sx={{
-                  borderRadius: 0,
-                  overflow: "hidden",
-                }}
-              >
-                <Table
-                  size="small"
+              {/* 4. Table Section (EVERY PAGE) */}
+              <Box sx={{ p: 2.5, flex: 1 }}>
+                <Typography
+                  variant="subtitle2"
                   sx={{
-                    borderCollapse: "collapse",
-                    "& th, & td": {
-                      border: "1px dotted #BF5B5B",
-                      fontSize: "0.85rem",
-                      p: 0.8,
-                    },
+                    fontWeight: 900,
+                    color: THEME_MAROON,
+                    mb: 2.5,
+                    textTransform: "uppercase",
+                    fontSize: "0.95rem",
+                    letterSpacing: "0.5px",
                   }}
                 >
-                  <TableHead>
-                    <TableRow>
-                      <TableCell
-                        align="center"
-                        sx={{
-                          width: 80,
-                          fontWeight: 900,
-                          bgcolor: "#F9B9A554",
-                        }}
-                      >
-                        SL. NO.
-                      </TableCell>
-                      <TableCell
-                        align="center"
-                        sx={{
-                          width: 140,
-                          fontWeight: 900,
-                          bgcolor: "#FCF3E0",
-                        }}
-                      >
-                        SKU
-                      </TableCell>
-                      <TableCell
-                        align="center"
-                        sx={{
-                          fontWeight: 900,
-                          bgcolor: "#F9B9A554",
-                        }}
-                      >
-                        PRODUCT NAME
-                      </TableCell>
-                      <TableCell
-                        align="center"
-                        sx={{
-                          width: 110,
-                          fontWeight: 900,
-                          bgcolor: "#FCF3E0",
-                        }}
-                      >
-                        SIZE
-                      </TableCell>
-                      <TableCell
-                        align="center"
-                        sx={{
-                          width: 130,
-                          fontWeight: 900,
-                          bgcolor: "#F9B9A554",
-                        }}
-                      >
-                        QTY/UNITS
-                      </TableCell>
-                      <TableCell
-                        align="center"
-                        sx={{
-                          width: 130,
-                          fontWeight: 900,
-                          bgcolor: "#FCF3E0",
-                        }}
-                      >
-                        WEIGHT/UNIT
-                      </TableCell>
-                      <TableCell
-                        align="center"
-                        sx={{
-                          width: 150,
-                          fontWeight: 900,
-                          bgcolor: "#F9B9A554",
-                        }}
-                      >
-                        TOTAL WEIGHT
-                      </TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {loadingItems ? (
-                      <TableRow>
-                        <TableCell colSpan={7} align="center" sx={{ py: 5 }}>
-                          <CircularProgress size={24} />
-                          <Typography variant="body2" sx={{ mt: 1 }}>
-                            Loading items...
-                          </Typography>
+                  PURCHASE ORDER/ENQUIRE DETAILS:
+                </Typography>
+                <TableContainer sx={{ borderRadius: 0, overflow: "hidden" }}>
+                  <Table
+                    size="small"
+                    sx={{
+                      borderCollapse: "collapse",
+                      "& th, & td": {
+                        border: "1.2px dotted #BF5B5B",
+                        fontSize: "0.85rem",
+                        p: 0.8,
+                      },
+                    }}
+                  >
+                    <TableHead>
+                      <TableRow sx={{ bgcolor: "#FEF5E7" }}>
+                        <TableCell
+                          align="center"
+                          sx={{
+                            fontWeight: 900,
+                            width: "60px",
+                            color: THEME_MAROON,
+                          }}
+                        >
+                          SL. NO.
+                        </TableCell>
+                        <TableCell
+                          align="center"
+                          sx={{
+                            fontWeight: 900,
+                            width: "90px",
+                            color: THEME_MAROON,
+                          }}
+                        >
+                          SKU
+                        </TableCell>
+                        <TableCell
+                          align="center"
+                          sx={{
+                            fontWeight: 900,
+                            width: "220px",
+                            color: THEME_MAROON,
+                          }}
+                        >
+                          PRODUCT NAME
+                        </TableCell>
+                        <TableCell
+                          align="center"
+                          sx={{
+                            fontWeight: 900,
+                            width: "100px",
+                            color: THEME_MAROON,
+                          }}
+                        >
+                          SIZE
+                        </TableCell>
+                        <TableCell
+                          align="center"
+                          sx={{
+                            fontWeight: 900,
+                            width: "100px",
+                            color: THEME_MAROON,
+                          }}
+                        >
+                          QTY/UNITS
+                        </TableCell>
+                        <TableCell
+                          align="center"
+                          sx={{
+                            fontWeight: 900,
+                            width: "120px",
+                            color: THEME_MAROON,
+                          }}
+                        >
+                          WEIGHT/UNIT
+                        </TableCell>
+                        <TableCell
+                          align="center"
+                          sx={{
+                            fontWeight: 900,
+                            width: "120px",
+                            color: THEME_MAROON,
+                          }}
+                        >
+                          TOTAL WEIGHT
                         </TableCell>
                       </TableRow>
-                    ) : items.length > 0 ? (
-                      items.map((item, index) => {
-                        const product = item.product;
-                        const variant =
-                          product?.variants?.find(
-                            (v) => v.id === item.variantId,
-                          ) || product?.variants?.[0];
-                        const data = variant?.data || {};
-                        const size = data["Size (cm)"] || data["Size"] || "-";
-                        const weightStr = (
-                          data["Weight (gm)"] ||
-                          data["Weight"] ||
-                          "0"
-                        ).toString();
-                        const cleanWeight = weightStr.replace(/[^0-9.]/g, "");
-                        const weightValue = parseFloat(cleanWeight);
-                        const totalWeight = !isNaN(weightValue)
-                          ? (weightValue * item.quantity).toFixed(0)
-                          : "-";
-
+                    </TableHead>
+                    <TableBody>
+                      {pageItems.map((item, idx) => {
+                        const globalIndex =
+                          pages
+                            .slice(0, pageIndex)
+                            .reduce((acc, p) => acc + p.length, 0) +
+                          idx +
+                          1;
+                        const data = item.product?.variants?.[0]?.data || {};
+                        const weight = parseFloat(
+                          (data["Weight (gm)"] || data["Weight"] || "0")
+                            .toString()
+                            .replace(/[^0-9.]/g, ""),
+                        );
                         return (
                           <TableRow key={item.id}>
-                            <TableCell align="center">{index + 1}</TableCell>
+                            <TableCell align="center">{globalIndex}</TableCell>
                             <TableCell align="center">
-                              {data?.SKU || data?.sku || product?.sku || "-"}
+                              {data.SKU || data.sku || item.product?.sku || "-"}
                             </TableCell>
-                            <TableCell>
-                              {product?.name || "N/A"} -{" "}
-                              {product.variants?.[0]?.data &&
-                                Object.entries(product.variants[0].data)
-                                  .filter(
-                                    ([key]) =>
-                                      ![
-                                        "EAN",
-                                        "SKU",
-                                        "Model No",
-                                        "variantImage",
-                                      ].includes(key),
-                                  )
-                                  .slice(0, 2)
-                                  .map(([key, value]) => (
-                                    <>
-                                      {key}:{String(value)}
-                                      {"; "}
-                                    </>
-                                  ))}
+                            <TableCell>{item.product?.name || "N/A"}</TableCell>
+                            <TableCell align="center">
+                              {data["Size (cm)"] || data["Size"] || "-"}
                             </TableCell>
-                            <TableCell align="center">{size}</TableCell>
                             <TableCell align="center">
                               {item.quantity}
                             </TableCell>
                             <TableCell align="center">
-                              {weightStr <= 0 ? "-" : weightStr}
+                              {weight > 0 ? weight : "-"}
                             </TableCell>
                             <TableCell align="center">
-                              {totalWeight <= 0 ? "-" : totalWeight}
+                              {weight > 0
+                                ? (weight * item.quantity).toFixed(0)
+                                : "-"}
                             </TableCell>
                           </TableRow>
                         );
-                      })
-                    ) : (
-                      <TableRow>
-                        <TableCell colSpan={7} align="center" sx={{ py: 5 }}>
-                          No items found
-                        </TableCell>
-                      </TableRow>
-                    )}
-                    {!loadingItems &&
-                      items.length < 30 &&
-                      Array.from({ length: 25 - items.length }).map((_, i) => (
-                        <TableRow key={`filler-${i}`} sx={{ height: 28 }}>
+                      })}
+                      {/* Filler Rows */}
+                      {Array.from({
+                        length:
+                          (pageIndex === 0 ? firstPageSize : otherPagesSize) -
+                          pageItems.length,
+                      }).map((_, i) => (
+                        <TableRow key={`filler-${i}`} sx={{ height: 38 }}>
                           <TableCell align="center">
-                            {items.length + i + 1}
+                            {pages
+                              .slice(0, pageIndex)
+                              .reduce((acc, p) => acc + p.length, 0) +
+                              pageItems.length +
+                              i +
+                              1}
                           </TableCell>
-                          <TableCell></TableCell>
-                          <TableCell></TableCell>
-                          <TableCell></TableCell>
-                          <TableCell></TableCell>
-                          <TableCell></TableCell>
-                          <TableCell></TableCell>
+                          <TableCell />
+                          <TableCell />
+                          <TableCell />
+                          <TableCell />
+                          <TableCell />
+                          <TableCell />
                         </TableRow>
                       ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </Box>
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </Box>
 
-            <Box
-              sx={{
-                height: 40,
-                bgcolor: "#E19B8E5E",
-                borderTop: "1px solid #E19B8E5E",
-              }}
-            />
-          </Paper>
-        )}
+              {/* 5. Note Section (FINAL PAGE ONLY) */}
+              {pageIndex === pages.length - 1 && (
+                <Box
+                  sx={{
+                    p: 2.5,
+                    bgcolor: "#FEF5E7",
+                    borderTop: "1.2px dotted #BF5B5B",
+                    marginTop: "7px",
+                  }}
+                >
+                  <Typography
+                    sx={{ fontWeight: 900, color: THEME_MAROON, mb: 1.2 }}
+                  >
+                    NOTE:
+                  </Typography>
+                  <Typography
+                    sx={{
+                      fontSize: "0.85rem",
+                      color: "#333",
+                      mb: 1.2,
+                      lineHeight: 1.6,
+                    }}
+                  >
+                    Thanking for your valuable time for enquire. I will send
+                    estimate bill with cost of goods, packing charges & shipping
+                    charges as soon as possible.
+                  </Typography>
+                  <Typography
+                    sx={{ fontSize: "0.85rem", color: "#333", lineHeight: 1.6 }}
+                  >
+                    Also know you expect time of delivery (** It will be pushed
+                    down to the last page of the enquary). After Thanks for the
+                    enquiry message.
+                  </Typography>
+                </Box>
+              )}
+
+              {/* 6. Bottom Bar (EVERY PAGE) */}
+              <Box
+                sx={{
+                  height: 40,
+                  bgcolor: "#FFE5DB",
+                  borderTop: "1px solid #eee",
+                }}
+              />
+            </Paper>
+          ))}
       </Container>
+
+      {/* Web pagination controls */}
+      {!isSuccess && pages.length > 1 && (
+        <Stack
+          direction="row"
+          justifyContent="center"
+          spacing={2}
+          sx={{ mt: 3, mb: 5 }}
+          className="no-print"
+        >
+          {pages.map((_, i) => (
+            <Button
+              key={i}
+              variant={currentPage === i ? "contained" : "outlined"}
+              onClick={() => setCurrentPage(i)}
+              sx={{
+                borderRadius: "50%",
+                minWidth: 40,
+                height: 40,
+                bgcolor: currentPage === i ? THEME_MAROON : "transparent",
+                color: currentPage === i ? "#fff" : THEME_MAROON,
+                borderColor: THEME_MAROON,
+              }}
+            >
+              {i + 1}
+            </Button>
+          ))}
+        </Stack>
+      )}
     </Box>
   );
 }
@@ -1224,8 +1003,11 @@ export default function InvoicePage() {
   return (
     <Suspense
       fallback={
-        <Box sx={{ p: 5, textAlign: "center" }}>
-          <Typography>Loading Invoice...</Typography>
+        <Box sx={{ p: 10, textAlign: "center" }}>
+          <CircularProgress />
+          <Typography sx={{ mt: 2 }}>
+            Rana Export - Initializing Invoice...
+          </Typography>
         </Box>
       }
     >
