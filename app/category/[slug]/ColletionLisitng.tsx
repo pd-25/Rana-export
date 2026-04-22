@@ -23,6 +23,8 @@ import { Navigation } from "swiper/modules";
 // Import Swiper styles
 import "swiper/css";
 import "swiper/css/navigation";
+import SidebarAdditionalCategories from "@/components/ui/SidebarAdditionalCategories";
+
 
 interface Category {
   id: number;
@@ -459,34 +461,7 @@ export default function ColletionLisitng({
                               </Box>
                             ))}
                           </Box>
-                          <Box className="additionalCategoryOuter">
-                            <Box className="additionalCategoryIcon">
-                              <Image
-                                src={AdditionalCategoryIcon}
-                                alt="additional category icon"
-                              />
-                            </Box>
-                            <Box className="additionalCategoryInner">
-                              <Button className="additionalCategoryItem">
-                                New Products
-                              </Button>
-                              <Button className="additionalCategoryItem">
-                                Best Sellers
-                              </Button>
-                              <Button className="additionalCategoryItem">
-                                Special Ofers
-                              </Button>
-                              <Button className="additionalCategoryItem">
-                                Warehouse clearance
-                              </Button>
-                              <Button className="additionalCategoryItem">
-                                Discontinued Products
-                              </Button>
-                              <Button className="additionalCategoryItem">
-                                Offers of the Month
-                              </Button>
-                            </Box>
-                          </Box>
+                          <SidebarAdditionalCategories />
                         </Box>
                       </Box>
                     </Box>

@@ -19,6 +19,8 @@ import Separator from "@/public/collection/collection-listing-heading-separator.
 import AdditionalCategoryIcon from "@/public/collection/additinoal-category-icon.png";
 import ProductImagePlaceholder from "@/public/collection/singing-bowl-pic.png";
 import BackgroundPattern from "@/public/collection/background-pattern.png";
+import SidebarAdditionalCategories from "@/components/ui/SidebarAdditionalCategories";
+
 
 const getWeightRange = (variants: any[]) => {
   if (!variants || variants.length === 0) return "";
@@ -182,34 +184,7 @@ export default function AllProductsListing({
                     </Box>
                   ))}
                 </Box>
-                <Box className="additionalCategoryOuter">
-                  <Box className="additionalCategoryIcon">
-                    <Image
-                      src={AdditionalCategoryIcon}
-                      alt="additional category icon"
-                    />
-                  </Box>
-                  <Box className="additionalCategoryInner">
-                    <Button className="additionalCategoryItem">
-                      New Products
-                    </Button>
-                    <Button className="additionalCategoryItem">
-                      Best Sellers
-                    </Button>
-                    <Button className="additionalCategoryItem">
-                      Special Ofers
-                    </Button>
-                    <Button className="additionalCategoryItem">
-                      Warehouse clearance
-                    </Button>
-                    <Button className="additionalCategoryItem">
-                      Discontinued Products
-                    </Button>
-                    <Button className="additionalCategoryItem">
-                      Offers of the Month
-                    </Button>
-                  </Box>
-                </Box>
+                <SidebarAdditionalCategories />
               </Box>
             </Box>
             <Box

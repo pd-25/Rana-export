@@ -28,6 +28,7 @@ import {
   useCartWishlist,
 } from "@/context/CartWishlistContext";
 import { Snackbar, Alert } from "@mui/material";
+import SidebarAdditionalCategories from "@/components/ui/SidebarAdditionalCategories";
 
 interface Category {
   id: number;
@@ -284,34 +285,7 @@ export default function CategoryListing({
                     </Box>
                   ))}
                 </Box>
-                <Box className="additionalCategoryOuter">
-                  <Box className="additionalCategoryIcon">
-                    <Image
-                      src={AdditionalCategoryIcon}
-                      alt="additional category icon"
-                    />
-                  </Box>
-                  <Box className="additionalCategoryInner">
-                    <Button className="additionalCategoryItem">
-                      New Products
-                    </Button>
-                    <Button className="additionalCategoryItem">
-                      Best Sellers
-                    </Button>
-                    <Button className="additionalCategoryItem">
-                      Special Ofers
-                    </Button>
-                    <Button className="additionalCategoryItem">
-                      Warehouse clearance
-                    </Button>
-                    <Button className="additionalCategoryItem">
-                      Discontinued Products
-                    </Button>
-                    <Button className="additionalCategoryItem">
-                      Offers of the Month
-                    </Button>
-                  </Box>
-                </Box>
+                <SidebarAdditionalCategories />
               </Box>
             </Box>
             <Box
