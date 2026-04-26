@@ -12,14 +12,31 @@ import quoteIcon2 from "@/public/home/quote-icon-02.svg"
 
 
 
-export default function Testimonial() {
+export default function Testimonial({ data }: { data?: any }) {
+    const content = data?.content || {};
+    const title = data?.title || "Trusted by People Who Value Quality";
+    const testimonials = content.testimonials || [
+        {
+            name: "Supriya Pramanik",
+            role: "Business Owner",
+            text: "Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel",
+            avatar: clientAvatar1
+        },
+        {
+            name: "Sunita Jain",
+            role: "Business Owner",
+            text: "Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel",
+            avatar: clientAvatar2
+        }
+    ];
+
     return (
         <Box component="section" className="testimonialWrapper">
 
             <Container>
                 <Box className="sectionHeading" textAlign="center">
                     <Typography variant="h2" component="h2" >
-                        Trusted by People Who Value Quality
+                        {title}
                     </Typography>
                 </Box>
                 <Box className="testimonialSliderOuter">
@@ -34,7 +51,6 @@ export default function Testimonial() {
                         pagination={false}
                         loop={true}
                         speed={1000}
-                        // autoplay={false}
                         autoplay={{
                             delay: 3000,
                             disableOnInteraction: false,
@@ -56,136 +72,29 @@ export default function Testimonial() {
                         }}
                         className="testimonialSwiper"
                     >
-                        <SwiperSlide>
-                            <Box className="testimonialCard">
-                                <Box className="avatar">
-                                    <Image src={clientAvatar1} alt="Avatar" />
-                                </Box>
-                                <Box className="reviewText">
-                                    <Box className="quoteIcon">
-                                        <Image src={quoteIcon1} alt="Quote Icon" />
-                                        <Image src={quoteIcon2} alt="Quote Icon" />
+                        {testimonials.map((t: any, idx: number) => (
+                            <SwiperSlide key={idx}>
+                                <Box className="testimonialCard">
+                                    <Box className="avatar">
+                                        <Image src={t.avatar} alt={t.name} width={80} height={80} />
                                     </Box>
-                                    <Typography variant="body1">
-                                        Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam
-                                        nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam
-                                        erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci
-                                        tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo
-                                        consequat. Duis autem vel eum iriure dolor in hendrerit in vulputate
-                                        velit esse molestie consequat, vel
-                                    </Typography>
-                                </Box>
-                                <Box className="autharInfo">
-                                    <Typography variant="body1">
-                                        <strong> Supriya Pramanik</strong> | Business Owner
-                                    </Typography>
-                                </Box>
-                            </Box>
-                        </SwiperSlide>
-                        <SwiperSlide>
-                            <Box className="testimonialCard">
-                                <Box className="avatar">
-                                    <Image src={clientAvatar2} alt="Avatar" />
-                                </Box>
-                                <Box className="reviewText">
-                                    <Box className="quoteIcon">
-                                        <Image src={quoteIcon1} alt="Quote Icon" />
-                                        <Image src={quoteIcon2} alt="Quote Icon" />
+                                    <Box className="reviewText">
+                                        <Box className="quoteIcon">
+                                            <Image src={quoteIcon1} alt="Quote Icon" />
+                                            <Image src={quoteIcon2} alt="Quote Icon" />
+                                        </Box>
+                                        <Typography variant="body1">
+                                            {t.text}
+                                        </Typography>
                                     </Box>
-                                    <Typography variant="body1">
-                                        Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam
-                                        nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam
-                                        erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci
-                                        tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo
-                                        consequat. Duis autem vel eum iriure dolor in hendrerit in vulputate
-                                        velit esse molestie consequat, vel
-                                    </Typography>
-                                </Box>
-                                <Box className="autharInfo">
-                                    <Typography variant="body1">
-                                        <strong> Sunita Jain</strong> | Business Owner
-                                    </Typography>
-                                </Box>
-                            </Box>
-                        </SwiperSlide>
-                        <SwiperSlide>
-                            <Box className="testimonialCard">
-                                <Box className="avatar">
-                                    <Image src={clientAvatar1} alt="Avatar" />
-                                </Box>
-                                <Box className="reviewText">
-                                    <Box className="quoteIcon">
-                                        <Image src={quoteIcon1} alt="Quote Icon" />
-                                        <Image src={quoteIcon2} alt="Quote Icon" />
+                                    <Box className="autharInfo">
+                                        <Typography variant="body1">
+                                            <strong> {t.name}</strong> | {t.role}
+                                        </Typography>
                                     </Box>
-                                    <Typography variant="body1">
-                                        Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam
-                                        nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam
-                                        erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci
-                                        tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo
-                                        consequat. Duis autem vel eum iriure dolor in hendrerit in vulputate
-                                        velit esse molestie consequat, vel
-                                    </Typography>
                                 </Box>
-                                <Box className="autharInfo">
-                                    <Typography variant="body1">
-                                        <strong> Supriya Pramanik</strong> | Business Owner
-                                    </Typography>
-                                </Box>
-                            </Box>
-                        </SwiperSlide>
-                        <SwiperSlide>
-                            <Box className="testimonialCard">
-                                <Box className="avatar">
-                                    <Image src={clientAvatar2} alt="Avatar" />
-                                </Box>
-                                <Box className="reviewText">
-                                    <Box className="quoteIcon">
-                                        <Image src={quoteIcon1} alt="Quote Icon" />
-                                        <Image src={quoteIcon2} alt="Quote Icon" />
-                                    </Box>
-                                    <Typography variant="body1">
-                                        Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam
-                                        nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam
-                                        erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci
-                                        tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo
-                                        consequat. Duis autem vel eum iriure dolor in hendrerit in vulputate
-                                        velit esse molestie consequat, vel
-                                    </Typography>
-                                </Box>
-                                <Box className="autharInfo">
-                                    <Typography variant="body1">
-                                        <strong> Sunita Jain</strong> | Business Owner
-                                    </Typography>
-                                </Box>
-                            </Box>
-                        </SwiperSlide>
-                        <SwiperSlide>
-                            <Box className="testimonialCard">
-                                <Box className="avatar">
-                                    <Image src={clientAvatar2} alt="Avatar" />
-                                </Box>
-                                <Box className="reviewText">
-                                    <Box className="quoteIcon">
-                                        <Image src={quoteIcon1} alt="Quote Icon" />
-                                        <Image src={quoteIcon2} alt="Quote Icon" />
-                                    </Box>
-                                    <Typography variant="body1">
-                                        Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam
-                                        nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam
-                                        erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci
-                                        tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo
-                                        consequat. Duis autem vel eum iriure dolor in hendrerit in vulputate
-                                        velit esse molestie consequat, vel
-                                    </Typography>
-                                </Box>
-                                <Box className="autharInfo">
-                                    <Typography variant="body1">
-                                        <strong> Sunita Jain</strong> | Business Owner
-                                    </Typography>
-                                </Box>
-                            </Box>
-                        </SwiperSlide>
+                            </SwiperSlide>
+                        ))}
                     </Swiper>
                     <Box className="ComSliderNavigation">
                         <Box className="swiper-button-prev"></Box>

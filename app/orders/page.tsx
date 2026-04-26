@@ -87,20 +87,20 @@ export default async function UserOrdersPage() {
             <Typography variant="h5" sx={{ mb: 3, color: "text.secondary" }}>
               You haven't placed any orders yet.
             </Typography>
-            <Button
-              variant="contained"
-              component={Link}
-              href="/"
-              sx={{
-                bgcolor: "#2D2D2D",
-                px: 6,
-                py: 2,
-                borderRadius: 10,
-                "&:hover": { bgcolor: "#000" },
-              }}
-            >
-              Start Shopping
-            </Button>
+            <Link href="/" passHref style={{ textDecoration: 'none' }}>
+              <Button
+                variant="contained"
+                sx={{
+                  bgcolor: "#2D2D2D",
+                  px: 6,
+                  py: 2,
+                  borderRadius: 10,
+                  "&:hover": { bgcolor: "#000" },
+                }}
+              >
+                Start Shopping
+              </Button>
+            </Link>
           </Paper>
         ) : (
           <TableContainer

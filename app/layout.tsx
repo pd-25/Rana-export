@@ -9,6 +9,8 @@ import "./scss/single.scss";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/thumbs";
+import "swiper/css/effect-fade";
+import "swiper/css/pagination";
 import Header from "@/components/layouts/Header";
 import Footer from "@/components/layouts/Footer";
 import ThemeRegistry from "./ThemeRegistry";

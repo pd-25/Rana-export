@@ -36,6 +36,7 @@ import {
   Collections as CollectionsIcon,
   AutoAwesome as CraftedIcon,
   QuestionAnswer as EnquiriesIcon,
+  Home as HomeIcon,
 } from "@mui/icons-material";
 import Link from "next/link";
 import { logoutAdmin } from "./logout/actions";
@@ -152,6 +153,7 @@ export default function AdminLayout({
       path: "/admin/partners",
     },
     { text: "Blogs", icon: <DashboardIcon />, path: "/admin/blogs" },
+    { text: "Homepage", icon: <HomeIcon />, path: "/admin/homepage" },
   ];
 
   return (

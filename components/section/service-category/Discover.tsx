@@ -11,10 +11,13 @@ interface DiscoverCategory {
 
 interface DiscoverProps {
   categories?: DiscoverCategory[];
+  title?: string;
 }
 
-export default function Discover({ categories = [] }: DiscoverProps) {
+export default function Discover({ categories = [], title }: DiscoverProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
+
+  const displayTitle = title || "DISCOVER YOUR Singing Bowls & So Much More";
 
   const scrollToSection = (categoryId: string) => {
     setActiveId(categoryId);
@@ -34,7 +37,7 @@ export default function Discover({ categories = [] }: DiscoverProps) {
         <Stack direction="column" spacing={8}>
           <Box className="sectionHeading" sx={{ textAlign: "center" }}>
             <Typography variant="h2" component="h2">
-              DISCOVER YOUR Singing Bowls & So Much More
+              {displayTitle}
             </Typography>
           </Box>
           <Stack

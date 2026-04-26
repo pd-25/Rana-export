@@ -368,6 +368,11 @@ export default async function AdminDashboard() {
                   icon: <ShippingIcon />,
                   path: "/admin/partners",
                 },
+                {
+                  title: "Manage Homepage",
+                  icon: <DashboardIcon />,
+                  path: "/admin/homepage",
+                },
               ].map((item) => (
                 <ListItem key={item.title} disablePadding sx={{ mb: 0.5 }}>
                   <Link

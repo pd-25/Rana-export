@@ -219,3 +219,15 @@ model Blog {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
+
+model HomeSection {
+  id        Int      @id @default(autoincrement())
+  section   String   @unique // e.g., "hero", "discover", "awards", "trusted_service", "testimonial", "product_video"
+  title     String?
+  subtitle  String?
+  content   Json?    // For flexible content like slider images, feature lists, etc.
+  isActive  Boolean  @default(true)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

@@ -8,6 +8,15 @@ import Testimonial from "@/components/section/testimonial/Testimonial";
 import ProductVideo from "@/components/section/product-video/ProductVideo";
 
 export default async function Home() {
+  const homeSections = await (prisma as any).homeSection.findMany({
+    where: { isActive: true },
+    orderBy: { order: "asc" },
+  });
+
+  const getSectionData = (sectionName: string) => {
+    return homeSections.find((s: any) => s.section === sectionName);
+  };
+
   const homeCategories = await (prisma as any).category.findMany({
     where: {
       showOnHome: true,
@@ -54,10 +63,17 @@ export default async function Home() {
       name: category.name,
     }));
 
+  const heroData = getSectionData("hero");
+  const discoverData = getSectionData("discover");
+  const csrAwardsData = getSectionData("csr_awards");
+  const trustedServiceData = getSectionData("trusted_service");
+  const testimonialData = getSectionData("testimonial");
+  const productVideoData = getSectionData("product_video");
+
   return (
     <>
-      <Banner />
-      <Discover categories={discoverCategories} />
+      <Banner data={heroData} />
+      <Discover categories={discoverCategories} title={discoverData?.title} />
 
       {homeCategories.map((category: any, index: number) => {
         // Combine products from main category and its subcategories
@@ -88,10 +104,10 @@ export default async function Home() {
         );
       })}
 
-      <CsrAwards />
-      <TrustedService />
-      <Testimonial />
-      <ProductVideo />
+      <CsrAwards data={csrAwardsData} />
+      <TrustedService data={trustedServiceData} />
+      <Testimonial data={testimonialData} />
+      <ProductVideo data={productVideoData} />
     </>
   );
 }
